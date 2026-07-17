@@ -11,6 +11,7 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 import typer
 from rich.console import Console
@@ -29,6 +30,7 @@ from swingbot.dashboard import StrategyResult, build_dashboard
 from swingbot.data.sources import get_source
 from swingbot.data.store import BarStore
 from swingbot.features.technical import build_dataset, feature_columns
+from swingbot.metrics import excess_sharpe
 from swingbot.reporting import format_report, write_run
 
 app = typer.Typer(add_completion=False, help="Simulated-capital swing-trading research system.")
@@ -132,18 +134,38 @@ def compare(
     agents = {s: _build_agent(s, cols, train, cfg, start) for s in strategies}
 
     table = Table(title=f"{symbol} out-of-sample ({start} onward)")
-    for c in ("strategy", "total ret", "CAGR", "Sharpe", "max DD", "trades", "costs", "DSR"):
+    for c in (
+        "strategy",
+        "total ret",
+        "CAGR",
+        "Sharpe",
+        "xSharpe",
+        "max DD",
+        "trades",
+        "costs",
+        "DSR",
+    ):
         table.add_column(c, justify="right" if c != "strategy" else "left")
 
     # n_trials = number of configurations tried, which is what DSR deflates by.
+    runs = []
     for name, agent in agents.items():
         agent.reset()
-        _, r = evaluate(test, cols, agent, cfg.env, n_trials=len(strategies))
+        result, r = evaluate(test, cols, agent, cfg.env, n_trials=len(strategies))
+        runs.append((name, result, r))
+
+    # Excess Sharpe vs buy-and-hold: the headline for a long-only book. A
+    # positive raw Sharpe in a bull market proves nothing; xSharpe asks
+    # whether anything is left after the benchmark.
+    bench_equity = next(res.equity for name, res, _ in runs if name == "buy_and_hold")
+    for name, result, r in runs:
+        xs = excess_sharpe(np.asarray(result.equity), np.asarray(bench_equity))
         table.add_row(
             name,
             f"{r.total_return:.1%}",
             f"{r.cagr:.1%}",
             f"{r.sharpe:.2f}",
+            "--" if name == "buy_and_hold" else f"{xs:+.2f}",
             f"{r.max_drawdown:.1%}",
             f"{r.n_trades:,}",
             f"${r.total_costs:,.0f}",
@@ -152,6 +174,7 @@ def compare(
     console.print(table)
     console.print(
         "\n[dim]If nothing beats buy_and_hold after costs, that is the finding.\n"
+        "xSharpe is the Sharpe of (strategy - buy_and_hold); negative means no alpha.\n"
         "Deflated Sharpe below 0.95 means the result is consistent with luck.[/dim]"
     )
 
@@ -215,6 +238,9 @@ def invest(
     refresh: bool = typer.Option(True, help="Refresh market data before running"),
     as_of: str | None = typer.Option(None, help="Process bars up to this date (for replays/tests)"),
     open_browser: bool = typer.Option(False, "--open", help="Open the dashboard when done"),
+    clear_halt: bool = typer.Option(
+        False, "--clear-halt", help="Operator override: clear a fired kill switch and resume"
+    ),
 ) -> None:
     """Run the autonomous daily paper-investing loop (idempotent, simulated capital).
 
@@ -243,6 +269,7 @@ def invest(
         capital=capital,
         as_of=_date.fromisoformat(as_of) if as_of else None,
         refresh=refresh,
+        clear_halt=clear_halt,
         log=lambda m: console.print(f"[dim]{m}[/dim]"),
     )
 
@@ -251,6 +278,13 @@ def invest(
         _print_invest_day(today)
     else:
         console.print("[yellow]No new completed trading day - portfolio unchanged.[/yellow]")
+
+    if summary.halted:
+        console.print(
+            f"\n[bold red]KILL SWITCH: {summary.halted}[/bold red]\n"
+            f"[red]The book is being flattened and no entries will be made. "
+            f"Investigate, then resume with 'invest --clear-halt'.[/red]"
+        )
 
     # ---- portfolio ----
     ret = summary.total_return
@@ -361,18 +395,30 @@ def rank(
     start: str | None = typer.Option(None, help="Bars start (default: paper.data_start)"),
     config: Path | None = typer.Option(None),
     out: Path = typer.Option(Path("artifacts/ranker"), help="Where scores/IC land"),
+    shuffle_null: bool = typer.Option(
+        False,
+        "--shuffle-null",
+        help="Also run the cross-sectional shuffle null (must produce IC ~ 0, else leakage)",
+    ),
 ) -> None:
     """Walk-forward evaluation of the cross-sectional excess-return ranker.
 
     Trains LightGBM on excess total return vs the benchmark with purged,
     embargoed expanding windows, then reports per-date RankIC. This is the
     go/no-go gate for the ranker: mean IC >= 0.02 with stability > 0.15 or
-    nothing gets built on top of it.
+    nothing gets built on top of it. Every invocation is appended to
+    artifacts/trials.jsonl -- the n_trials that keeps DSR honest.
     """
-    from swingbot.agents.ranker import ic_summary, rank_ic, walk_forward_scores
+    from swingbot.agents.ranker import (
+        ic_summary,
+        rank_ic,
+        shuffle_targets_within_date,
+        walk_forward_scores,
+    )
     from swingbot.features.cross_section import build_panel
     from swingbot.paper.gate import gate_signal, health_index
     from swingbot.paper.universe import resolve_universe
+    from swingbot.trials import log_trial
 
     cfg = _load_config(config)
     if universe:
@@ -428,6 +474,39 @@ def rank(
     result.scores.write_parquet(out / "scores.parquet", compression="zstd")
     ic.write_parquet(out / "rank_ic.parquet", compression="zstd")
     console.print(f"\n  scores -> {out / 'scores.parquet'}")
+
+    if shuffle_null:
+        null_res = walk_forward_scores(
+            shuffle_targets_within_date(panel, seed=cfg.seed),
+            horizon=horizon,
+            refit_every=refit_every,
+            seed=cfg.seed,
+        )
+        ns = ic_summary(rank_ic(null_res.scores))
+        clean = abs(ns["mean"]) < 0.01
+        tone = "green" if clean else "red"
+        console.print(
+            f"[{tone}]shuffle null: mean IC {ns['mean']:+.4f} over {ns['n_days']} days -- "
+            f"{'pipeline is leak-free' if clean else 'LEAKAGE: shuffled targets scored'}[/{tone}]"
+        )
+
+    n = log_trial(
+        Path("artifacts/trials.jsonl"),
+        {
+            "command": "rank",
+            "universe": cfg.paper.universe,
+            "benchmark": benchmark.upper(),
+            "horizon": horizon,
+            "refit_every": refit_every,
+            "data_start": data_start,
+            "n_days": s["n_days"],
+            "mean_ic": s["mean"],
+            "stability": s["stability"],
+        },
+    )
+    console.print(
+        f"[dim]trials on record: {n} (artifacts/trials.jsonl -- feeds DSR n_trials)[/dim]"
+    )
 
     verdict = s["mean"] >= 0.02 and s["stability"] > 0.15
     color = "green" if verdict else "yellow"

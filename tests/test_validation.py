@@ -13,6 +13,7 @@ from swingbot.backtest.validation import (
 )
 from swingbot.metrics import (
     deflated_sharpe_ratio,
+    excess_sharpe,
     expected_max_sharpe,
     max_drawdown,
     probabilistic_sharpe_ratio,
@@ -134,3 +135,17 @@ class TestMetricsSanity:
     def test_max_drawdown_measures_peak_to_trough(self):
         equity = np.array([100.0, 150.0, 75.0, 120.0])
         assert max_drawdown(equity) == pytest.approx(0.5)
+
+    def test_excess_sharpe_vs_itself_is_zero(self):
+        equity = np.array([100.0, 101.0, 99.0, 103.0, 102.0])
+        assert excess_sharpe(equity, equity) == 0.0
+
+    def test_excess_sharpe_signs_follow_the_benchmark_gap(self):
+        """A bull-market book has positive raw Sharpe by default; excess
+        Sharpe must be signed by out/under-performance instead."""
+        rng = np.random.default_rng(0)
+        curve = lambda drift: 100.0 * np.cumprod(1.0 + drift + rng.normal(0, 0.002, 250))  # noqa: E731
+        bench, faster, slower = curve(0.001), curve(0.002), curve(0.0002)
+        assert excess_sharpe(faster, bench) > 0
+        assert excess_sharpe(slower, bench) < 0
+        assert sharpe_ratio(np.diff(slower) / slower[:-1]) > 0  # the trap

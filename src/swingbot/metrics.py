@@ -58,6 +58,27 @@ def sharpe_ratio(
     return float(np.mean(excess) / sd * np.sqrt(periods_per_year))
 
 
+def excess_sharpe(
+    equity: np.ndarray, bench_equity: np.ndarray, periods_per_year: int = TRADING_DAYS
+) -> float:
+    """Annualized Sharpe of the strategy-minus-benchmark return stream.
+
+    Deflating a long-only equity book against zero asks the wrong question:
+    every long-only strategy has a positive Sharpe in a bull market. This
+    asks the one that matters -- is anything left after the benchmark? -- and
+    it is the number a "beat the market" claim must be judged on.
+    """
+    n = min(len(equity), len(bench_equity))
+    if n < 3:
+        return 0.0
+    e, b = np.asarray(equity[:n], float), np.asarray(bench_equity[:n], float)
+    if np.any(e[:-1] <= 0) or np.any(b[:-1] <= 0):
+        return 0.0
+    return sharpe_ratio(
+        np.diff(e) / e[:-1] - np.diff(b) / b[:-1], periods_per_year=periods_per_year
+    )
+
+
 def sortino_ratio(
     returns: np.ndarray, risk_free: float = 0.0, periods_per_year: int = TRADING_DAYS
 ) -> float:

@@ -71,6 +71,11 @@ class PaperState:
     # Last stop-out fill date per symbol (ISO), for re-entry cooldown and
     # post-stop de-grossing.
     last_stop_out: dict[str, str] = field(default_factory=dict)
+    # A fired kill switch: reason string plus the day it tripped. While set,
+    # the engine only ever flattens -- no entries, no rebalances -- until a
+    # human clears it. Surviving restarts is the entire point.
+    halted: str | None = None
+    halted_ts: str | None = None
     version: int = STATE_VERSION
     simulated_capital: bool = True  # always; asserted on load
     updated_utc: str = ""

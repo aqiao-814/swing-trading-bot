@@ -44,6 +44,13 @@ def make_cfg(tmp: Path) -> Config:
     # Synthetic signals are weak; lower the bar so the tests exercise trading.
     cfg.paper.min_conviction = 0.02
     cfg.paper.exit_conviction = 0.005
+    # Kill switches off by default in tests: the synthetic policy's conviction
+    # spread is legitimately tiny, and most tests exercise normal trading.
+    # TestKillSwitches turns them on selectively.
+    cfg.paper.kill_max_drawdown = None
+    cfg.paper.kill_daily_loss = None
+    cfg.paper.kill_rolling_20d_loss = None
+    cfg.paper.kill_conviction_std = None
     return cfg
 
 
@@ -229,7 +236,7 @@ class TestStopDiscipline:
 
     def test_stop_out_recorded_and_no_reentry_within_cooldown(self, tmp_path):
         cfg = make_cfg(tmp_path)
-        cfg.paper.stop_loss_pct = 0.005  # hair trigger: synthetic noise must stop out
+        cfg.paper.stop_loss_sigma = 0.05  # hair trigger: synthetic noise must stop out
         seed_store(cfg)
         engine = PaperEngine(cfg)
         engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
@@ -252,6 +259,58 @@ class TestStopDiscipline:
                 assert days_out > cooldown, (
                     f"{stop['symbol']} re-bought {days_out}d after its stop-out"
                 )
+
+
+class TestKillSwitches:
+    """A fired switch flattens the book, halts entries, and survives restarts."""
+
+    def test_daily_loss_kill_flattens_and_halts(self, tmp_path):
+        cfg = make_cfg(tmp_path)
+        cfg.paper.kill_daily_loss = 0.0001  # any down day fires
+        seed_store(cfg)
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+
+        state = PaperState.load(engine.store.state_path)
+        assert state.halted and "daily_loss" in state.halted
+        assert not state.positions  # the flatten orders actually filled
+        halted_day = date.fromisoformat(state.halted_ts)
+        buys_after = engine.store.read("trades").filter(
+            (pl.col("action") == "buy") & (pl.col("ts") > halted_day)
+        )
+        assert buys_after.is_empty()
+
+    def test_model_health_kill_never_lets_the_book_open(self, tmp_path):
+        """conviction_std below the bar means the scores are degenerate; a
+        book allocated by a degenerate ranking has no reason to exist."""
+        cfg = make_cfg(tmp_path)
+        cfg.paper.kill_conviction_std = 10.0  # impossible bar: fires on day one
+        seed_store(cfg)
+        engine = PaperEngine(cfg)
+        summary = engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+
+        state = PaperState.load(engine.store.state_path)
+        assert state.halted and "conviction_std" in state.halted
+        assert engine.store.read("trades").is_empty()  # never traded at all
+        assert summary.equity == pytest.approx(100_000)
+        assert summary.halted == state.halted
+
+    def test_clear_halt_is_an_explicit_operator_action(self, tmp_path):
+        cfg = make_cfg(tmp_path)
+        cfg.paper.kill_conviction_std = 10.0
+        seed_store(cfg)
+        PaperEngine(cfg).run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+
+        # A plain re-run must NOT clear the halt.
+        engine2 = PaperEngine(cfg)
+        engine2.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        assert PaperState.load(engine2.store.state_path).halted
+
+        engine3 = PaperEngine(cfg)
+        engine3.run(
+            capital=100_000, as_of=AS_OF, refresh=False, clear_halt=True, log=lambda m: None
+        )
+        assert PaperState.load(engine3.store.state_path).halted is None
 
 
 class TestPersistence:

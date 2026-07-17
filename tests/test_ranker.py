@@ -15,9 +15,15 @@ import numpy as np
 import polars as pl
 import pytest
 
-from swingbot.agents.ranker import ic_summary, rank_ic, walk_forward_scores
+from swingbot.agents.ranker import (
+    ic_summary,
+    rank_ic,
+    shuffle_targets_within_date,
+    walk_forward_scores,
+)
 from swingbot.features.cross_section import FEATURES, build_panel
 from swingbot.paper.gate import gate_signal, health_index, should_trade
+from swingbot.trials import log_trial, n_trials
 
 HORIZON = 5
 
@@ -176,6 +182,40 @@ class TestWalkForward:
         )
         s = ic_summary(rank_ic(res.scores))
         assert abs(s["mean"]) < 0.06, f"IC on pure noise: {s}"
+
+    def test_shuffle_null_kills_planted_signal(self):
+        """The cross-sectional shuffle preserves every per-date marginal but
+        severs the feature->outcome link. Real signal must die; if it
+        survives, the pipeline is leaking."""
+        panel = make_panel(signal=0.5)
+        shuffled = shuffle_targets_within_date(panel, seed=1)
+        # Same numbers on every date, different assignment to symbols.
+        a = panel.group_by("ts").agg(pl.col("target").sort()).sort("ts")
+        b = shuffled.group_by("ts").agg(pl.col("target").sort()).sort("ts")
+        assert a.equals(b)
+        res = walk_forward_scores(
+            shuffled,
+            horizon=HORIZON,
+            refit_every=21,
+            min_train_days=100,
+            embargo_days=2,
+            params=FAST_PARAMS,
+        )
+        s = ic_summary(rank_ic(res.scores))
+        assert abs(s["mean"]) < 0.06, f"planted signal survived the shuffle: {s}"
+
+
+class TestTrials:
+    def test_ledger_is_append_only_and_counted(self, tmp_path):
+        path = tmp_path / "trials.jsonl"
+        assert n_trials(path) == 0
+        assert log_trial(path, {"mean_ic": 0.01}) == 1
+        assert log_trial(path, {"mean_ic": 0.02}) == 2
+        import json
+
+        lines = [json.loads(x) for x in path.read_text().splitlines()]
+        assert lines[0]["mean_ic"] == 0.01
+        assert all("utc" in rec for rec in lines)
 
 
 class TestGate:

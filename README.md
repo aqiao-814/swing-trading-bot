@@ -144,11 +144,21 @@ Spread, slippage, square-root (Almgren-Chriss) impact, commission, SEC Section
 stop-loss/take-profit, vol targeting, fractional Kelly, a **no-trade band**, and
 portfolio kill switches (max drawdown, daily loss).
 
-The paper loop adds **stop-loss discipline**: a stopped-out symbol sits in a
-re-entry cooldown (`stop_cooldown_days`), and each stop inside the window lowers
-the gross-exposure cap (`stop_degross_per_stop`, floored at
-`min_gross_exposure`) — so a stop converts risk into cash instead of rotating
-into the next correlated name.
+The paper loop adds **stop-loss discipline**: stops are **vol-scaled**
+(`stop_loss_sigma` standard deviations of the name's own horizon volatility —
+a fixed percentage is a different distance in sigma for every name), a
+stopped-out symbol sits in a re-entry cooldown (`stop_cooldown_days`), and each
+stop inside the window lowers the gross-exposure cap (`stop_degross_per_stop`,
+floored at `min_gross_exposure`) — so a stop converts risk into cash instead of
+rotating into the next correlated name.
+
+The paper loop also carries **kill switches** (`kill_max_drawdown`,
+`kill_daily_loss`, `kill_rolling_20d_loss`, and — the one that matters —
+`kill_conviction_std` on **model health**). A fired switch flattens the book,
+persists across restarts, and refuses new entries until an operator runs
+`invest --clear-halt`. A health switch turns "the model broke" from a
+post-mortem into an alert: the conviction-std switch would have fired on day
+one of this portfolio's live history, and firing it is the point.
 
 Costs are reported all-in: `explicit_costs` (cash debits) **plus**
 `slippage_costs` (embedded in fill prices). Counting only the former understates
@@ -189,6 +199,17 @@ yields a *distribution* of Sharpes across many paths rather than one number.
 `deflated_sharpe_ratio` and `probability_of_backtest_overfitting` correct for
 selection bias. **Report DSR with an honest `n_trials`.** Passing `n_trials=1`
 after testing hundreds of configurations is how people fool themselves.
+`artifacts/trials.jsonl` makes undercounting impossible: the runner appends one
+line per evaluated configuration, and `n_trials` is the line count. Deleting or
+editing that file invalidates every DSR computed after it.
+
+Two more nulls guard the pipeline itself. The **cross-sectional shuffle**
+(`rank --shuffle-null`) permutes targets across symbols within each date —
+preserving every marginal and the market factor, destroying only the
+stock-selection link — and must produce RankIC ≈ 0 (measured on real data:
+−0.006, leak-free). And **`excess_sharpe`** reports every strategy against
+buy-and-hold (`xSharpe` in the compare table), because deflating a long-only
+book against zero asks the wrong question in a bull market.
 
 ## Code intelligence (graphify)
 

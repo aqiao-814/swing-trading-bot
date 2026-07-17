@@ -136,6 +136,10 @@ class RRLAgent(Agent):
         # Running gradient of F_prev w.r.t. weights, for the recurrent term.
         self._dfprev_dw = np.zeros_like(self.w)
         self._dfprev_du = 0.0
+        # Optimizer diagnostics, refreshed every update. |z| >> 2 means tanh
+        # is pinned; grad_norm ~ 0 alongside it means learning has stopped.
+        self.last_z = 0.0
+        self.last_grad_norm = 0.0
 
     def _market_features(self, obs: np.ndarray) -> np.ndarray:
         """Take only the market features, dropping any appended agent state."""
@@ -202,6 +206,8 @@ class RRLAgent(Agent):
         # Ascent: we are maximising the Sharpe ratio, not minimising a loss.
         # L2 shrinkage rides along inside the step so the penalty is felt even
         # when the DSR gradient has vanished into a saturated tanh.
+        self.last_z = z
+        self.last_grad_norm = float(np.linalg.norm(np.clip(grad_w, -1.0, 1.0)))
         self.w += self.lr * (np.clip(grad_w, -1.0, 1.0) - self.l2 * self.w)
         self.u += self.lr * (float(np.clip(grad_u, -1.0, 1.0)) - self.l2 * self.u)
         self.b += self.lr * float(np.clip(grad_b, -1.0, 1.0))

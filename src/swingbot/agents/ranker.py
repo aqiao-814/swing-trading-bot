@@ -123,6 +123,17 @@ def walk_forward_scores(
     return WalkForwardResult(scores=scores, folds=folds)
 
 
+def shuffle_targets_within_date(panel: pl.DataFrame, *, seed: int = 7) -> pl.DataFrame:
+    """Permute targets across symbols within each date -- the sharpest null.
+
+    The shuffle preserves every marginal distribution, every date's return
+    cross-section, and the market factor; it destroys ONLY the link between a
+    symbol's features and its outcome. A pipeline that still reports RankIC
+    on shuffled targets is leaking, full stop.
+    """
+    return panel.with_columns(pl.col("target").shuffle(seed=seed).over("ts"))
+
+
 def rank_ic(scores: pl.DataFrame) -> pl.DataFrame:
     """Per-date Spearman rho between score and matured target. THE metric."""
     return (

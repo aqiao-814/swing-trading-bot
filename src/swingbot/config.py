@@ -146,10 +146,30 @@ class PaperConfig(BaseModel):
     min_conviction: float = 0.15  # |policy output| needed to open
     exit_conviction: float = 0.05  # close when conviction decays below this
     rebalance_threshold: float = 0.05  # no-trade band on weight drift
-    stop_loss_pct: float | None = 0.10  # close-to-close stop on cost basis
+    # Vol-scaled stop: exit when price falls stop_loss_sigma standard
+    # deviations of the name's own horizon volatility below cost basis.
+    # A fixed-percentage stop is a different distance in sigma for every name
+    # (the old 10% stop was ~1.2 sigma on high-vol names -- a coin flip that
+    # loses 10%, hit ~20% of the time by pure noise). Set to None to fall
+    # back to the fixed stop_loss_pct.
+    stop_loss_sigma: float | None = 2.0
+    stop_horizon_days: int = 20  # holding horizon the stop is scaled to
+    stop_loss_pct: float | None = 0.10  # fixed fallback when sigma stop is off
     allow_short: bool = False  # long-only keeps simulated cash non-negative
     # Cancel a pending order if the symbol prints no bar for this many days.
     cancel_after_days: int = 5
+
+    # ---- kill switches ----
+    # When any of these fires the engine flattens the book, halts, and stays
+    # halted until 'invest --clear-halt'. The first three watch P&L; the last
+    # watches MODEL HEALTH -- a conviction spread this thin means every score
+    # is saturated and "conviction-ranked" sizing is the sort's tiebreak, so
+    # there is no reason to hold the book at all. A health switch turns "the
+    # model broke" from a post-mortem into an alert. None disables a switch.
+    kill_max_drawdown: float | None = 0.15
+    kill_daily_loss: float | None = 0.04
+    kill_rolling_20d_loss: float | None = 0.10
+    kill_conviction_std: float | None = 0.05
 
     # ---- stop-loss discipline ----
     # A stopped-out symbol may not be re-entered for this many calendar days.
