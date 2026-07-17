@@ -57,6 +57,27 @@ editable installs — it re-hides `.pth` files and CPython skips hidden ones. Se
 [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md), which also covers the
 Rosetta-emulated default Python that disables MPS.
 
+### Cross-sectional ranker research
+
+```bash
+./.venv/bin/python -m swingbot.cli rank --universe nasdaq100 --horizon 20
+```
+
+Walk-forward evaluation of a LightGBM ranker on **20-day excess total return
+vs QQQ** — a mean-zero target a model cannot beat by saying "yes" to
+everything. Training windows are purged and embargoed so no label overlaps a
+prediction date; the metric is per-date Spearman RankIC. The command enforces
+its own go/no-go: mean IC ≥ 0.02 with stability > 0.15, or nothing gets built
+on top of the signal.
+
+Measured on this repo's cached NDX data (2019–2026, seven-feature baseline):
+**mean IC +0.0044, stability 0.033 — the gate is NOT met.** The signal was
+real in 2020 (+0.040) and decayed to negative by 2024–2026. A realized-efficacy
+regime gate (`paper/gate.py`) was evaluated on the same series and came out
+*inverted* — trailing IC anti-predicts future IC on a signal this weak. Both
+results are the honest baseline the feature work in the research roadmap has
+to beat; neither component is wired into the paper loop.
+
 ## What it actually found
 
 Out-of-sample AAPL, 2016–2025 (trained pre-2016), $100k simulated:

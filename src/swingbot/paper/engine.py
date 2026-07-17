@@ -308,6 +308,16 @@ class PaperEngine:
             summary.days.append(report)
             prev_day = d
 
+        if learning_rows:
+            lr = learning_rows[-1]
+            if lr["frac_saturated"] > 0.5 or lr["conviction_std"] < 0.05:
+                log(
+                    f"[learn] WARNING: policy saturated "
+                    f"(frac |f|>0.99 = {lr['frac_saturated']:.2f}, "
+                    f"conviction std = {lr['conviction_std']:.3f}) -- "
+                    f"conviction ranking is degenerate; sizing is the tiebreak"
+                )
+
         # ---- persist everything exactly once ----
         if todo:
             state.capture_portfolio(pf, entry_ts)
@@ -394,7 +404,7 @@ class PaperEngine:
                 self.store.set_decision_results(prev_day, results_prev)
 
         # 4. decide: score the whole universe on today's close
-        orders, decisions = self._decide(d, state, pf, learner, data, last_close, equity)
+        orders, decisions, sat = self._decide(d, state, pf, learner, data, last_close, equity)
         # New decisions supersede same-symbol pending orders; orders for symbols
         # that simply printed no bar today (and were not re-scored) carry over.
         new_syms = {o.symbol for o in orders}
@@ -431,6 +441,11 @@ class PaperEngine:
                 "policy_loss": -float(np.mean(day_rewards)) if day_rewards else 0.0,
                 "ew_sharpe": learner.sharpe,
                 "weight_norm": learner.weight_norm(),
+                # The saturation alarms. frac_saturated > 0.5 or
+                # conviction_std < 0.05 means ranking has degenerated into the
+                # sort's tiebreak; run() shouts when that happens.
+                "frac_saturated": sat["frac_saturated"],
+                "conviction_std": sat["conviction_std"],
             }
         )
 
@@ -570,9 +585,16 @@ class PaperEngine:
         data: dict[str, _SymbolData],
         last_close: dict[str, float],
         equity: float,
-    ) -> tuple[list[PendingOrder], list[dict]]:
-        """Score the universe, rank, allocate. Returns (orders, decision log)."""
+    ) -> tuple[list[PendingOrder], list[dict], dict[str, float]]:
+        """Score the universe, rank, allocate.
+
+        Returns (orders, decision log, saturation metrics). The metrics are
+        computed over the *whole* scored universe, before any conviction
+        threshold, because the failure they detect -- every conviction pinned
+        near +/-1 -- is only visible in the full cross-section.
+        """
         p = self.paper
+        raw_scores: list[float] = []
         scores: dict[str, tuple[float, float]] = {}  # sym -> (f, daily_vol)
         for sym in sorted(data):
             sd = data[sym]
@@ -580,9 +602,15 @@ class PaperEngine:
             if i is None:
                 continue
             f = learner.score(sym, sd.x[i])
+            raw_scores.append(f)
             if not p.allow_short:
                 f = max(f, 0.0)
             scores[sym] = (f, float(sd.daily_vol[i]))
+        fs = np.abs(np.asarray(raw_scores)) if raw_scores else np.zeros(0)
+        sat = {
+            "frac_saturated": float((fs > 0.99).mean()) if fs.size else 0.0,
+            "conviction_std": float(fs.std()) if fs.size else 0.0,
+        }
 
         held = {s for s in pf.positions if not pf.positions[s].is_flat}
         orders: list[PendingOrder] = []
@@ -679,7 +707,7 @@ class PaperEngine:
             )
             log_decision(sym, "buy" if reason == "entry" else "rebalance", f, dvol, target)
 
-        return orders, decisions
+        return orders, decisions, sat
 
     # ---- benchmarks ------------------------------------------------------------
 
@@ -783,6 +811,8 @@ class PaperEngine:
             learning_rate=self.paper.learning_rate,
             eta=self.paper.dsr_eta,
             seed=self.cfg.seed,
+            l2=self.paper.learn_l2,
+            max_weight_norm=self.paper.learn_max_weight_norm,
         )
 
     def _pretrain(

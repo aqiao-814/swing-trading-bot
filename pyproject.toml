@@ -10,6 +10,7 @@ dependencies = [
     "pandas>=2.2",
     "polars>=1.0",
     "duckdb>=1.1",
+    "lightgbm>=4.4",
     "pyarrow>=17.0",
     "pydantic>=2.8",
     "pyyaml>=6.0",

@@ -32,7 +32,7 @@ import numpy as np
 
 from swingbot.agents.baselines import RRLAgent
 
-_FORMAT_VERSION = 2
+_FORMAT_VERSION = 3
 
 
 @dataclass
@@ -54,10 +54,18 @@ class ContinualRRL:
         learning_rate: float = 0.01,
         eta: float = 0.01,
         seed: int = 7,
+        l2: float = 1e-3,
+        max_weight_norm: float = 1.0,
     ) -> None:
         self.feature_cols = list(feature_cols)
         self.agent = RRLAgent(
-            len(feature_cols), learning_rate=learning_rate, eta=eta, seed=seed, discrete=False
+            len(feature_cols),
+            learning_rate=learning_rate,
+            eta=eta,
+            seed=seed,
+            discrete=False,
+            l2=l2,
+            max_weight_norm=max_weight_norm,
         )
         self._states: dict[str, _SymbolState] = {}
         self.n_updates = 0
@@ -166,6 +174,8 @@ class ContinualRRL:
             b=np.float64(self.agent.b),
             lr=np.float64(self.agent.lr),
             eta=np.float64(self.agent.eta),
+            l2=np.float64(self.agent.l2),
+            max_weight_norm=np.float64(self.agent.max_weight_norm),
             a=np.float64(self.agent.a),
             b_moment=np.float64(self.agent.b_moment),
             steps=np.int64(self.agent._steps),
@@ -187,7 +197,17 @@ class ContinualRRL:
     def load(cls, path: str | Path) -> ContinualRRL:
         with np.load(io.BytesIO(Path(path).read_bytes()), allow_pickle=False) as z:
             feature_cols = [str(c) for c in z["feature_cols"]]
-            learner = cls(feature_cols, learning_rate=float(z["lr"]), eta=float(z["eta"]))
+            learner = cls(
+                feature_cols,
+                learning_rate=float(z["lr"]),
+                eta=float(z["eta"]),
+                # Version-2 files predate the saturation guards; loading one
+                # applies the guards from the next update onward.
+                l2=float(z["l2"]) if "l2" in z.files else 1e-3,
+                max_weight_norm=(
+                    float(z["max_weight_norm"]) if "max_weight_norm" in z.files else 1.0
+                ),
+            )
             learner.agent.w = z["w"].astype(np.float64)
             learner.agent.u = float(z["u"])
             learner.agent.b = float(z["b"])

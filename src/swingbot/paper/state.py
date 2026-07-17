@@ -158,11 +158,19 @@ class PaperStore:
         return pl.read_parquet(path) if path.exists() else pl.DataFrame()
 
     def append(self, name: str, rows: pl.DataFrame) -> None:
-        """Append rows; caller guarantees the day has not been written before."""
+        """Append rows; caller guarantees the day has not been written before.
+
+        Columns added by newer code backfill as null on old files instead of
+        being silently dropped -- history written before a metric existed
+        stays honest about not having it.
+        """
         if rows.is_empty():
             return
         existing = self.read(name)
         if not existing.is_empty():
+            for col in rows.columns:
+                if col not in existing.columns:
+                    existing = existing.with_columns(pl.lit(None).cast(rows[col].dtype).alias(col))
             rows = pl.concat([existing, rows.select(existing.columns)], how="vertical")
         rows.write_parquet(self._path(name), compression="zstd")
 

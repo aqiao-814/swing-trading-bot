@@ -313,6 +313,32 @@ class TestContinualLearning:
         assert learner._state("AAA").f_prev != 0.0
         assert st_bbb_before == 0.0  # AAA's update never touches BBB's recurrence
 
+    def test_weight_norm_never_exceeds_cap(self):
+        """The saturation guard: once ||w|| drifts past ~2, tanh pins at +/-1
+        and conviction ranking degenerates. The cap is a hard invariant."""
+        learner = ContinualRRL([f"f{i}" for i in range(6)], seed=2, max_weight_norm=0.5)
+        rng = np.random.default_rng(0)
+        for _ in range(500):
+            learner.observe("AAA", rng.normal(0, 3, 6), float(rng.normal(0.01, 0.05)), 0.0)
+            assert learner.weight_norm() <= 0.5 + 1e-9
+
+    def test_l2_decays_weights_absent_signal(self):
+        """With no reward gradient, L2 alone must pull weights toward zero --
+        that is what stops the slow monotonic norm drift of the online loop."""
+        learner = ContinualRRL([f"f{i}" for i in range(6)], seed=2, l2=0.05)
+        learner.agent.w[:] = 1.0
+        n0 = learner.weight_norm()
+        for _ in range(50):
+            learner.observe("AAA", np.zeros(6), 0.0, 0.0)
+        assert learner.weight_norm() < n0
+
+    def test_saturation_metrics_are_logged(self, completed_run):
+        _, engine, _ = completed_run
+        learning = engine.store.read("learning")
+        assert {"frac_saturated", "conviction_std"} <= set(learning.columns)
+        assert learning["frac_saturated"].null_count() == 0
+        assert (learning["frac_saturated"] <= 1.0).all()
+
 
 class TestDeterminism:
     def test_two_fresh_runs_are_identical(self, tmp_path):

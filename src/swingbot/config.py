@@ -166,6 +166,12 @@ class PaperConfig(BaseModel):
     # ---- learning ----
     learning_rate: float = 0.01
     dsr_eta: float = 0.01
+    # Saturation guards on the online policy: L2 shrinkage plus a hard cap on
+    # ||w||. Without them the weight norm drifts up until tanh pins at +/-1,
+    # every conviction ties at 1.0, and "conviction-ranked" sizing degenerates
+    # into the sort's tiebreak (i.e. alphabetical).
+    learn_l2: float = 1e-3
+    learn_max_weight_norm: float = 1.0
     # Pretrain the policy on this many years of history before inception, so
     # day one is not a random coin-flip. 0 disables pretraining.
     pretrain_years: float = 3.0

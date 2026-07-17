@@ -107,6 +107,8 @@ class RRLAgent(Agent):
         seed: int = 0,
         discrete: bool = True,
         threshold: float = 0.33,
+        l2: float = 1e-3,
+        max_weight_norm: float = 1.0,
     ) -> None:
         rng = np.random.default_rng(seed)
         self.n_features = n_features
@@ -118,6 +120,12 @@ class RRLAgent(Agent):
         self.eta = eta
         self.discrete = discrete
         self.threshold = threshold
+        # Saturation guards. Once |w.x| routinely exceeds ~2, tanh pins at +/-1,
+        # its gradient vanishes, and every conviction ties at 1.0 -- so ranking
+        # degenerates to the sort's tiebreak. L2 shrinks; the norm cap is a
+        # hard stop against the slow monotonic drift L2 alone permits.
+        self.l2 = l2
+        self.max_weight_norm = max_weight_norm
         self.reset()
 
     def reset(self) -> None:
@@ -192,9 +200,15 @@ class RRLAgent(Agent):
         grad_b = d_sharpe_d_r * dr_df * df_db
 
         # Ascent: we are maximising the Sharpe ratio, not minimising a loss.
-        self.w += self.lr * np.clip(grad_w, -1.0, 1.0)
-        self.u += self.lr * float(np.clip(grad_u, -1.0, 1.0))
+        # L2 shrinkage rides along inside the step so the penalty is felt even
+        # when the DSR gradient has vanished into a saturated tanh.
+        self.w += self.lr * (np.clip(grad_w, -1.0, 1.0) - self.l2 * self.w)
+        self.u += self.lr * (float(np.clip(grad_u, -1.0, 1.0)) - self.l2 * self.u)
         self.b += self.lr * float(np.clip(grad_b, -1.0, 1.0))
+        if self.max_weight_norm > 0:
+            norm = float(np.linalg.norm(self.w))
+            if norm > self.max_weight_norm:
+                self.w *= self.max_weight_norm / norm
 
         self._dfprev_dw, self._dfprev_du = df_dw, df_du
 

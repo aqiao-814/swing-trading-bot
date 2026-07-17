@@ -350,6 +350,93 @@ def _print_invest_day(today) -> None:
         )
 
 
+@app.command()
+def rank(
+    universe: str | None = typer.Option(
+        None, help="sp500 | nasdaq100 | sp100 | config | watchlist file (default: paper.universe)"
+    ),
+    benchmark: str = typer.Option("QQQ", help="Excess-return benchmark"),
+    horizon: int = typer.Option(20, help="Forward-return horizon in trading days"),
+    refit_every: int = typer.Option(21, help="Refit cadence in trading days"),
+    start: str | None = typer.Option(None, help="Bars start (default: paper.data_start)"),
+    config: Path | None = typer.Option(None),
+    out: Path = typer.Option(Path("artifacts/ranker"), help="Where scores/IC land"),
+) -> None:
+    """Walk-forward evaluation of the cross-sectional excess-return ranker.
+
+    Trains LightGBM on excess total return vs the benchmark with purged,
+    embargoed expanding windows, then reports per-date RankIC. This is the
+    go/no-go gate for the ranker: mean IC >= 0.02 with stability > 0.15 or
+    nothing gets built on top of it.
+    """
+    from swingbot.agents.ranker import ic_summary, rank_ic, walk_forward_scores
+    from swingbot.features.cross_section import build_panel
+    from swingbot.paper.gate import gate_signal, health_index
+    from swingbot.paper.universe import resolve_universe
+
+    cfg = _load_config(config)
+    if universe:
+        cfg.paper.universe = universe
+    symbols = resolve_universe(cfg.paper.universe, cfg)
+    data_start = start or cfg.paper.data_start
+    store = BarStore(cfg.data.root)
+
+    bench_bars = store.read([benchmark.upper()], start=data_start)
+    bars = store.read([s for s in symbols if s in store], start=data_start)
+    if bars.is_empty() or bench_bars.is_empty():
+        console.print(
+            "[red]No cached bars for the universe/benchmark. Run 'invest' or 'fetch' first.[/red]"
+        )
+        raise typer.Exit(1)
+
+    panel = build_panel(bars, bench_bars, horizon=horizon)
+    console.print(
+        f"[dim]panel: {panel.height:,} rows · {panel['symbol'].n_unique()} symbols · "
+        f"{panel['ts'].min()} .. {panel['ts'].max()}[/dim]"
+    )
+    result = walk_forward_scores(panel, horizon=horizon, refit_every=refit_every, seed=cfg.seed)
+    ic = rank_ic(result.scores)
+    s = ic_summary(ic)
+
+    table = Table("metric", "value", title=f"RankIC · {horizon}d excess vs {benchmark.upper()}")
+    table.add_row("days scored", f"{s['n_days']}")
+    table.add_row("mean IC", f"{s['mean']:+.4f}")
+    table.add_row("IC stability (mean/std)", f"{s['stability']:+.3f}")
+    table.add_row("t-stat", f"{s['t_stat']:+.2f}")
+    table.add_row("frac positive days", f"{s['frac_positive']:.1%}")
+    console.print(table)
+
+    year_table = Table("year", "mean IC", "days", title="By year")
+    by_year = (
+        ic.with_columns(year=pl.col("ts").dt.year())
+        .group_by("year")
+        .agg(pl.col("ic").mean(), pl.len())
+        .sort("year")
+    )
+    for row in by_year.iter_rows():
+        year_table.add_row(str(row[0]), f"{row[1]:+.4f}", str(row[2]))
+    console.print(year_table)
+
+    # Gate preview: how often would the realized-efficacy gate have abstained?
+    g = gate_signal(health_index(ic, horizon=horizon))
+    live = g.drop_nulls(subset=["g"])
+    if not live.is_empty():
+        abstain = float((live["g"] < 0.2).mean())
+        console.print(f"[dim]gate preview: abstains {abstain:.1%} of days at threshold 0.2[/dim]")
+
+    out.mkdir(parents=True, exist_ok=True)
+    result.scores.write_parquet(out / "scores.parquet", compression="zstd")
+    ic.write_parquet(out / "rank_ic.parquet", compression="zstd")
+    console.print(f"\n  scores -> {out / 'scores.parquet'}")
+
+    verdict = s["mean"] >= 0.02 and s["stability"] > 0.15
+    color = "green" if verdict else "yellow"
+    console.print(
+        f"[{color}]sanity gate {'PASSED' if verdict else 'NOT met'}: "
+        f"need mean IC >= 0.02 and stability > 0.15 before building on this signal[/{color}]"
+    )
+
+
 def _build_agent(strategy: str, cols: list[str], train: pl.DataFrame, cfg: Config, start: str):
     match strategy:
         case "buy_and_hold":
