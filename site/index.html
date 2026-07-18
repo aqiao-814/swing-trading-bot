@@ -47,6 +47,7 @@
   .tile { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:12px 14px; }
   .tile .label { font-size:12.5px; color:var(--ink-2); margin-bottom:4px; }
   .tile .value { font-size:24px; font-weight:600; }
+  .tile.hero { grid-column:span 2; }
   .tile.hero .value { font-size:34px; }
   .tile .delta { font-size:13px; margin-top:2px; color:var(--ink-2); }
   .delta.up, .num.up { color:var(--up); }
@@ -246,9 +247,10 @@ function renderChart(live){
   const pad = Math.max((hi-lo)*.08, hi*.002); lo -= pad; hi += pad;
   const ys = v => mT + (H - mT - mB) * (1 - (v-lo)/(hi-lo));
 
-  // clean y ticks
+  // clean y ticks; sub-$1k steps need a decimal or labels collide as "$100K"
   const span = hi-lo, step = [50000,25000,10000,5000,2500,1000,500,250,100].find(s => span/s >= 3 && span/s <= 8) || span/4;
   let ticks = []; for (let t = Math.ceil(lo/step)*step; t <= hi; t += step) ticks.push(t);
+  const tick$ = v => "$" + (v/1e3).toFixed(step < 1000 ? 1 : 0).replace(/\.0$/,"") + "K";
 
   const path = key => { let d=""; pts.forEach((p,i)=>{ if(p[key]==null) return; d += (d?" L":"M") + xs(i).toFixed(1) + " " + ys(p[key]).toFixed(1); }); return d; };
   const area = (()=>{ let d=""; pts.forEach((p,i)=>{ d += (d?" L":"M") + xs(i).toFixed(1) + " " + ys(p.pf).toFixed(1); });
@@ -264,7 +266,7 @@ function renderChart(live){
 
   svg.innerHTML =
     ticks.map(t => `<line x1="${mL}" x2="${W-mR}" y1="${ys(t)}" y2="${ys(t)}" stroke="${C.grid}" stroke-width="1"/>
-      <text x="${mL-8}" y="${ys(t)+4}" font-size="11" fill="${C.muted}" text-anchor="end">${compact$(t)}</text>`).join("") +
+      <text x="${mL-8}" y="${ys(t)+4}" font-size="11" fill="${C.muted}" text-anchor="end">${tick$(t)}</text>`).join("") +
     `<line x1="${mL}" x2="${W-mR}" y1="${H-mB}" y2="${H-mB}" stroke="${C.axis}" stroke-width="1"/>` +
     xLabels.join("") +
     `<path d="${area}" fill="${C.wash}"/>` +
