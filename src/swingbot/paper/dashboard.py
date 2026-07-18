@@ -67,10 +67,16 @@ def build_paper_dashboard(paper_root: str | Path, out: str | Path | None = None)
     state = PaperState.load(store.state_path)
     out = Path(out) if out else root / "dashboard.html"
 
-    ledger = store.read("ledger").sort("ts")
-    trades = store.read("trades").sort("ts")
-    decisions = store.read("decisions").sort("ts")
-    learning = store.read("learning").sort("ts")
+    def _sorted(name: str) -> pl.DataFrame:
+        # Day one: a table with no rows yet reads back column-less; sorting it
+        # would raise, and inception day has no trades by construction.
+        df = store.read(name)
+        return df.sort("ts") if "ts" in df.columns else df
+
+    ledger = _sorted("ledger")
+    trades = _sorted("trades")
+    decisions = _sorted("decisions")
+    learning = _sorted("learning")
     positions = store.read("positions")
 
     cap = state.starting_capital
