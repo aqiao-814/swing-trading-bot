@@ -31,7 +31,9 @@ jobs:
           cache: pip
 
       - name: Install swingbot
-        run: pip install -e .
+        # gymnasium: EpisodeResult lives in env/trading_env.py, which imports it
+        # at module top; the paper loop never uses it and torch stays out.
+        run: pip install -e . gymnasium
 
       - name: Restore bar cache
         uses: actions/cache@v4

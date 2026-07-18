@@ -24,7 +24,6 @@ from swingbot.agents.baselines import (
     RandomAgent,
     RRLAgent,
 )
-from swingbot.backtest.runner import evaluate, train_rrl
 from swingbot.config import Config
 from swingbot.dashboard import StrategyResult, build_dashboard
 from swingbot.data.sources import get_source
@@ -76,6 +75,8 @@ def backtest(
     save: bool = typer.Option(True, help="Write artifacts to disk"),
 ) -> None:
     """Run one strategy over one symbol and report performance."""
+    from swingbot.backtest.runner import evaluate  # RL extras load only when backtesting
+
     cfg = _load_config(config)
     cfg.env.starting_capital = capital
     cfg.env.episode_length = None
@@ -112,6 +113,8 @@ def compare(
     config: Path | None = typer.Option(None),
 ) -> None:
     """Compare every strategy under identical market conditions."""
+    from swingbot.backtest.runner import evaluate  # RL extras load only when backtesting
+
     cfg = _load_config(config)
     cfg.env.starting_capital = capital
     cfg.env.episode_length = None
@@ -189,6 +192,8 @@ def dashboard(
     open_browser: bool = typer.Option(False, "--open", help="Open when done"),
 ) -> None:
     """Build a self-contained HTML analytics dashboard for every strategy."""
+    from swingbot.backtest.runner import evaluate  # RL extras load only when backtesting
+
     cfg = _load_config(config)
     cfg.env.starting_capital = capital
     cfg.env.episode_length = None
@@ -517,6 +522,8 @@ def rank(
 
 
 def _build_agent(strategy: str, cols: list[str], train: pl.DataFrame, cfg: Config, start: str):
+    from swingbot.backtest.runner import train_rrl  # RL extras load only when backtesting
+
     match strategy:
         case "buy_and_hold":
             return BuyAndHold()
