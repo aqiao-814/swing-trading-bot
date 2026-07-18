@@ -1,0 +1,60 @@
+name: live-quotes
+# Intraday refresh: live quotes, live P&L, provisional open fills. Every
+# 15 minutes across 13:00-21:59 UTC weekdays, which covers 9:30-16:00 ET in
+# both EST and EDT; off-hours runs are cheap no-ops that keep quotes fresh.
+
+on:
+  schedule:
+    - cron: "*/15 13-21 * * 1-5"
+  workflow_dispatch:
+
+concurrency:
+  group: live-quotes
+  cancel-in-progress: true
+
+jobs:
+  quotes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install yfinance
+        run: pip install yfinance
+
+      - name: Pull state + site data
+        run: |
+          git clone --depth 1 https://github.com/aqiao-814/swingbot-live.git /tmp/site
+          test -f /tmp/site/state/paper/portfolio/state.json || { echo "no state yet"; exit 0; }
+          mkdir -p artifacts site
+          cp -r /tmp/site/state/paper artifacts/paper
+          cp /tmp/site/data.json site/data.json
+
+      - name: Compute live view
+        run: python scripts/live_quotes.py
+
+      - name: Publish live.json
+        env:
+          DEPLOY_KEY: ${{ secrets.SITE_DEPLOY_KEY }}
+        run: |
+          test -f site/live.json || exit 0
+          eval "$(ssh-agent -s)"
+          echo "$DEPLOY_KEY" | ssh-add -
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+          cp site/live.json /tmp/site/live.json
+          cd /tmp/site
+          git remote set-url origin git@github.com:aqiao-814/swingbot-live.git
+          git config user.name "swingbot"
+          git config user.email "actions@users.noreply.github.com"
+          git add live.json
+          git diff --cached --quiet && { echo "unchanged"; exit 0; }
+          git commit -m "live $(date -u +%FT%H:%M)"
+          for i in 1 2 3; do
+            git push && break
+            git pull --rebase && sleep 5
+          done

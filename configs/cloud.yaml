@@ -1,0 +1,8 @@
+# Config for the hosted live paper bot (GitHub Actions).
+# Fresh portfolio: $100k simulated, inception 2026-07-17, no prior holdings.
+seed: 7
+run_name: cloud
+paper:
+  universe: nasdaq100
+  start: '2026-07-17'
+  data_start: '2018-01-01'

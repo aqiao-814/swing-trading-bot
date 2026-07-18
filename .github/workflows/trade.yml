@@ -1,0 +1,96 @@
+name: nightly-trade
+# The autonomous daily paper-trading run: after each market close, process the
+# completed day (fill queued orders at the open, mark to market, learn, decide
+# for the next open), then publish state + dashboard data to the public site.
+# 21:25 UTC = 16:25 EST / 17:25 EDT -- always after the 16:15 ET bar cutoff.
+
+on:
+  schedule:
+    - cron: "25 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      clear_halt:
+        description: "Clear a fired kill switch and resume trading"
+        type: boolean
+        default: false
+
+concurrency:
+  group: portfolio-state
+  cancel-in-progress: false
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install swingbot
+        run: pip install -e .
+
+      - name: Restore bar cache
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: bars-v1-${{ github.run_id }}
+          restore-keys: bars-v1-
+
+      - name: Pull portfolio state from site repo
+        env:
+          DEPLOY_KEY: ${{ secrets.SITE_DEPLOY_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$DEPLOY_KEY" | ssh-add -
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+          git clone --depth 1 git@github.com:aqiao-814/swingbot-live.git /tmp/site
+          mkdir -p artifacts
+          if [ -d /tmp/site/state/paper ]; then
+            cp -r /tmp/site/state/paper artifacts/paper
+            cp -r /tmp/site/state/models artifacts/models || true
+            echo "restored state through $(python -c "import json;print(json.load(open('artifacts/paper/portfolio/state.json'))['last_processed'])")"
+          else
+            echo "no prior state -- this run incepts the portfolio"
+          fi
+
+      - name: Run the trading day
+        run: |
+          EXTRA=""
+          if [ "${{ inputs.clear_halt }}" = "true" ]; then EXTRA="--clear-halt"; fi
+          python -m swingbot.cli invest --config configs/cloud.yaml --capital 100000 $EXTRA \
+            || (echo "retrying after 90s (data source hiccup?)" && sleep 90 && \
+                python -m swingbot.cli invest --config configs/cloud.yaml --capital 100000 $EXTRA)
+
+      - name: Export dashboard data
+        run: python scripts/export_site_data.py
+
+      - name: Refresh intraday layer
+        run: pip install yfinance && python scripts/live_quotes.py || true
+
+      - name: Publish state + site
+        env:
+          DEPLOY_KEY: ${{ secrets.SITE_DEPLOY_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$DEPLOY_KEY" | ssh-add -
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+          mkdir -p /tmp/site/state
+          rm -rf /tmp/site/state/paper /tmp/site/state/models
+          cp -r artifacts/paper /tmp/site/state/paper
+          cp -r artifacts/models /tmp/site/state/models
+          cp site/index.html site/data.json /tmp/site/
+          cp site/live.json /tmp/site/ 2>/dev/null || true
+          cd /tmp/site
+          git config user.name "swingbot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "nothing to publish"; exit 0; }
+          git commit -m "trading day $(date -u +%F)"
+          for i in 1 2 3; do
+            git push && break
+            git pull --rebase && sleep 5
+          done
