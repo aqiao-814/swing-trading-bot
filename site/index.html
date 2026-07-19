@@ -119,7 +119,7 @@
 
   <section>
     <h2>Queued orders</h2>
-    <div class="sub">Decided on the latest close; they fill at the next market open.</div>
+    <div class="sub" id="pendSub">Decided on the latest bar; they fill at the next bar's open.</div>
     <div class="tbl-wrap"><table id="pendTable"></table></div>
   </section>
 
@@ -181,8 +181,16 @@ function render(){
   const cash   = live ? LIVE.cash : S.cash;
   const invested = live ? LIVE.invested : S.invested;
   const totRet = live ? LIVE.total_return : S.total_return;
-  const dayPnl = live ? LIVE.day_pnl : (DATA.ledger.length ? S.equity - (DATA.ledger.length>1 ? DATA.ledger[DATA.ledger.length-2].equity : M.starting_capital) : 0);
-  const dayPct = live ? LIVE.day_pnl_pct : (DATA.ledger.length ? DATA.ledger[DATA.ledger.length-1].daily_return : 0);
+  // Non-live "today": last ledger equity vs the previous DAY's final bar
+  // (one row per day on the daily loop, one per hour intraday).
+  let dayPnl = 0, dayPct = 0;
+  if (live) { dayPnl = LIVE.day_pnl; dayPct = LIVE.day_pnl_pct; }
+  else if (DATA.ledger.length) {
+    const lastDate = DATA.ledger[DATA.ledger.length-1].ts.slice(0,10);
+    const prior = DATA.ledger.filter(r => r.ts.slice(0,10) < lastDate);
+    const base = prior.length ? prior[prior.length-1].equity : M.starting_capital;
+    dayPnl = S.equity - base; dayPct = base > 0 ? S.equity/base - 1 : 0;
+  }
 
   // market pill
   const mkt = $("mkt");
@@ -222,7 +230,8 @@ function render(){
   renderTrades();
 
   const L = DATA.learning || {};
-  $("foot").innerHTML = `<b>All capital is simulated.</b> A $${(M.starting_capital/1000).toFixed(0)}k paper portfolio over the ${M.universe} universe, traded by an online-learning RRL policy: it scores every stock on each day's close, ranks by conviction, and queues orders that fill at the next open with modeled spread, slippage, impact and fees. Inception ${M.inception} · last processed close ${M.last_processed} · ${M.n_fills} fills · learner: ${(L.n_updates||0).toLocaleString()} updates, conviction σ ${(L.conviction_std??0).toFixed(3)} · data: Yahoo Finance (may be delayed ~15 min) · updated ${etDate(DATA.generated_utc)} · not investment advice.`;
+  const barWord = M.interval === "60m" ? "hourly bar" : "day's close";
+  $("foot").innerHTML = `<b>All capital is simulated.</b> A $${(M.starting_capital/1000).toFixed(0)}k paper portfolio over the ${M.universe} universe, traded by an online-learning RRL policy: it scores every stock on each completed ${barWord}, ranks by conviction, and queues orders that fill at the next bar's open with modeled spread, slippage, impact and fees. Inception ${M.inception.slice(0,10)} · last processed bar ${(M.last_processed||"—").slice(0,16).replace("T"," ")} · ${M.n_fills} fills · learner: ${(L.n_updates||0).toLocaleString()} updates, conviction σ ${(L.conviction_std??0).toFixed(3)} · data: Yahoo Finance (may be delayed ~15 min) · updated ${etDate(DATA.generated_utc)} · not investment advice.`;
 }
 
 // ---- chart ----------------------------------------------------------------
@@ -285,7 +294,8 @@ function renderChart(live){
      <span class="key">${key(C.muted,true)} QQQ buy&nbsp;&amp;&nbsp;hold</span>`;
   const last = led[led.length-1];
   const lead = (last.bench_SPY!=null) ? ` · vs SPY ${fmtPct((live?LIVE.equity:last.equity)/DATA.meta.starting_capital - last.bench_SPY/DATA.meta.starting_capital)}` : "";
-  $("chartSub").textContent = `$${(DATA.meta.starting_capital/1000).toFixed(0)}k at inception ${DATA.meta.inception}, marked at each close${live&&LIVE.market_open?" — last point is live":""}${lead}`;
+  const markWord = DATA.meta.interval === "60m" ? "each hourly bar" : "each close";
+  $("chartSub").textContent = `$${(DATA.meta.starting_capital/1000).toFixed(0)}k at inception ${DATA.meta.inception.slice(0,10)}, marked at ${markWord}${live&&LIVE.market_open?" — last point is live":""}${lead}`;
 
   // crosshair + tooltip
   const tip = $("tooltip"), xh = svg.querySelector("#xhair"), xhLine = xh.querySelector("line");
@@ -299,7 +309,7 @@ function renderChart(live){
     const rows = [["portfolio",p.pf],["SPY",p.spy],["QQQ",p.qqq]].filter(r=>r[1]!=null)
       .map(([n,v]) => `<div class="t-row"><span>${n}</span><span class="v">${fmt$(v,false)}</span></div>`).join("");
     tip.innerHTML = `<div class="t-date">${p.ts==="live"?"now (live)":p.ts}</div>${rows}
-      <div class="t-row"><span>day</span><span class="v ${cls(p.ret)}">${fmtPct(p.ret)}</span></div>`;
+      <div class="t-row"><span>${DATA.meta.interval==="60m"?"bar":"day"}</span><span class="v ${cls(p.ret)}">${fmtPct(p.ret)}</span></div>`;
     tip.style.display = "block";
     const bw = box.clientWidth, tw = tip.offsetWidth;
     const lx = px * (r.width / W);
@@ -309,7 +319,7 @@ function renderChart(live){
   svg.onmouseleave = () => { tip.style.display="none"; xh.style.display="none"; };
 
   // data table
-  $("ledgerTable").innerHTML = `<tr><th>date</th><th>equity</th><th>SPY</th><th>QQQ</th><th>day</th><th>cash</th><th>positions</th></tr>` +
+  $("ledgerTable").innerHTML = `<tr><th>${DATA.meta.interval==="60m"?"bar":"date"}</th><th>equity</th><th>SPY</th><th>QQQ</th><th>${DATA.meta.interval==="60m"?"bar":"day"}</th><th>cash</th><th>positions</th></tr>` +
     [...led].reverse().map(r => `<tr><td>${r.ts}</td><td>${fmt$(r.equity)}</td><td>${r.bench_SPY!=null?fmt$(r.bench_SPY):"—"}</td>
       <td>${r.bench_QQQ!=null?fmt$(r.bench_QQQ):"—"}</td><td class="num ${cls(r.daily_return)}">${fmtPct(r.daily_return)}</td>
       <td>${fmt$(r.cash,false)}</td><td>${r.n_positions}</td></tr>`).join("");
@@ -325,7 +335,7 @@ function renderPositions(live){
         return `<tr><td class="sym">${p.symbol}</td><td>${fmtQty(p.quantity)}</td><td>${fmt$(p.avg_price)}</td>
         <td>${fmt$(p.live_price)}</td><td class="num ${cls(p.day_change_pct)}">${fmtPct(p.day_change_pct)}</td>
         <td>${fmt$(p.market_value,false)}</td><td class="num ${cls(p.unrealized_pnl)}">${fmtSign$(p.unrealized_pnl)} (${fmtPct(pct,1)})</td>
-        <td>${fmtPct(p.weight,1).replace("+","")}</td><td class="reason">${p.entry_ts||"—"}</td></tr>`; }).join("");
+        <td>${fmtPct(p.weight,1).replace("+","")}</td><td class="reason">${(p.entry_ts||"—").slice(0,16).replace("T"," ")}</td></tr>`; }).join("");
   } else if (DATA.positions.length){
     $("posSub").textContent = `Marked at the ${DATA.meta.last_processed} close.`;
     t.innerHTML = `<tr><th>symbol</th><th>shares</th><th>avg cost</th><th>price</th><th>value</th><th>unrealized P&amp;L</th><th>weight</th><th>entered</th></tr>` +
@@ -333,7 +343,7 @@ function renderPositions(live){
         return `<tr><td class="sym">${p.symbol}</td><td>${fmtQty(p.quantity)}</td><td>${fmt$(p.avg_price)}</td>
         <td>${fmt$(p.current_price)}</td><td>${fmt$(p.market_value,false)}</td>
         <td class="num ${cls(p.unrealized_pnl)}">${fmtSign$(p.unrealized_pnl)} (${fmtPct(pct,1)})</td>
-        <td>${fmtPct(p.weight,1).replace("+","")}</td><td class="reason">${p.entry_ts||"—"}</td></tr>`; }).join("");
+        <td>${fmtPct(p.weight,1).replace("+","")}</td><td class="reason">${(p.entry_ts||"—").slice(0,16).replace("T"," ")}</td></tr>`; }).join("");
   } else {
     $("posSub").textContent = "";
     t.innerHTML = `<tr><td class="empty">All cash — no open positions.</td></tr>`;
@@ -357,7 +367,7 @@ function renderPending(){
     po.map(o => { const side = o.target_weight <= 1e-9 ? "sell" : "buy";
       return `<tr><td class="sym">${o.symbol}</td><td><span class="chip ${side}">${side}</span></td>
       <td>${fmtPct(o.target_weight,1).replace("+","")}</td><td>${o.conviction.toFixed(3)}</td>
-      <td class="reason">${o.reason}</td><td class="reason">${o.decided_ts}</td></tr>`; }).join("");
+      <td class="reason">${o.reason}</td><td class="reason">${o.decided_ts.slice(0,16).replace("T"," ")}</td></tr>`; }).join("");
 }
 
 function renderTrades(){

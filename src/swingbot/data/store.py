@@ -7,7 +7,7 @@ Partitioned by symbol so a single-ticker read touches exactly one file.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import duckdb
@@ -20,6 +20,23 @@ from swingbot.data.schema import (
     normalize,
     validate,
 )
+
+
+def _bound(value: str | date | datetime, ts_dtype: pl.DataType) -> date | datetime:
+    """Coerce a start/end bound to the store's ts type (Date or Datetime).
+
+    Intraday stores carry Datetime timestamps; a date-typed bound there would
+    fail the comparison, so dates widen to midnight of that day.
+    """
+    if isinstance(value, str):
+        value = (
+            datetime.fromisoformat(value) if ts_dtype == pl.Datetime else date.fromisoformat(value)
+        )
+    if ts_dtype == pl.Datetime and not isinstance(value, datetime):
+        value = datetime(value.year, value.month, value.day)
+    if ts_dtype == pl.Date and isinstance(value, datetime):
+        value = value.date()
+    return value
 
 
 class BarStore:
@@ -88,9 +105,9 @@ class BarStore:
 
         df = pl.concat([pl.read_parquet(p) for p in existing], how="vertical")
         if start is not None:
-            df = df.filter(pl.col("ts") >= pl.lit(start).cast(pl.Date))
+            df = df.filter(pl.col("ts") >= _bound(start, df.schema["ts"]))
         if end is not None:
-            df = df.filter(pl.col("ts") <= pl.lit(end).cast(pl.Date))
+            df = df.filter(pl.col("ts") <= _bound(end, df.schema["ts"]))
 
         df = apply_adjustment(df, adjustment)
         return df.sort(["symbol", "ts"])

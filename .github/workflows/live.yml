@@ -1,11 +1,11 @@
 name: live-quotes
-# Intraday refresh: live quotes, live P&L, provisional open fills. Every
-# 15 minutes across 13:00-21:59 UTC weekdays, which covers 9:30-16:00 ET in
+# Intraday refresh between hourly trading runs: live quotes and live P&L.
+# Every 20 minutes across 13:00-21:59 UTC weekdays, covering 9:30-16:00 ET in
 # both EST and EDT; off-hours runs are cheap no-ops that keep quotes fresh.
 
 on:
   schedule:
-    - cron: "*/15 13-21 * * 1-5"
+    - cron: "*/20 13-21 * * 1-5"
   workflow_dispatch:
 
 concurrency:

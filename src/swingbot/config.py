@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field, model_validator
@@ -129,6 +129,10 @@ class PaperConfig(BaseModel):
 
     # Universe name (sp500 | nasdaq100 | sp100 | config | a watchlist file path).
     universe: str = "nasdaq100"
+    # Bar interval the loop trades on: "1d" (decide at close, fill next open)
+    # or "60m" (decide each completed hourly bar, fill next bar's open).
+    # Intraday history is capped at ~730 days by the data source.
+    interval: Literal["1d", "60m"] = "1d"
     # Paper-trading inception. None = today (portfolio starts with today's run).
     # A past date makes the engine replay forward day-by-day from there, which
     # is how a fresh install builds a real forward track record.

@@ -44,13 +44,22 @@ class DataQualityError(ValueError):
 
 
 def normalize(df: pl.DataFrame) -> pl.DataFrame:
-    """Coerce a source frame into BAR_SCHEMA order, types, and sort."""
+    """Coerce a source frame into BAR_SCHEMA order, types, and sort.
+
+    ``ts`` keeps its temporal resolution: intraday frames arrive with a
+    Datetime column and must stay Datetime — casting to Date would collapse
+    every bar of a day onto one key and silently drop all but the last.
+    """
     missing = set(REQUIRED_COLUMNS) - set(df.columns)
     if missing:
         raise DataQualityError(f"missing required columns: {sorted(missing)}")
 
+    schema = dict(BAR_SCHEMA)
+    if df.schema["ts"] == pl.Datetime:
+        schema["ts"] = pl.Datetime("us")
+
     return (
-        df.select([pl.col(name).cast(dtype, strict=False) for name, dtype in BAR_SCHEMA.items()])
+        df.select([pl.col(name).cast(dtype, strict=False) for name, dtype in schema.items()])
         .drop_nulls(subset=["symbol", "ts", "close"])
         .unique(subset=["symbol", "ts"], keep="last")
         .sort(["symbol", "ts"])

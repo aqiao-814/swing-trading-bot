@@ -57,6 +57,10 @@ class PaperState:
     starting_capital: float
     cash: float
     seed: int
+    # Bar interval this portfolio trades on ("1d" | "60m"). Timestamps below
+    # are date-ISO on the daily loop and datetime-ISO intraday; the engine
+    # refuses to run a state file at the wrong resolution.
+    interval: str = "1d"
     inception: str | None = None  # first processed trading day
     last_processed: str | None = None  # idempotency watermark
     positions: list[HeldPosition] = field(default_factory=list)

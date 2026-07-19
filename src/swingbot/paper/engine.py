@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -48,17 +48,26 @@ from swingbot.paper.universe import resolve_universe
 
 _ET = ZoneInfo("America/New_York")
 _MARKET_CLOSE_HOUR = 16  # 16:15 ET: bar for `today` is considered complete
+_LAST_HOURLY_BAR = time(15, 30)  # the half-hour 15:30 bar; completes at 16:00
+
+# One bar timestamp: a date on the daily loop, a naive-ET datetime intraday.
+BarTs = date | datetime
 
 
-def stop_cooldown_active(paper: PaperConfig, state: PaperState, symbol: str, d: date) -> bool:
+def _parse_like(iso: str, like: BarTs) -> BarTs:
+    """Parse a stored ISO timestamp with the same resolution as ``like``."""
+    return datetime.fromisoformat(iso) if isinstance(like, datetime) else date.fromisoformat(iso)
+
+
+def stop_cooldown_active(paper: PaperConfig, state: PaperState, symbol: str, d: BarTs) -> bool:
     """True while a stopped-out symbol is still barred from re-entry."""
     last = state.last_stop_out.get(symbol)
     if last is None:
         return False
-    return (d - date.fromisoformat(last)).days < paper.stop_cooldown_days
+    return (d - _parse_like(last, d)).days < paper.stop_cooldown_days
 
 
-def target_gross_exposure(paper: PaperConfig, state: PaperState, d: date) -> float:
+def target_gross_exposure(paper: PaperConfig, state: PaperState, d: BarTs) -> float:
     """Gross-exposure cap after recent stop-outs.
 
     Each stop inside the cooldown window de-grosses the book, so the cash a
@@ -67,7 +76,7 @@ def target_gross_exposure(paper: PaperConfig, state: PaperState, d: date) -> flo
     recent = sum(
         1
         for iso in state.last_stop_out.values()
-        if 0 <= (d - date.fromisoformat(iso)).days < paper.stop_cooldown_days
+        if 0 <= (d - _parse_like(iso, d)).days < paper.stop_cooldown_days
     )
     return max(
         paper.min_gross_exposure,
@@ -135,6 +144,8 @@ class PaperEngine:
         self.universe_name = universe or self.paper.universe
         self.symbols = resolve_universe(self.universe_name, cfg)
         self.benchmarks = [s.upper() for s in self.paper.benchmark_symbols]
+        self.hourly = self.paper.interval == "60m"
+        self.bars_per_day = 7 if self.hourly else 1  # regular-session hourly bars
 
         self.bar_store = BarStore(cfg.data.root)
         self.paper_root = cfg.artifacts_root / "paper"
@@ -144,6 +155,10 @@ class PaperEngine:
         self.feature_cols = feature_columns(cfg.features)
         # Round-trip friction the learner is charged per unit of position change.
         self._learn_cost = 2.0 * (cfg.env.costs.half_spread_bps + cfg.env.costs.slippage_bps) * 1e-4
+
+    def _iso(self, iso: str) -> BarTs:
+        """Parse a stored ISO timestamp at this loop's bar resolution."""
+        return datetime.fromisoformat(iso) if self.hourly else date.fromisoformat(iso)
 
     # ---- data --------------------------------------------------------------
 
@@ -156,7 +171,8 @@ class PaperEngine:
         source_name = self.cfg.data.source
         if source_name in ("yahoo", "yfinance"):
             source_name = "yahoo_bulk"  # universe-scale refresh in a few requests
-        source = get_source(source_name)
+        kwargs = {"interval": self.paper.interval} if source_name.startswith("yahoo") else {}
+        source = get_source(source_name, **kwargs)
 
         wanted = sorted(set(self.symbols) | set(self.benchmarks))
         cached, new = [], []
@@ -171,6 +187,8 @@ class PaperEngine:
             # Refresh from the *stalest* cached symbol, minus a 30-day overlap
             # so recent splits/dividends re-adjust the boundary cleanly.
             stalest = coverage["end"].min() if not coverage.is_empty() else None
+            if isinstance(stalest, datetime):
+                stalest = stalest.date()
             start = max(
                 date.fromisoformat(self.paper.data_start),
                 (stalest or date.min) - timedelta(days=30),
@@ -191,9 +209,29 @@ class PaperEngine:
                 except DataQualityError as exc:
                     log(f"[data] skipping {sym}: {str(exc)[:80]}")
 
-    def _load_symbol_data(self, as_of: date) -> dict[str, _SymbolData]:
+    def _read_completed(self, symbols: list[str], cutoff: BarTs) -> pl.DataFrame:
+        """Bars whose *completion time* is at or before the cutoff.
+
+        Daily bars complete at their own date (the caller's cutoff rule already
+        excluded today's forming bar). Hourly bars start on the stamp and
+        complete an hour later — 30 minutes for the half-length 15:30 bar — so
+        a partial bar the vendor returns mid-hour can never enter the loop.
+        """
+        if not self.hourly:
+            return self.bar_store.read(symbols, start=self.paper.data_start, end=cutoff)
+        bars = self.bar_store.read(symbols, start=self.paper.data_start)
+        if bars.is_empty():
+            return bars
+        completes = (
+            pl.when(pl.col("ts").dt.time() == _LAST_HOURLY_BAR)
+            .then(pl.col("ts") + pl.duration(minutes=30))
+            .otherwise(pl.col("ts") + pl.duration(minutes=60))
+        )
+        return bars.filter(completes <= pl.lit(cutoff))
+
+    def _load_symbol_data(self, as_of: BarTs) -> dict[str, _SymbolData]:
         """Feature-complete per-symbol arrays, truncated to completed bars."""
-        bars = self.bar_store.read(self.symbols, start=self.paper.data_start, end=as_of)
+        bars = self._read_completed(self.symbols, as_of)
         if bars.is_empty():
             return {}
         features = build_dataset(bars, self.cfg.features)
@@ -215,10 +253,10 @@ class PaperEngine:
             )
         return out
 
-    def _benchmark_closes(self, as_of: date) -> dict[str, dict[date, float]]:
-        out: dict[str, dict[date, float]] = {}
+    def _benchmark_closes(self, as_of: BarTs) -> dict[str, dict[BarTs, float]]:
+        out: dict[str, dict[BarTs, float]] = {}
         for sym in self.benchmarks:
-            bars = self.bar_store.read([sym], start=self.paper.data_start, end=as_of)
+            bars = self._read_completed([sym], as_of)
             if not bars.is_empty():
                 out[sym] = dict(zip(bars["ts"].to_list(), bars["close"].to_list(), strict=True))
         return out
@@ -238,6 +276,14 @@ class PaperEngine:
         market_closed = (now.hour, now.minute) >= (_MARKET_CLOSE_HOUR, 15)
         return today if market_closed else today - timedelta(days=1)
 
+    def _cutoff(self, as_of: date | None) -> BarTs:
+        """The completion-time cutoff for this run, per the loop's interval."""
+        if not self.hourly:
+            return self.latest_completed(as_of)
+        if as_of is not None and as_of < datetime.now(_ET).date():
+            return datetime.combine(as_of, time(23, 59))  # replay a full day
+        return datetime.now(_ET).replace(tzinfo=None)
+
     # ---- the daily loop -----------------------------------------------------
 
     def run(
@@ -253,7 +299,7 @@ class PaperEngine:
         if refresh:
             self.refresh_data(log=log)
 
-        cutoff = self.latest_completed(as_of)
+        cutoff = self._cutoff(as_of)
         data = self._load_symbol_data(cutoff)
         if not data:
             raise DataQualityError("no feature-complete bars for the universe; fetch data first")
@@ -267,10 +313,10 @@ class PaperEngine:
             state.halted_ts = None
             state.save(self.store.state_path)
 
-        last = date.fromisoformat(state.last_processed) if state.last_processed else None
+        last = self._iso(state.last_processed) if state.last_processed else None
         todo = [d for d in calendar if (last is None or d > last)]
         if state.inception:
-            todo = [d for d in todo if d >= date.fromisoformat(state.inception)]
+            todo = [d for d in todo if d >= self._iso(state.inception)]
 
         summary = RunSummary(
             universe=self.universe_name,
@@ -282,7 +328,7 @@ class PaperEngine:
         entry_ts = {p.symbol: p.entry_ts for p in state.positions if p.entry_ts}
         # Prime carry-forward prices strictly *before* the first day we will
         # process -- never from bars the loop has not reached yet.
-        boundary = last or (date.fromisoformat(state.inception) - timedelta(days=1))
+        boundary = last or (self._iso(state.inception) - timedelta(days=1))
         last_close: dict[str, float] = {}
         for sym, sd in data.items():
             past = [i for i, t in enumerate(sd.ts) if t <= boundary]
@@ -337,6 +383,7 @@ class PaperEngine:
         if todo:
             state.capture_portfolio(pf, entry_ts)
             state.last_processed = todo[-1].isoformat()
+            ckpt_ts = todo[-1].date() if isinstance(todo[-1], datetime) else todo[-1]
             self.store.append("ledger", pl.DataFrame(ledger_rows))
             if trade_rows:
                 self.store.append("trades", pl.DataFrame(trade_rows))
@@ -347,7 +394,7 @@ class PaperEngine:
                 )
             self.store.append("learning", pl.DataFrame(learning_rows))
             self._write_positions(pf, entry_ts, last_close)
-            learner.checkpoint(self.models_root, todo[-1], max_keep=self.paper.max_checkpoints)
+            learner.checkpoint(self.models_root, ckpt_ts, max_keep=self.paper.max_checkpoints)
             state.save(self.store.state_path)
         else:
             log("[paper] no new completed trading day; nothing to do")
@@ -389,7 +436,9 @@ class PaperEngine:
         for sym in list(pf.positions):
             pos = pf.positions[sym]
             if pos.is_short and sym in last_close:
-                cost = self.execution.borrow_cost(pos.market_value(last_close[sym]), days=1.0)
+                cost = self.execution.borrow_cost(
+                    pos.market_value(last_close[sym]), days=1.0 / self.bars_per_day
+                )
                 if cost > 0:
                     pf.charge(cost, symbol=sym)
 
@@ -576,7 +625,7 @@ class PaperEngine:
             sd = data.get(order.symbol)
             if sd is not None and d in sd.idx:
                 executable.append(order)
-            elif (d - date.fromisoformat(order.decided_ts)).days <= self.paper.cancel_after_days:
+            elif (d - _parse_like(order.decided_ts, d)).days <= self.paper.cancel_after_days:
                 keep.append(order)  # no bar today; wait, then expire
         state.pending_orders = keep
 
@@ -650,7 +699,7 @@ class PaperEngine:
                     "reason": order.reason,
                     "conviction": order.conviction,
                     "target_weight": order.target_weight,
-                    "decided_ts": date.fromisoformat(order.decided_ts),
+                    "decided_ts": _parse_like(order.decided_ts, d),
                 }
             )
         return notional
@@ -864,6 +913,12 @@ class PaperEngine:
         model_path = self.models_root / "rrl_latest.bin"
         if self.store.state_path.exists():
             state = PaperState.load(self.store.state_path)
+            if state.interval != self.paper.interval:
+                raise ValueError(
+                    f"saved portfolio state is on interval '{state.interval}' but the config "
+                    f"says '{self.paper.interval}'; delete artifacts/paper (and artifacts/"
+                    f"models) to start a fresh portfolio at the new cadence"
+                )
             if model_path.exists():
                 learner = ContinualRRL.load(model_path)
                 if learner.feature_cols != self.feature_cols:
@@ -876,7 +931,12 @@ class PaperEngine:
             return state, learner
 
         # ---- first run: inception ----
-        start = date.fromisoformat(self.paper.start) if self.paper.start else calendar[-1]
+        if self.paper.start:
+            start: BarTs = date.fromisoformat(self.paper.start)
+            if self.hourly:
+                start = datetime.combine(start, time.min)
+        else:
+            start = calendar[-1]
         inception_days = [t for t in calendar if t >= start]
         if not inception_days:
             raise DataQualityError(f"no completed trading days on/after {start}")
@@ -888,6 +948,7 @@ class PaperEngine:
             cash=capital,
             seed=self.cfg.seed,
             inception=inception.isoformat(),
+            interval=self.paper.interval,
         )
         # Benchmarks: buy-and-hold units purchased at the first close *before*
         # inception (the last price knowable when the portfolio went live).
@@ -927,7 +988,7 @@ class PaperEngine:
     ) -> None:
         """Warm-start on history strictly before inception -- never on the
         forward period the portfolio will be judged on."""
-        window = int(self.paper.pretrain_years * 252)
+        window = int(self.paper.pretrain_years * 252 * self.bars_per_day)
         feats: dict[str, np.ndarray] = {}
         rets: dict[str, np.ndarray] = {}
         for sym, sd in data.items():
@@ -1008,9 +1069,7 @@ class PaperEngine:
         entry_ts: dict[str, str],
     ) -> None:
         equity = pf.equity(last_close)
-        summary.last_processed = (
-            date.fromisoformat(state.last_processed) if state.last_processed else None
-        )
+        summary.last_processed = self._iso(state.last_processed) if state.last_processed else None
         summary.equity = equity
         summary.cash = pf.cash
         summary.halted = state.halted

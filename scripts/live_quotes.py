@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,10 +22,11 @@ from zoneinfo import ZoneInfo
 
 import yfinance as yf
 
-import os
-
 ROOT = Path(__file__).resolve().parent.parent
-STATE = Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio")) / "state.json"
+STATE = (
+    Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio"))
+    / "state.json"
+)
 _SITE = Path(os.environ.get("SWINGBOT_SITE", ROOT / "site"))
 DATA = _SITE / "data.json"
 OUT = _SITE / "live.json"
@@ -87,8 +89,15 @@ def main() -> None:
     in_hours = now_et.weekday() < 5 and (9, 30) <= (now_et.hour, now_et.minute) < (16, 0)
     market_open = traded_today and in_hours
 
+    # "Today's P&L" baselines at the previous *day's* last bar. On the hourly
+    # loop the ledger has one row per bar, so the last row is only minutes old
+    # on a trading day; on a quiet day the last row is the right baseline.
     ledger = data.get("ledger", [])
     prev_equity = ledger[-1]["equity"] if ledger else state["starting_capital"]
+    if ledger and traded_today:
+        before_today = [r for r in ledger if r["ts"][:10] < today]
+        if before_today:
+            prev_equity = before_today[-1]["equity"]
 
     positions = []
     invested = 0.0

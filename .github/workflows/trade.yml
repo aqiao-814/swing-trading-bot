@@ -1,12 +1,14 @@
-name: nightly-trade
-# The autonomous daily paper-trading run: after each market close, process the
-# completed day (fill queued orders at the open, mark to market, learn, decide
-# for the next open), then publish state + dashboard data to the public site.
-# 21:25 UTC = 16:25 EST / 17:25 EDT -- always after the 16:15 ET bar cutoff.
+name: hourly-trade
+# The autonomous hourly paper-trading run: process every newly completed
+# 60-minute bar (fill queued orders at the bar's open, mark, learn, decide for
+# the next bar), then publish state + dashboard data to the public site.
+# Bars start on the half hour ET, so :40 UTC lands ~10 min after each EDT bar
+# completes; the 13:40-21:40 window covers the full session in EST and EDT,
+# and off-hours firings are idempotent no-ops.
 
 on:
   schedule:
-    - cron: "25 21 * * 1-5"
+    - cron: "40 13-21 * * 1-5"
   workflow_dispatch:
     inputs:
       clear_halt:
@@ -40,9 +42,9 @@ jobs:
       - name: Restore bar cache
         uses: actions/cache@v4
         with:
-          path: data
-          key: bars-v1-${{ github.run_id }}
-          restore-keys: bars-v1-
+          path: data60
+          key: bars60-v1-${{ github.run_id }}
+          restore-keys: bars60-v1-
 
       - name: Pull portfolio state from site repo
         env:
@@ -93,7 +95,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && { echo "nothing to publish"; exit 0; }
-          git commit -m "trading day $(date -u +%F)"
+          git commit -m "bar $(date -u +%FT%H:%M)"
           for i in 1 2 3; do
             git push && break
             git pull --rebase && sleep 5

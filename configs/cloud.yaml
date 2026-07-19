@@ -1,8 +1,15 @@
 # Config for the hosted live paper bot (GitHub Actions).
-# Fresh portfolio: $100k simulated, inception 2026-07-17, no prior holdings.
+# Hourly cadence: decide on every completed 60-minute bar, fill at the next
+# bar's open. Fresh portfolio: $100k simulated, inception 2026-07-17.
+# Yahoo serves ~730 days of hourly bars, so data_start sits inside that window
+# and horizons/windows below are in BARS (7 per session).
 seed: 7
 run_name: cloud
+data:
+  root: data60
 paper:
+  interval: 60m
   universe: nasdaq100
   start: '2026-07-17'
-  data_start: '2018-01-01'
+  data_start: '2024-09-01'
+  pretrain_years: 1.0

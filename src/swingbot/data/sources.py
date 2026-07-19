@@ -32,7 +32,7 @@ import hashlib
 import time
 import warnings
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -106,9 +106,31 @@ class YahooSource(BarSource):
     fetch once, then read from Parquet forever).
     """
 
-    def __init__(self, timeout: float = 30.0, auto_retry: bool = True) -> None:
+    def __init__(
+        self, timeout: float = 30.0, auto_retry: bool = True, interval: str = "1d"
+    ) -> None:
         self.timeout = timeout
         self.auto_retry = auto_retry
+        self.interval = interval
+
+    def _clamp_start(self, start: date | str | None) -> str | None:
+        """Yahoo serves intraday bars ~730 days back; older starts error out."""
+        if start is None or self.interval == "1d":
+            return str(start) if start else None
+        lo = date.today() - timedelta(days=728)
+        s = date.fromisoformat(str(start)[:10])
+        return str(max(s, lo))
+
+    def _ts_series(self, values) -> pl.Series:
+        """Vendor timestamps -> naive US/Eastern Datetime (intraday) or Date."""
+        if self.interval == "1d":
+            return pl.Series(values).cast(pl.Date)
+        import pandas as pd
+
+        idx = pd.DatetimeIndex(values)
+        if idx.tz is not None:
+            idx = idx.tz_convert("America/New_York").tz_localize(None)
+        return pl.Series(idx.values.astype("datetime64[us]"))
 
     def fetch(
         self, symbol: str, start: date | str | None = None, end: date | str | None = None
@@ -119,8 +141,9 @@ class YahooSource(BarSource):
             warnings.simplefilter("ignore")
             raw = yf.download(
                 symbol,
-                start=str(start) if start else None,
+                start=self._clamp_start(start),
                 end=str(end) if end else None,
+                interval=self.interval,
                 progress=False,
                 auto_adjust=False,  # we want raw close AND adj close
                 actions=False,
@@ -136,9 +159,13 @@ class YahooSource(BarSource):
 
         raw = raw.reset_index()
         cols = {c.lower().replace(" ", "_"): c for c in raw.columns}
+        cols.setdefault("date", cols.get("datetime", cols.get("index")))
+        if self.interval != "1d" and "close" in cols:
+            # Intraday bars are as-traded; Yahoo may omit Adj Close there.
+            cols.setdefault("adj_close", cols["close"])
         required = ("open", "high", "low", "close", "adj_close", "volume")
         missing = [c for c in required if c not in cols]
-        if missing:
+        if missing or cols["date"] is None:
             raise DataQualityError(
                 f"yahoo schema for {symbol} missing {missing}: {list(raw.columns)}"
             )
@@ -146,7 +173,7 @@ class YahooSource(BarSource):
         df = pl.DataFrame(
             {
                 "symbol": [symbol.upper()] * len(raw),
-                "ts": pl.Series(raw[cols["date"]]).cast(pl.Date),
+                "ts": self._ts_series(raw[cols["date"]]),
                 "open": pl.Series(raw[cols["open"]].astype(float)),
                 "high": pl.Series(raw[cols["high"]].astype(float)),
                 "low": pl.Series(raw[cols["low"]].astype(float)),
@@ -168,8 +195,14 @@ class YahooBulkSource(YahooSource):
     fall back to the throttled per-symbol path.
     """
 
-    def __init__(self, timeout: float = 30.0, chunk_size: int = 50, pause: float = 1.0) -> None:
-        super().__init__(timeout=timeout)
+    def __init__(
+        self,
+        timeout: float = 30.0,
+        chunk_size: int = 50,
+        pause: float = 1.0,
+        interval: str = "1d",
+    ) -> None:
+        super().__init__(timeout=timeout, interval=interval)
         self.chunk_size = chunk_size
         self.chunk_pause = pause
 
@@ -194,8 +227,9 @@ class YahooBulkSource(YahooSource):
                 warnings.simplefilter("ignore")
                 raw = yf.download(
                     chunk,
-                    start=str(start) if start else None,
+                    start=self._clamp_start(start),
                     end=str(end) if end else None,
+                    interval=self.interval,
                     progress=False,
                     auto_adjust=False,
                     actions=False,
@@ -229,8 +263,7 @@ class YahooBulkSource(YahooSource):
             raise DataQualityError(f"no data fetched for any of {symbols}")
         return normalize(pl.concat(frames, how="vertical"))
 
-    @staticmethod
-    def _extract_ticker(raw, symbol: str, *, single: bool) -> pl.DataFrame | None:
+    def _extract_ticker(self, raw, symbol: str, *, single: bool) -> pl.DataFrame | None:
         """Pull one ticker's frame out of a (possibly MultiIndex) bulk response."""
         try:
             sub = raw if single or not hasattr(raw.columns, "nlevels") else raw[symbol]
@@ -242,13 +275,16 @@ class YahooBulkSource(YahooSource):
             return None
 
         cols = {c.lower().replace(" ", "_"): c for c in sub.columns}
-        required = ("date", "open", "high", "low", "close", "adj_close", "volume")
-        if any(c not in cols for c in required):
+        cols.setdefault("date", cols.get("datetime", cols.get("index")))
+        if self.interval != "1d" and "close" in cols:
+            cols.setdefault("adj_close", cols["close"])
+        required = ("open", "high", "low", "close", "adj_close", "volume")
+        if any(c not in cols for c in required) or cols["date"] is None:
             return None
         return pl.DataFrame(
             {
                 "symbol": [symbol] * len(sub),
-                "ts": pl.Series(sub[cols["date"]]).cast(pl.Date),
+                "ts": self._ts_series(sub[cols["date"]]),
                 "open": pl.Series(sub[cols["open"]].astype(float)),
                 "high": pl.Series(sub[cols["high"]].astype(float)),
                 "low": pl.Series(sub[cols["low"]].astype(float)),

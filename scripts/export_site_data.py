@@ -10,13 +10,12 @@ Everything exported is SIMULATED capital.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
 import polars as pl
-
-import os
 
 ROOT = Path(__file__).resolve().parent.parent
 PORTFOLIO = Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio"))
@@ -32,14 +31,14 @@ def _records(name: str, sort_by: str | None = None, descending: bool = False) ->
         return []
     if sort_by and sort_by in df.columns:
         df = df.sort(sort_by, descending=descending)
-    # ISO-format dates and null out NaN/inf so json.dumps never chokes.
+    # Format timestamps and null out NaN/inf so json.dumps never chokes.
     for col in df.columns:
-        if df[col].dtype in (pl.Date, pl.Datetime):
-            df = df.with_columns(pl.col(col).cast(pl.Utf8))
+        if df[col].dtype == pl.Date:
+            df = df.with_columns(pl.col(col).dt.strftime("%Y-%m-%d"))
+        elif df[col].dtype == pl.Datetime:
+            df = df.with_columns(pl.col(col).dt.strftime("%Y-%m-%d %H:%M"))
         elif df[col].dtype in (pl.Float32, pl.Float64):
-            df = df.with_columns(
-                pl.when(pl.col(col).is_finite()).then(pl.col(col)).alias(col)
-            )
+            df = df.with_columns(pl.when(pl.col(col).is_finite()).then(pl.col(col)).alias(col))
     return df.to_dicts()
 
 
@@ -65,6 +64,7 @@ def main() -> None:
         "simulated": True,
         "meta": {
             "universe": state["universe"],
+            "interval": state.get("interval", "1d"),
             "inception": state["inception"],
             "last_processed": state["last_processed"],
             "starting_capital": starting,
