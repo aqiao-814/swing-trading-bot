@@ -44,7 +44,7 @@ class TestSyntheticDeterminism:
 
         src = str(Path(__file__).resolve().parents[1] / "src")
         # Pass PYTHONPATH explicitly: the editable install is unreliable here
-        # (iCloud re-hides the .pth file; see docs/ENVIRONMENT.md).
+        # (iCloud re-hides the .pth file; see the note atop the Makefile).
         env = {**os.environ, "PYTHONPATH": src}
 
         code = (

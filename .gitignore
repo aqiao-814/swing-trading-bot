@@ -8,3 +8,4 @@ artifacts/
 graphify-out/cache/
 site/data.json
 site/live.json
+graphify-out/
