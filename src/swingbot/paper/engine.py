@@ -931,12 +931,10 @@ class PaperEngine:
             return state, learner
 
         # ---- first run: inception ----
-        if self.paper.start:
-            start: BarTs = date.fromisoformat(self.paper.start)
-            if self.hourly:
-                start = datetime.combine(start, time.min)
-        else:
-            start = calendar[-1]
+        # On the hourly loop `start` may carry a time ("2026-07-17T15:30") to
+        # incept at a specific bar -- e.g. a session's last bar, so the first
+        # decisions are made on a flat book and fill at the next open.
+        start: BarTs = self._iso(self.paper.start) if self.paper.start else calendar[-1]
         inception_days = [t for t in calendar if t >= start]
         if not inception_days:
             raise DataQualityError(f"no completed trading days on/after {start}")

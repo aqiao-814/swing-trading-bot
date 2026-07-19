@@ -135,7 +135,8 @@ class PaperConfig(BaseModel):
     interval: Literal["1d", "60m"] = "1d"
     # Paper-trading inception. None = today (portfolio starts with today's run).
     # A past date makes the engine replay forward day-by-day from there, which
-    # is how a fresh install builds a real forward track record.
+    # is how a fresh install builds a real forward track record. On the hourly
+    # loop this may include a time ("2026-07-17T15:30") to incept at one bar.
     start: str | None = None
     # How far back to fetch bars. Features need ~550 bars of warmup, and the
     # learner pretrains on history *before* inception, so keep several years.
