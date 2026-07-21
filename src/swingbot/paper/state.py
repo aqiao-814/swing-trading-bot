@@ -180,7 +180,12 @@ class PaperStore:
             for col in rows.columns:
                 if col not in existing.columns:
                     existing = existing.with_columns(pl.lit(None).cast(rows[col].dtype).alias(col))
-            rows = pl.concat([existing, rows.select(existing.columns)], how="vertical")
+            # vertical_relaxed upcasts to a common supertype instead of raising:
+            # a flat day writes `invested`/`unrealized_pnl` as Int64 (sum([]) is
+            # int 0), while days with holdings produce Float64. Strict "vertical"
+            # rejects that widening; relaxed promotes Int64 -> Float64 and rewrites
+            # the file consistently. Applies to every table and numeric column.
+            rows = pl.concat([existing, rows.select(existing.columns)], how="vertical_relaxed")
         rows.write_parquet(self._path(name), compression="zstd")
 
     def replace(self, name: str, rows: pl.DataFrame) -> None:
