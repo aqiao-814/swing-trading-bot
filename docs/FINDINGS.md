@@ -155,3 +155,42 @@ replays of the *live config* on real 30m bars, kill switches ON:
   are typically |r| < 0.005, and the 4%-bar / 10%-per-20-bars kill switches
   flatten the book in exactly the sustained-loss regime where the pathology
   lives.
+
+## 10. Day-one live result + signal-refinement attempt (2026-07-22)
+
+**Day one traded and closed red.** The 30m loop filled all 10 seeded orders at
+Wed 2026-07-22's 09:30 ET open and held them to the 15:30 close: **−1.37%**
+(equity $98,628.66, entirely unrealized, 0 intraday closes) vs QQQ −0.44% / SPY
+−0.12% / equal-weight −0.85%. It lagged every benchmark, including the EW of its
+own universe. Cron fired green all session, never halted; learning stayed
+healthy (n_updates 184,652, conviction σ 0.262, grad_norm 0.836,
+frac_saturated 0.15). So *starts-sharp / cron-reliable / learns-from-mistakes*
+are confirmed with forward evidence; **profitable is not** — one down day is not
+a track record, and the loss is consistent with §2/§4's near-zero measured
+signal.
+
+**Refinement attempt (the "run backtests to refine and learn" ask).** Rebuilt
+the cross-sectional panel with theory-motivated additions — short-term reversal
+(`rev_5d`), 52-week-high proximity (`close/rolling_max_252`), vol-scaled
+momentum (`mom_3m/vol_20d`), log-ADV, and cross-sectional z-scoring within date
+(the correct transform for a mean-zero relative target). Same purged/embargoed
+walk-forward harness, same NDX 2019–2026 panel, seed 7:
+
+| panel | mean IC | stability | t | gate (≥0.02 / >0.15) |
+|---|---:|---:|---:|:--|
+| baseline 7-feature (§4) | +0.0043 | 0.032 | +1.26 | FAIL |
+| improved, raw | +0.0074 | 0.050 | +2.01 | FAIL |
+| improved, z-scored | +0.0052 | 0.033 | +1.33 | FAIL |
+
+Leak-free (shuffle null −0.0002). The improvement is real but small and **still
+fails the go/no-go bar by ~3×.** The by-year decomposition is decisive: the edge
+is a **2020–2021 phenomenon** (IC +0.050 / +0.036) that is flat-to-negative
+every year since (2022 −0.038, 2023 −0.007, 2024 −0.001, 2025 +0.007, 2026
+−0.018). There is no cross-sectional edge in the current regime on this
+liquid-megacap universe with price/volume features. Hunting a feature set that
+happens to cross 0.02 on this exact sample would be the overfitting §4/§5
+explicitly forbid, and it would not produce forward profit anyway. **Honest
+conclusion:** reliable profitability is not deliverable from more
+price-feature engineering here; it needs a genuinely different information
+source (fundamentals/EDGAR, alt-data) — the §5 "improve the base signal first"
+directive stands, now with a second validated refutation behind it.
