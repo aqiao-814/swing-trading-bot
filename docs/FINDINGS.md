@@ -115,3 +115,28 @@ training: the checkpoint it leaves becomes the seed for the live loop.
   the seed still matches. `trade.yml` fires every 30 min from the open. **Caveat:
   daily→30m transfer is a hypothesis** — features live on a different time scale;
   the forward 30m record is the only real test.
+
+## 9. 30m deployment verification and pre-launch replays (2026-07-21 night)
+
+Deployed the 30m loop to the cloud (merged to `main`; site re-incepted Tue
+2026-07-21 15:30 ET, day one Wed 2026-07-22). Verified end to end: seeded cloud
+inception ("tempering seed recurrence u 1.038 -> ±0.7", 152,652 prior updates,
+10 queued ~9% entries, conviction σ 0.289 / frac_saturated 0) and the
+state-restore path (idempotent no-op, nothing republished). Two walk-forward
+replays of the *live config* on real 30m bars, kill switches ON:
+
+- **5-week replay (incept 2026-06-16):** only ~3 weeks of pretrain data fit
+  inside Yahoo's 60-day window, the under-refined model's conviction spread
+  came up σ 0.043 < 0.05 and the **model-health kill switch flattened the book
+  two hours in**; it sat in cash five weeks (+0.12% vs QQQ −3.41% — survival
+  by abstention, not signal). Lesson: the seed *needs* the full ~40-session
+  refinement window; a mid-history 30m inception is structurally handicapped,
+  and the halt-on-degenerate-spread guard works live.
+- **2-week replay (incept 2026-07-06, full pretrain window — the fair
+  rehearsal):** traded all 11 sessions, **no halt**, −1.18% absolute in a
+  falling tape vs QQQ −2.19% / EW −1.85% / SPY −0.53%. Beat its own universe's
+  beta, lost less than the index it draws from, lost to cash. Read: the loop
+  functions and de-risks; returns remain beta-dominated; 11 sessions is
+  evidence of *function*, not alpha. No pre-launch tuning done off this sample
+  (§4's overfitting discipline applies). The forward paper record remains the
+  pre-registered test.
