@@ -140,3 +140,18 @@ replays of the *live config* on real 30m bars, kill switches ON:
   evidence of *function*, not alpha. No pre-launch tuning done off this sample
   (§4's overfitting discipline applies). The forward paper record remains the
   pre-registered test.
+- **Learning-direction audit (does it actually learn from mistakes?).** On the
+  deployed model's real state (183k updates, pooled moments a≈−6.6e−4,
+  var≈1.4e−5), 30 consecutive losing bars on a setup cut its conviction
+  **+0.80 → +0.29** while 30 winning bars raised it to +0.97 — losses are
+  corrective in the live regime. Caveat found on the way: the differential
+  Sharpe has the known negative-mean pathology — `dD/dR = (B − A·R)/var^1.5`
+  flips sign when a bar's reward drops below `B/A` with the pooled mean
+  negative (measured threshold: a per-bar position-weighted loss worse than
+  ~−2.2%), where gradient ascent would *amplify* rather than correct. A cold
+  model fed only losses reproduces it (conviction rose +0.05 → +0.90 in a
+  synthetic all-loss regime). Live exposure is bounded: moments pool across
+  ~100 symbols so the mean sits near zero, per-bar position-weighted rewards
+  are typically |r| < 0.005, and the 4%-bar / 10%-per-20-bars kill switches
+  flatten the book in exactly the sustained-loss regime where the pathology
+  lives.
