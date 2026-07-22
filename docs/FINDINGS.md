@@ -83,3 +83,35 @@ nulls for the cross-sectional pipeline.
   is deliberately not circumvented.
 - Single-symbol backtest results (§1) do not transfer to the portfolio loop;
   the live track record is the only forward evidence.
+
+## 8. Five-year portfolio backtest & 30-minute migration (2026-07)
+
+Ran the *actual* `PaperEngine` (continual-learning RRL, the live policy) over the
+last five years of daily nasdaq100 bars — `scripts/backtest_5y.py`, kill switches
+off so a safety halt doesn't freeze the measurement. It is both evaluation and
+training: the checkpoint it leaves becomes the seed for the live loop.
+
+- **2021-07 → 2026-07: +142.2% total (CAGR 19.3%, Sharpe 0.92, maxDD −35.1%),
+  vs QQQ +102.1% / SPY +85.8% / equal-weight +100.7%.** Beats the benchmarks —
+  but read it as **beta + survivorship**, not alpha: today's-constituents
+  universe, long-only in a bull market, a drawdown deeper than the index, mixed
+  years (2025 lagged QQQ by −22.6%; 2022 down −11.9% but beat QQQ's ~−33%), and
+  Sharpe below 1. Consistent with the near-zero RankIC of §2/§4. Charts +
+  full write-up: `scripts/build_findings_page.py` → self-contained HTML tearsheet.
+- **Recurrence saturation, diagnosed and fixed.** The backtest exposed *why*
+  convictions saturate (§2): the recurrent weight drifts to **u > 1**, making
+  `F_t = tanh(w·x + u·F_{t-1} + b)` explosive — every conviction pins to ±1 in a
+  few bars. The `‖w‖` cap never watched `u`. Added `RRLAgent.max_recurrence`
+  (config `paper.learn_max_recurrence`), a hard `|u| ≤ cap`. Live 30m config uses
+  0.7, which restores a healthy cross-sectional spread (σ ≈ 0.25 on the full
+  universe) so the model-health kill switch is satisfied.
+- **30-minute live loop.** The engine is now interval-agnostic over `1d | 60m |
+  30m` (13 bars/session). Yahoo serves only ~60 days of 30m bars — too little to
+  pretrain — so inception **seeds** from the offline 5-year model
+  (`_seed_or_new_learner`): load weights, clear the daily recurrence, temper `u`
+  into the cap, then refine on the ~60 days of 30m history. `configs/cloud.yaml`
+  shortens the long-memory feature windows (z-score 252→100, fracdiff 1e-4→1e-2,
+  warmup 300→60) so features survive ~520 bars *without renaming any column*, so
+  the seed still matches. `trade.yml` fires every 30 min from the open. **Caveat:
+  daily→30m transfer is a hypothesis** — features live on a different time scale;
+  the forward 30m record is the only real test.

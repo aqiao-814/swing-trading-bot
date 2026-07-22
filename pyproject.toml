@@ -58,6 +58,9 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 # Typer's API *requires* calling Option()/Argument() in argument defaults.
 "src/swingbot/cli.py" = ["B008"]
+# This generator embeds a full CSS/JS web page as a string literal; its lines
+# are web assets, not Python, so the 100-char limit doesn't apply.
+"scripts/build_findings_page.py" = ["E501"]
 # Mostly an embedded HTML/CSS/JS template string; hard-wrapping markup at 100
 # columns hurts readability rather than helping it.
 "src/swingbot/dashboard.py" = ["E501"]

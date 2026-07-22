@@ -129,10 +129,12 @@ class PaperConfig(BaseModel):
 
     # Universe name (sp500 | nasdaq100 | sp100 | config | a watchlist file path).
     universe: str = "nasdaq100"
-    # Bar interval the loop trades on: "1d" (decide at close, fill next open)
-    # or "60m" (decide each completed hourly bar, fill next bar's open).
-    # Intraday history is capped at ~730 days by the data source.
-    interval: Literal["1d", "60m"] = "1d"
+    # Bar interval the loop trades on: "1d" (decide at close, fill next open),
+    # "60m" (decide each completed hourly bar), or "30m" (each half-hour bar).
+    # Intraday history is capped by the data source: ~730 days for 60m, only
+    # ~60 days for 30m -- so a 30m loop is meant to be *seeded* from a model
+    # trained offline on longer history rather than pretrained on 30m bars.
+    interval: Literal["1d", "60m", "30m"] = "1d"
     # Paper-trading inception. None = today (portfolio starts with today's run).
     # A past date makes the engine replay forward day-by-day from there, which
     # is how a fresh install builds a real forward track record. On the hourly
@@ -197,6 +199,13 @@ class PaperConfig(BaseModel):
     # into the sort's tiebreak (i.e. alphabetical).
     learn_l2: float = 1e-3
     learn_max_weight_norm: float = 1.0
+    # Hard cap on the recurrent weight |u| in F_t = tanh(w.x + u*F_{t-1} + b).
+    # The recurrence only contracts while |u| < 1; past that it is explosive and
+    # convictions saturate to +/-1 within a few bars no matter the features.
+    # None keeps the original uncapped behavior; a live intraday loop seeded
+    # from an offline model wants this set (e.g. 0.7) so the seed's recurrence
+    # can't re-saturate during pretraining or forward trading.
+    learn_max_recurrence: float | None = None
     # Pretrain the policy on this many years of history before inception, so
     # day one is not a random coin-flip. 0 disables pretraining.
     pretrain_years: float = 3.0

@@ -57,7 +57,7 @@ class PaperState:
     starting_capital: float
     cash: float
     seed: int
-    # Bar interval this portfolio trades on ("1d" | "60m"). Timestamps below
+    # Bar interval this portfolio trades on ("1d" | "60m" | "30m"). Timestamps below
     # are date-ISO on the daily loop and datetime-ISO intraday; the engine
     # refuses to run a state file at the wrong resolution.
     interval: str = "1d"
