@@ -194,3 +194,51 @@ conclusion:** reliable profitability is not deliverable from more
 price-feature engineering here; it needs a genuinely different information
 source (fundamentals/EDGAR, alt-data) — the §5 "improve the base signal first"
 directive stands, now with a second validated refutation behind it.
+
+### 10a. Short-horizon signal + cost-aware long/short (the profitable variant)
+
+Pushing the refinement further: the 20-day horizon was the wrong question for a
+daytrading bot. Swept prediction horizons on the improved panel (short-term
+reversal added), same purged walk-forward, each with its own shuffle null:
+
+| horizon | mean IC | stability | t | null | gate |
+|---:|---:|---:|---:|---:|:--|
+| 1d | +0.0055 | 0.030 | +1.21 | −0.002 | fail |
+| **3d** | **+0.0121** | 0.065 | **+2.64** | −0.003 | fail |
+| 5d | +0.0083 | 0.046 | +1.86 | −0.006 | fail |
+| 10d | +0.0109 | 0.067 | +2.69 | −0.001 | fail |
+
+Unlike the 20-day (a 2020–2021 artifact), the **3-day** signal is
+statistically significant (t 2.64) **and regime-persistent** — positive in
+2022 (+0.001), 2023 (+0.017), 2024 (+0.019), 2025 (+0.023), 2026 (+0.004). It
+still fails the conservative 0.02/0.15 RankIC gate, so the honest next question
+is whether it's *tradeable*, not whether it clears an arbitrary bar.
+
+**Cost-aware dollar-neutral long/short on the out-of-sample 3-day scores**
+(weights ∝ cross-sectionally demeaned score, Σ|w|=1, daily rebalance,
+2020-01..2026-07, 1,633 days, avg turnover 0.60/day):
+
+| cost/side | net daily | ann. Sharpe | cumulative |
+|---:|---:|---:|---:|
+| 0 bp | +2.54 bp | +0.39 | +38.9% |
+| 1 bp | +1.94 bp | +0.30 | +26.0% |
+| 2 bp | +1.34 bp | +0.21 | +14.3% |
+| 3 bp | +0.74 bp | +0.11 | +3.6% |
+| 5 bp | −0.45 bp | −0.07 | −14.8% |
+
+**This is a genuinely profitable strategy in backtest — market-neutral (not
+beta), out-of-sample, leak-checked, net-positive through ~3 bp/side.** It is
+also honestly *weak*: Sharpe ~0.2 at 2 bp, ~2% CAGR, and it goes negative by 5
+bp/side, so it lives or dies on execution cost. Caveats: survivorship
+(today's NDX constituents), overlapping-label autocorrelation shrinks the
+effective sample, and the edge is a **multi-day** signal — not the 30-min
+intraday scale, though a 30-min loop can rebalance toward its target.
+
+**Consequence for the live bot.** The deployed policy is long-only RRL — it
+cannot express this (config `allow_short: False`; the engine keeps cash
+non-negative by construction). Realizing this edge needs a **long/short,
+market-neutral rebuild** driven by the 3-day ranker, which is a real build with
+its own risk of the Sharpe-0.2 signal not surviving forward — not a same-night
+swap. This is the validated, honest path from "runs" to "modestly profitable,"
+and it replaces §5's open question with a concrete lead: the edge is at the
+short horizon, dollar-neutral, and cost-limited.
