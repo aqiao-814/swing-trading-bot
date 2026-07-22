@@ -1,19 +1,38 @@
 # Config for the hosted live paper bot (GitHub Actions).
-# Hourly cadence: decide on every completed 60-minute bar, fill at the next
-# bar's open. Fresh portfolio: $100k simulated, incepted on Monday 2026-07-20's
-# LAST bar so the first decisions are made on a flat book by the pretrained
-# policy and fill at Tuesday 2026-07-21's open -- Tuesday is day one of live
-# trading. (Timestamps are naive exchange time / ET; 15:30 is the session's
-# final 60m bar.)
-# Yahoo serves ~730 days of hourly bars, so data_start sits inside that window
-# and horizons/windows below are in BARS (7 per session).
+# 30-MINUTE cadence: decide on every completed 30-minute bar (13 per session,
+# 09:30..15:30 ET), fill at the next bar's open. The workflow fires every 30
+# minutes from the market open.
+#
+# Yahoo only serves ~60 days of 30-minute bars, far too little to pretrain a
+# policy on -- so the live model is SEEDED from a model trained offline on five
+# years of daily bars: scripts/backtest_5y.py writes
+# artifacts/backtest5y/models/rrl_latest.bin, which is published to the site repo
+# as state/models/rrl_latest.bin before inception. At inception the engine
+# loads that seed, clears its daily-bar recurrence, then refines it on the ~60
+# days of 30m history available before trading forward. `pretrain_years` here is
+# just that light refinement window, not a from-scratch warm-up.
 seed: 7
 run_name: cloud
 data:
-  root: data60
+  root: data30
+features:
+  # 60 days of 30m bars is only ~520 rows, so the default long-memory windows
+  # (252-bar z-score, 1e-4 fracdiff ≈ 280-bar width, 300-bar warmup) would drop
+  # every row. These shorter windows leave ~320 usable bars. Crucially they keep
+  # return_horizons and vol_windows at their defaults, so the feature COLUMN set
+  # is byte-for-byte identical to the seed model's -- only the trailing-window
+  # lengths change, which does not rename any column.
+  zscore_window: 100
+  fracdiff_threshold: 0.01
+  warmup: 60
 paper:
-  interval: 60m
+  interval: 30m
   universe: nasdaq100
-  start: '2026-07-20T15:30'
-  data_start: '2024-09-01'
-  pretrain_years: 1.0
+  start: '2026-07-21T15:30'
+  data_start: '2026-05-24'
+  pretrain_years: 0.2
+  # The seed is trained on daily bars where the recurrence drifted to u>1 (an
+  # explosive recurrence -> saturated, degenerate convictions). Cap it below 1
+  # so the seed is tempered on load and stays a contraction through pretraining
+  # and live trading -- keeping the conviction spread the ranking depends on.
+  learn_max_recurrence: 0.7
