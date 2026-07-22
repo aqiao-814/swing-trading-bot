@@ -113,11 +113,17 @@ class YahooSource(BarSource):
         self.auto_retry = auto_retry
         self.interval = interval
 
+    # Yahoo's intraday history caps depend on the interval: hourly reaches back
+    # ~730 days, but sub-hour bars (30m and finer) only ~60. Clamp to just
+    # inside each cap so an over-eager data_start doesn't get the whole request
+    # rejected.
+    _INTRADAY_MAX_DAYS = {"60m": 728, "1h": 728, "90m": 58, "30m": 58, "15m": 58, "5m": 58, "1m": 6}
+
     def _clamp_start(self, start: date | str | None) -> str | None:
-        """Yahoo serves intraday bars ~730 days back; older starts error out."""
+        """Clamp an intraday start to just inside Yahoo's history cap."""
         if start is None or self.interval == "1d":
             return str(start) if start else None
-        lo = date.today() - timedelta(days=728)
+        lo = date.today() - timedelta(days=self._INTRADAY_MAX_DAYS.get(self.interval, 58))
         s = date.fromisoformat(str(start)[:10])
         return str(max(s, lo))
 

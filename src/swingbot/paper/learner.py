@@ -56,6 +56,7 @@ class ContinualRRL:
         seed: int = 7,
         l2: float = 1e-3,
         max_weight_norm: float = 1.0,
+        max_recurrence: float | None = None,
     ) -> None:
         self.feature_cols = list(feature_cols)
         self.agent = RRLAgent(
@@ -66,6 +67,7 @@ class ContinualRRL:
             discrete=False,
             l2=l2,
             max_weight_norm=max_weight_norm,
+            max_recurrence=max_recurrence,
         )
         self._states: dict[str, _SymbolState] = {}
         self.n_updates = 0
@@ -79,6 +81,17 @@ class ContinualRRL:
             st = _SymbolState(dfprev_dw=np.zeros(self.agent.n_features))
             self._states[symbol] = st
         return st
+
+    def reset_recurrence(self) -> None:
+        """Drop every symbol's recurrent trace (``F_{t-1}`` and its gradient),
+        keeping the learned weights.
+
+        Used when transplanting a model across bar intervals: a recurrence
+        learned on daily bars is scaled to a daily holding period and must not
+        leak into an intraday loop, where each symbol should start flat and
+        rebuild its trace from the new cadence.
+        """
+        self._states.clear()
 
     def _load_state(self, st: _SymbolState) -> None:
         self.agent.f_prev = st.f_prev
@@ -176,6 +189,10 @@ class ContinualRRL:
             eta=np.float64(self.agent.eta),
             l2=np.float64(self.agent.l2),
             max_weight_norm=np.float64(self.agent.max_weight_norm),
+            # None -> NaN sentinel so the npz stays all-float; load maps it back.
+            max_recurrence=np.float64(
+                np.nan if self.agent.max_recurrence is None else self.agent.max_recurrence
+            ),
             a=np.float64(self.agent.a),
             b_moment=np.float64(self.agent.b_moment),
             steps=np.int64(self.agent._steps),
@@ -206,6 +223,12 @@ class ContinualRRL:
                 l2=float(z["l2"]) if "l2" in z.files else 1e-3,
                 max_weight_norm=(
                     float(z["max_weight_norm"]) if "max_weight_norm" in z.files else 1.0
+                ),
+                # Pre-cap checkpoints omit this key; NaN also decodes to None.
+                max_recurrence=(
+                    None
+                    if "max_recurrence" not in z.files or not np.isfinite(z["max_recurrence"])
+                    else float(z["max_recurrence"])
                 ),
             )
             learner.agent.w = z["w"].astype(np.float64)

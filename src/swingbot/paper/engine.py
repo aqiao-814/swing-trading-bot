@@ -50,6 +50,12 @@ _ET = ZoneInfo("America/New_York")
 _MARKET_CLOSE_HOUR = 16  # 16:15 ET: bar for `today` is considered complete
 _LAST_HOURLY_BAR = time(15, 30)  # the half-hour 15:30 bar; completes at 16:00
 
+# Regular-session bars per trading day, by interval. 60m is 6.5h split into six
+# hourly bars plus the half-length 15:30 bar (7); 30m is thirteen half-hours.
+_BARS_PER_DAY = {"1d": 1, "60m": 7, "30m": 13}
+# Nominal bar length in minutes for the intraday completion clock.
+_BAR_MINUTES = {"60m": 60, "30m": 30}
+
 # One bar timestamp: a date on the daily loop, a naive-ET datetime intraday.
 BarTs = date | datetime
 
@@ -144,8 +150,8 @@ class PaperEngine:
         self.universe_name = universe or self.paper.universe
         self.symbols = resolve_universe(self.universe_name, cfg)
         self.benchmarks = [s.upper() for s in self.paper.benchmark_symbols]
-        self.hourly = self.paper.interval == "60m"
-        self.bars_per_day = 7 if self.hourly else 1  # regular-session hourly bars
+        self.intraday = self.paper.interval in ("60m", "30m")
+        self.bars_per_day = _BARS_PER_DAY[self.paper.interval]  # regular-session bars
 
         self.bar_store = BarStore(cfg.data.root)
         self.paper_root = cfg.artifacts_root / "paper"
@@ -158,7 +164,7 @@ class PaperEngine:
 
     def _iso(self, iso: str) -> BarTs:
         """Parse a stored ISO timestamp at this loop's bar resolution."""
-        return datetime.fromisoformat(iso) if self.hourly else date.fromisoformat(iso)
+        return datetime.fromisoformat(iso) if self.intraday else date.fromisoformat(iso)
 
     # ---- data --------------------------------------------------------------
 
@@ -213,20 +219,25 @@ class PaperEngine:
         """Bars whose *completion time* is at or before the cutoff.
 
         Daily bars complete at their own date (the caller's cutoff rule already
-        excluded today's forming bar). Hourly bars start on the stamp and
-        complete an hour later — 30 minutes for the half-length 15:30 bar — so
-        a partial bar the vendor returns mid-hour can never enter the loop.
+        excluded today's forming bar). Intraday bars start on the stamp and
+        complete one bar-length later, so a partial bar the vendor returns
+        mid-bar can never enter the loop. The 60m loop's 15:30 bar is a
+        half-length close bar (completes at 16:00, +30 min); 30m bars are all a
+        uniform half hour, including the 15:30 close bar.
         """
-        if not self.hourly:
+        if not self.intraday:
             return self.bar_store.read(symbols, start=self.paper.data_start, end=cutoff)
         bars = self.bar_store.read(symbols, start=self.paper.data_start)
         if bars.is_empty():
             return bars
-        completes = (
-            pl.when(pl.col("ts").dt.time() == _LAST_HOURLY_BAR)
-            .then(pl.col("ts") + pl.duration(minutes=30))
-            .otherwise(pl.col("ts") + pl.duration(minutes=60))
-        )
+        if self.paper.interval == "60m":
+            completes = (
+                pl.when(pl.col("ts").dt.time() == _LAST_HOURLY_BAR)
+                .then(pl.col("ts") + pl.duration(minutes=30))
+                .otherwise(pl.col("ts") + pl.duration(minutes=60))
+            )
+        else:  # 30m: every bar is a full half hour
+            completes = pl.col("ts") + pl.duration(minutes=_BAR_MINUTES[self.paper.interval])
         return bars.filter(completes <= pl.lit(cutoff))
 
     def _load_symbol_data(self, as_of: BarTs) -> dict[str, _SymbolData]:
@@ -278,7 +289,7 @@ class PaperEngine:
 
     def _cutoff(self, as_of: date | None) -> BarTs:
         """The completion-time cutoff for this run, per the loop's interval."""
-        if not self.hourly:
+        if not self.intraday:
             return self.latest_completed(as_of)
         if as_of is not None and as_of < datetime.now(_ET).date():
             return datetime.combine(as_of, time(23, 59))  # replay a full day
@@ -934,7 +945,7 @@ class PaperEngine:
             return state, learner
 
         # ---- first run: inception ----
-        # On the hourly loop `start` may carry a time ("2026-07-17T15:30") to
+        # On an intraday loop `start` may carry a time ("2026-07-17T15:30") to
         # incept at a specific bar -- e.g. a session's last bar, so the first
         # decisions are made on a flat book and fill at the next open.
         start: BarTs = self._iso(self.paper.start) if self.paper.start else calendar[-1]
@@ -963,7 +974,14 @@ class PaperEngine:
             if past:
                 state.equal_weight_base[sym] = float(sd.close[past[-1]])
 
-        learner = self._new_learner()
+        # Seed inception from a model trained offline (e.g. the 5-year backtest)
+        # if one has been placed at model_path, so the live book starts from
+        # lived experience rather than a cold policy. The weights map the same
+        # feature vector at any bar length; per-symbol recurrences are dropped
+        # so a daily-trained trace can't leak into an intraday loop. Any
+        # configured pretraining then refines the seed on *this* interval's
+        # history before the forward period the portfolio is judged on.
+        learner = self._seed_or_new_learner(model_path, log=log)
         if self.paper.pretrain_years > 0:
             self._pretrain(learner, data, inception, log=log)
         learner.save(model_path)
@@ -974,6 +992,34 @@ class PaperEngine:
         )
         return state, learner
 
+    def _seed_or_new_learner(self, model_path: Path, *, log=print) -> ContinualRRL:
+        """Load a pre-placed pretrained model as the inception seed, else start
+        fresh. A seed whose feature columns don't match the config is ignored."""
+        if model_path.exists():
+            try:
+                seed = ContinualRRL.load(model_path)
+            except Exception as exc:  # noqa: BLE001 -- a corrupt seed must not block inception
+                log(f"[learn] ignoring unreadable seed model at {model_path}: {str(exc)[:80]}")
+            else:
+                if seed.feature_cols == self.feature_cols:
+                    seed.reset_recurrence()
+                    # Adopt this loop's saturation guards for all future learning
+                    # and temper the seed's recurrence into range now, so a model
+                    # trained uncapped (u possibly > 1) can't re-saturate during
+                    # pretraining or forward trading on this loop.
+                    cap = self.paper.learn_max_recurrence
+                    seed.agent.max_recurrence = cap
+                    if cap is not None and abs(seed.agent.u) > cap:
+                        log(f"[learn] tempering seed recurrence u {seed.agent.u:.3f} -> ±{cap}")
+                        seed.agent.u = float(np.clip(seed.agent.u, -cap, cap))
+                    log(
+                        f"[learn] seeded inception from pretrained model "
+                        f"({seed.n_updates:,} prior updates) at {model_path}"
+                    )
+                    return seed
+                log("[learn] seed model feature columns differ from config; starting fresh")
+        return self._new_learner()
+
     def _new_learner(self) -> ContinualRRL:
         return ContinualRRL(
             self.feature_cols,
@@ -982,6 +1028,7 @@ class PaperEngine:
             seed=self.cfg.seed,
             l2=self.paper.learn_l2,
             max_weight_norm=self.paper.learn_max_weight_norm,
+            max_recurrence=self.paper.learn_max_recurrence,
         )
 
     def _pretrain(

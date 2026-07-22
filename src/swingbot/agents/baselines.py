@@ -109,6 +109,7 @@ class RRLAgent(Agent):
         threshold: float = 0.33,
         l2: float = 1e-3,
         max_weight_norm: float = 1.0,
+        max_recurrence: float | None = None,
     ) -> None:
         rng = np.random.default_rng(seed)
         self.n_features = n_features
@@ -126,6 +127,12 @@ class RRLAgent(Agent):
         # hard stop against the slow monotonic drift L2 alone permits.
         self.l2 = l2
         self.max_weight_norm = max_weight_norm
+        # The recurrence u*F_{t-1} is a *contraction* only while |u| < 1. Left
+        # uncapped, u drifts past 1 and the recurrence becomes explosive: every
+        # conviction pins near +/-1 within a few bars regardless of features,
+        # which is the same saturation the weight-norm cap fights but by a
+        # different door. None keeps the original (uncapped) behavior.
+        self.max_recurrence = max_recurrence
         self.reset()
 
     def reset(self) -> None:
@@ -215,6 +222,8 @@ class RRLAgent(Agent):
             norm = float(np.linalg.norm(self.w))
             if norm > self.max_weight_norm:
                 self.w *= self.max_weight_norm / norm
+        if self.max_recurrence is not None:
+            self.u = float(np.clip(self.u, -self.max_recurrence, self.max_recurrence))
 
         self._dfprev_dw, self._dfprev_du = df_dw, df_du
 
