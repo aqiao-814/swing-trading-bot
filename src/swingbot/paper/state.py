@@ -34,7 +34,7 @@ class PendingOrder:
     target_weight: float  # fraction of equity, signed
     conviction: float  # policy output f in [-1, 1]
     expected_reward: float  # predicted next-day net return
-    reason: str  # entry | exit | rebalance | stop_loss
+    reason: str  # entry | exit | rebalance | stop_loss | eod_flat | kill_switch
 
 
 @dataclass

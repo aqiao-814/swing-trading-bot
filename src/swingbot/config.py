@@ -166,6 +166,16 @@ class PaperConfig(BaseModel):
     # Cancel a pending order if the symbol prints no bar for this many days.
     cancel_after_days: int = 5
 
+    # ---- day trading (intraday only) ----
+    # When True on an intraday loop ("60m"/"30m"), the book is forced flat
+    # before every session close: no position is ever carried overnight. On the
+    # flatten bar (the last bar whose next-open fill still lands inside the same
+    # session) every holding is sold to zero, and no new position is opened on
+    # the flatten bar or the final bar because it could not be closed again the
+    # same day. Ignored on the "1d" loop, where a bar *is* a day. Off by default
+    # so the daily research/backtest path is unchanged.
+    day_trading: bool = False
+
     # ---- kill switches ----
     # When any of these fires the engine flattens the book, halts, and stays
     # halted until 'invest --clear-halt'. The first three watch P&L; the last

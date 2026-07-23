@@ -11,7 +11,7 @@ construction free of edge -- which also makes look-ahead detectable.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -438,3 +438,163 @@ class TestDashboardAndUniverse:
         assert resolve_universe(str(watchlist)) == ["AAPL", "MSFT"]
         with pytest.raises(ValueError):
             resolve_universe("nope")
+
+
+# ---- day trading (intraday, flat by close) -----------------------------------
+
+# The regular 30-minute session: 09:30..15:30 ET, thirteen bars. The flatten
+# decision bar is 15:00 (its next-open fill is the 15:30 open); the final bar is
+# 15:30. Naive-ET datetimes, exactly as the intraday loop stores them.
+SESSION_TIMES = [time(9, 30)] + [time(10 + (i // 2), (i % 2) * 30) for i in range(12)]
+FLATTEN_TIME = SESSION_TIMES[-2]  # 15:00
+LAST_TIME = SESSION_TIMES[-1]  # 15:30
+
+
+def _trading_days(start: date, n: int) -> list[date]:
+    days, d = [], start
+    while len(days) < n:
+        if d.weekday() < 5:
+            days.append(d)
+        d += timedelta(days=1)
+    return days
+
+
+def make_intraday_cfg(tmp: Path) -> Config:
+    """A 30-minute day-trading config with short feature windows so a few weeks
+    of synthetic bars are enough to warm the features up."""
+    cfg = Config()
+    cfg.data.root = tmp / "data"
+    cfg.data.source = "synthetic"
+    cfg.data.universe = list(SYMS)
+    cfg.artifacts_root = tmp / "artifacts"
+    # Short windows: ~13 bars/day means default 252-bar windows would need a year
+    # of intraday history. These keep the feature COLUMN set unchanged.
+    cfg.features.return_horizons = [1, 5, 10]
+    cfg.features.vol_windows = [5, 10]
+    cfg.features.rsi_window = 10
+    cfg.features.macd = (6, 13, 5)
+    cfg.features.bollinger_window = 10
+    cfg.features.zscore_window = 20
+    cfg.features.fracdiff_threshold = 0.05
+    cfg.features.warmup = 20
+    cfg.paper.universe = "config"
+    cfg.paper.interval = "30m"
+    cfg.paper.day_trading = True
+    cfg.paper.benchmark_symbols = []
+    cfg.paper.data_start = "2026-01-01"
+    cfg.paper.pretrain_years = 0.2
+    cfg.paper.min_conviction = 0.01  # synthetic edge is weak; keep the book busy
+    cfg.paper.exit_conviction = 0.005
+    cfg.paper.kill_max_drawdown = None
+    cfg.paper.kill_daily_loss = None
+    cfg.paper.kill_rolling_20d_loss = None
+    cfg.paper.kill_conviction_std = None
+    return cfg
+
+
+def seed_intraday_store(cfg: Config, days: list[date]) -> None:
+    """Write deterministic 30-minute OHLCV bars for every SYM across ``days``."""
+    store = BarStore(cfg.data.root)
+    stamps = [
+        datetime.combine(d, t) for d in days for t in SESSION_TIMES
+    ]  # continuous intraday series, as Yahoo 30m bars arrive
+    n = len(stamps)
+    for k, sym in enumerate(SYMS):
+        rng = np.random.default_rng(1000 + k)
+        # A gentle geometric walk per 30m bar (~0.3% bar vol).
+        steps = rng.normal(0.0, 0.003, n)
+        close = 100.0 * np.exp(np.cumsum(steps))
+        prev = np.concatenate([[100.0], close[:-1]])
+        openp = prev * np.exp(rng.normal(0, 0.0005, n))
+        wick = np.abs(rng.normal(0, 0.001, n))
+        high = np.maximum(openp, close) * (1 + wick)
+        low = np.minimum(openp, close) * (1 - wick)
+        vol = rng.lognormal(12, 0.3, n)
+        store.write(
+            pl.DataFrame(
+                {
+                    "symbol": [sym] * n,
+                    "ts": stamps,
+                    "open": openp,
+                    "high": high,
+                    "low": low,
+                    "close": close,
+                    "adj_close": close,
+                    "volume": vol,
+                }
+            )
+        )
+
+
+@pytest.fixture(scope="module")
+def intraday_run(tmp_path_factory):
+    """One full 30-minute day-trading run shared by the read-only assertions."""
+    tmp = tmp_path_factory.mktemp("intraday")
+    cfg = make_intraday_cfg(tmp)
+    days = _trading_days(date(2026, 3, 2), 45)
+    seed_intraday_store(cfg, days)
+    # Incept flat on a session's last bar; trade forward ~6 sessions.
+    cfg.paper.start = datetime.combine(days[-7], LAST_TIME).isoformat()
+    engine = PaperEngine(cfg)
+    summary = engine.run(capital=100_000, as_of=days[-1], refresh=False, log=lambda m: None)
+    return cfg, engine, summary
+
+
+class TestDayTradingFlatByClose:
+    """A day-trading bot never carries a position overnight: on the flatten bar
+    the whole book is sold to zero, filling at the session's final bar open."""
+
+    def test_engine_recognizes_the_flatten_bar(self, intraday_run):
+        _, engine, _ = intraday_run
+        assert engine.day_trading
+        assert engine._flatten_time == FLATTEN_TIME
+
+    def test_book_actually_trades_intraday(self, intraday_run):
+        """Guards against a vacuous pass: the bot must open real positions."""
+        _, engine, _ = intraday_run
+        trades = engine.store.read("trades")
+        buys = trades.filter(pl.col("action") == "buy")
+        assert buys.height > 0
+        ledger = engine.store.read("ledger")
+        assert (ledger["n_positions"] > 0).any()  # held something intraday
+
+    def test_flat_at_every_session_close(self, intraday_run):
+        """The load-bearing invariant: at each session's final bar the book is
+        already flat -- nothing to mark, nothing carried overnight."""
+        _, engine, _ = intraday_run
+        ledger = engine.store.read("ledger").with_columns(
+            pl.col("ts").dt.time().alias("tod")
+        )
+        closes = ledger.filter(pl.col("tod") == LAST_TIME)
+        assert closes.height >= 3  # several sessions were processed
+        assert (closes["n_positions"] == 0).all()
+        assert (closes["invested"].abs() < 1e-6).all()
+
+    def test_no_entries_into_the_close(self, intraday_run):
+        """No position is opened on the flatten bar or the final bar."""
+        _, engine, _ = intraday_run
+        decisions = engine.store.read("decisions").with_columns(
+            pl.col("ts").dt.time().alias("tod")
+        )
+        late_entries = decisions.filter(
+            (pl.col("action") == "buy") & (pl.col("tod") >= FLATTEN_TIME)
+        )
+        assert late_entries.is_empty()
+
+    def test_flatten_orders_are_recorded_and_fill(self, intraday_run):
+        _, engine, _ = intraday_run
+        trades = engine.store.read("trades").with_columns(
+            pl.col("ts").dt.time().alias("tod")
+        )
+        eod = trades.filter(pl.col("reason") == "eod_flat")
+        assert eod.height > 0
+        assert (eod["action"] == "sell").all()
+        # eod_flat fills land at the session's final bar open.
+        assert (eod["tod"] == LAST_TIME).all()
+
+    def test_final_state_holds_nothing_overnight(self, intraday_run):
+        _, engine, summary = intraday_run
+        # The run ends on a session's last bar, so the persisted book is flat.
+        state = PaperState.load(engine.store.state_path)
+        assert state.positions == []
+        assert summary.positions == []

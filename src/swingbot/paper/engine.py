@@ -161,6 +161,10 @@ class PaperEngine:
         self.feature_cols = feature_columns(cfg.features)
         # Round-trip friction the learner is charged per unit of position change.
         self._learn_cost = 2.0 * (cfg.env.costs.half_spread_bps + cfg.env.costs.slippage_bps) * 1e-4
+        # Day-trading: only meaningful on an intraday loop, where a session has
+        # several bars. Populated in run() once the bar calendar is known.
+        self.day_trading = self.intraday and self.paper.day_trading
+        self._flatten_time: time | None = None  # the intraday flatten decision bar
 
     def _iso(self, iso: str) -> BarTs:
         """Parse a stored ISO timestamp at this loop's bar resolution."""
@@ -317,6 +321,7 @@ class PaperEngine:
         bench_closes = self._benchmark_closes(cutoff)
 
         calendar = sorted({t for sd in data.values() for t in sd.ts})
+        self._set_session_landmarks(calendar)
         state, learner = self._load_or_init(capital, calendar, data, bench_closes, log=log)
         if clear_halt and state.halted:
             log(f"[risk] halt cleared by operator (was: {state.halted} on {state.halted_ts})")
@@ -736,6 +741,37 @@ class PaperEngine:
                 return None
         return None
 
+    # ---- day-trading session landmarks ---------------------------------------
+
+    def _set_session_landmarks(self, calendar: list[BarTs]) -> None:
+        """Derive the intraday flatten bar from the session's bar-time grid.
+
+        The grid is taken over the *whole* calendar, not just the latest day, so
+        a partial final session (mid-day live run, only the morning bars printed)
+        can never be mistaken for a short day and trigger an early flatten. The
+        flatten bar is the second-to-last bar time: a decision there fills at the
+        final bar's open, so the book is flat before the session close.
+        """
+        self._flatten_time = None
+        if not self.day_trading:
+            return
+        times = sorted({t.time() for t in calendar if isinstance(t, datetime)})
+        if len(times) >= 2:
+            self._flatten_time = times[-2]
+
+    def _is_flatten_bar(self, d: BarTs) -> bool:
+        """True on the bar that closes the book out for the day (day-trading)."""
+        return self._flatten_time is not None and isinstance(d, datetime) and (
+            d.time() == self._flatten_time
+        )
+
+    def _entries_allowed(self, d: BarTs) -> bool:
+        """False on the flatten bar and the final bar: a position opened then
+        could not be flattened again inside the same session."""
+        if self._flatten_time is None or not isinstance(d, datetime):
+            return True
+        return d.time() < self._flatten_time
+
     # ---- decisions -----------------------------------------------------------
 
     def _decide(
@@ -796,6 +832,27 @@ class PaperEngine:
                 }
             )
 
+        # ---- day-trading: force the whole book flat before the close ----
+        # On the flatten bar every holding is sold to zero (filling at the final
+        # bar's open), so nothing is ever carried overnight. This supersedes the
+        # normal exit/entry/rebalance logic for this bar. Saturation metrics are
+        # still returned above so model-health monitoring keeps running.
+        if self._is_flatten_bar(d):
+            for sym in sorted(held):
+                f, dvol = scores.get(sym, (0.0, 0.02))
+                orders.append(
+                    PendingOrder(
+                        symbol=sym,
+                        decided_ts=d.isoformat(),
+                        target_weight=0.0,
+                        conviction=f,
+                        expected_reward=f * dvol,
+                        reason="eod_flat",
+                    )
+                )
+                log_decision(sym, "sell", f, dvol, 0.0)
+            return orders, decisions, sat
+
         # ---- exits: conviction decay and stop-loss ----
         keep_holds: list[str] = []
         for sym in sorted(held):
@@ -833,15 +890,21 @@ class PaperEngine:
                 keep_holds.append(sym)
 
         # ---- entries: rank the rest of the universe by conviction ----
-        candidates = sorted(
-            (
-                (sym, f, dvol)
-                for sym, (f, dvol) in scores.items()
-                if sym not in held
-                and abs(f) >= p.min_conviction
-                and not stop_cooldown_active(p, state, sym, d)
-            ),
-            key=lambda t: (-abs(t[1]), t[0]),
+        # Day-trading suppresses entries too close to the close: a name opened on
+        # the flatten bar or the final bar could not be flattened same-session.
+        candidates = (
+            sorted(
+                (
+                    (sym, f, dvol)
+                    for sym, (f, dvol) in scores.items()
+                    if sym not in held
+                    and abs(f) >= p.min_conviction
+                    and not stop_cooldown_active(p, state, sym, d)
+                ),
+                key=lambda t: (-abs(t[1]), t[0]),
+            )
+            if self._entries_allowed(d)
+            else []
         )
         slots = max(p.max_positions - len(keep_holds), 0)
         entries = candidates[:slots]
