@@ -27,6 +27,11 @@ features:
   warmup: 60
 paper:
   interval: 30m
+  # DAY TRADING: flat before every close, never a position held overnight.
+  # On the 15:00 ET bar (second-to-last of the 30m session) the whole book is
+  # sold to zero, filling at the 15:30 open; no new position is opened on the
+  # 15:00 or 15:30 bars because it could not be closed again the same day.
+  day_trading: true
   universe: nasdaq100
   start: '2026-07-21T15:30'
   data_start: '2026-05-24'
