@@ -562,9 +562,7 @@ class TestDayTradingFlatByClose:
         """The load-bearing invariant: at each session's final bar the book is
         already flat -- nothing to mark, nothing carried overnight."""
         _, engine, _ = intraday_run
-        ledger = engine.store.read("ledger").with_columns(
-            pl.col("ts").dt.time().alias("tod")
-        )
+        ledger = engine.store.read("ledger").with_columns(pl.col("ts").dt.time().alias("tod"))
         closes = ledger.filter(pl.col("tod") == LAST_TIME)
         assert closes.height >= 3  # several sessions were processed
         assert (closes["n_positions"] == 0).all()
@@ -573,9 +571,7 @@ class TestDayTradingFlatByClose:
     def test_no_entries_into_the_close(self, intraday_run):
         """No position is opened on the flatten bar or the final bar."""
         _, engine, _ = intraday_run
-        decisions = engine.store.read("decisions").with_columns(
-            pl.col("ts").dt.time().alias("tod")
-        )
+        decisions = engine.store.read("decisions").with_columns(pl.col("ts").dt.time().alias("tod"))
         late_entries = decisions.filter(
             (pl.col("action") == "buy") & (pl.col("tod") >= FLATTEN_TIME)
         )
@@ -583,9 +579,7 @@ class TestDayTradingFlatByClose:
 
     def test_flatten_orders_are_recorded_and_fill(self, intraday_run):
         _, engine, _ = intraday_run
-        trades = engine.store.read("trades").with_columns(
-            pl.col("ts").dt.time().alias("tod")
-        )
+        trades = engine.store.read("trades").with_columns(pl.col("ts").dt.time().alias("tod"))
         eod = trades.filter(pl.col("reason") == "eod_flat")
         assert eod.height > 0
         assert (eod["action"] == "sell").all()
@@ -598,3 +592,81 @@ class TestDayTradingFlatByClose:
         state = PaperState.load(engine.store.state_path)
         assert state.positions == []
         assert summary.positions == []
+
+
+class TestUnlimitedIntradayTrading:
+    """The loop has no per-day trade budget. Every completed 30m bar gets the
+    full fill+learn+decide pass (exactly what one cron firing does live), so
+    the bot can buy and sell on any bar of the session, as many times as its
+    signal asks for."""
+
+    def test_every_session_bar_is_processed(self, intraday_run):
+        """One ledger row per completed bar, 13 per full session, no gaps:
+        every price update the cron sees produced a decision pass."""
+        _, engine, _ = intraday_run
+        stamps = engine.store.read("ledger").sort("ts")["ts"].to_list()
+        days = sorted({t.date() for t in stamps})
+        grid = [datetime.combine(d, t) for d in days for t in SESSION_TIMES]
+        assert stamps == [t for t in grid if t >= stamps[0]]
+
+    def test_fills_happen_all_across_the_session(self, intraday_run):
+        """Not an open-only bot: fills land on many distinct bars per session,
+        including strictly mid-session ones."""
+        _, engine, _ = intraday_run
+        trades = engine.store.read("trades").with_columns(
+            pl.col("ts").dt.date().alias("day"), pl.col("ts").dt.time().alias("tod")
+        )
+        bars_per_day = trades.group_by("day").agg(pl.col("tod").n_unique().alias("n"))
+        assert bars_per_day["n"].max() >= 5
+        mid_session = trades.filter(
+            (pl.col("tod") > SESSION_TIMES[0]) & (pl.col("tod") < FLATTEN_TIME)
+        )
+        assert mid_session.height > 0
+
+    def test_round_trips_inside_a_single_session(self, intraday_run):
+        """Entries, exits and the eod flatten all inside one session: buys and
+        sells are not rationed to one shot per day."""
+        _, engine, _ = intraday_run
+        trades = engine.store.read("trades").with_columns(pl.col("ts").dt.date().alias("day"))
+        by_day = trades.group_by("day").agg(pl.col("reason").unique().alias("reasons"))
+        assert any({"entry", "exit", "eod_flat"} <= set(r) for r in by_day["reasons"].to_list())
+
+
+class TestIntradayStopCooldownClock:
+    """With ``stop_cooldown_bars`` set, the stop lockout and the de-gross
+    window run on the bar clock: a stopped name is back in play the same
+    session instead of frozen for stop_cooldown_days of calendar time."""
+
+    @staticmethod
+    def paper_30m():
+        p = Config().paper
+        p.interval = "30m"
+        p.stop_cooldown_bars = 6  # 3 hours of 30m bars
+        return p
+
+    def test_lockout_lapses_within_the_session(self):
+        p = self.paper_30m()
+        state = TestStopDiscipline.fresh_state()
+        state.last_stop_out["AAA"] = "2026-03-02T10:00"
+        assert stop_cooldown_active(p, state, "AAA", datetime(2026, 3, 2, 10, 30))
+        assert stop_cooldown_active(p, state, "AAA", datetime(2026, 3, 2, 12, 30))
+        assert not stop_cooldown_active(p, state, "AAA", datetime(2026, 3, 2, 13, 0))
+        assert not stop_cooldown_active(p, state, "BBB", datetime(2026, 3, 2, 10, 30))
+
+    def test_degross_window_rolls_in_bars(self):
+        p = self.paper_30m()  # gross 0.90, -0.10 per stop
+        state = TestStopDiscipline.fresh_state()
+        state.last_stop_out = {"AAA": "2026-03-02T10:00", "BBB": "2026-03-02T11:30"}
+        d = datetime(2026, 3, 2, 12, 0)
+        assert target_gross_exposure(p, state, d) == pytest.approx(0.70)
+        # AAA ages out at 13:00, BBB at 14:30: the cap recovers the same day.
+        assert target_gross_exposure(p, state, datetime(2026, 3, 2, 13, 30)) == pytest.approx(0.80)
+        assert target_gross_exposure(p, state, datetime(2026, 3, 2, 14, 30)) == pytest.approx(0.90)
+
+    def test_daily_loop_ignores_the_bar_clock(self):
+        p = Config().paper
+        p.stop_cooldown_bars = 6  # meaningless on "1d"; the day clock rules
+        state = TestStopDiscipline.fresh_state()
+        state.last_stop_out["AAA"] = "2024-06-03"
+        assert stop_cooldown_active(p, state, "AAA", date(2024, 6, 12))
+        assert not stop_cooldown_active(p, state, "AAA", date(2024, 6, 13))
