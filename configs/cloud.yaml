@@ -41,3 +41,9 @@ paper:
   # so the seed is tempered on load and stays a contraction through pretraining
   # and live trading -- keeping the conviction spread the ranking depends on.
   learn_max_recurrence: 0.7
+  # Stop discipline on the day-trader's clock: a stopped-out name is locked out
+  # for 6 bars (3 hours), not 10 calendar days, and the stop de-gross window
+  # rolls over the same span -- so one stop never freezes a name (or pins the
+  # gross cap down) for weeks of 30-minute decisions. The bot decides on every
+  # completed bar and may re-enter the same session once the lockout lapses.
+  stop_cooldown_bars: 6

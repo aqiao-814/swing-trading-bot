@@ -65,11 +65,25 @@ def _parse_like(iso: str, like: BarTs) -> BarTs:
     return datetime.fromisoformat(iso) if isinstance(like, datetime) else date.fromisoformat(iso)
 
 
+def _cooldown_span(paper: PaperConfig) -> timedelta | None:
+    """The stop lockout as elapsed time, when configured in bars (intraday).
+
+    None means the day-based clock applies: either the loop is daily or
+    ``stop_cooldown_bars`` is unset.
+    """
+    if paper.stop_cooldown_bars is None or paper.interval not in _BAR_MINUTES:
+        return None
+    return timedelta(minutes=_BAR_MINUTES[paper.interval] * paper.stop_cooldown_bars)
+
+
 def stop_cooldown_active(paper: PaperConfig, state: PaperState, symbol: str, d: BarTs) -> bool:
     """True while a stopped-out symbol is still barred from re-entry."""
     last = state.last_stop_out.get(symbol)
     if last is None:
         return False
+    span = _cooldown_span(paper)
+    if span is not None and isinstance(d, datetime):
+        return d - _parse_like(last, d) < span
     return (d - _parse_like(last, d)).days < paper.stop_cooldown_days
 
 
@@ -79,11 +93,19 @@ def target_gross_exposure(paper: PaperConfig, state: PaperState, d: BarTs) -> fl
     Each stop inside the cooldown window de-grosses the book, so the cash a
     stop frees stays cash instead of rotating into the next correlated name.
     """
-    recent = sum(
-        1
-        for iso in state.last_stop_out.values()
-        if 0 <= (d - _parse_like(iso, d)).days < paper.stop_cooldown_days
-    )
+    span = _cooldown_span(paper)
+    if span is not None and isinstance(d, datetime):
+        recent = sum(
+            1
+            for iso in state.last_stop_out.values()
+            if timedelta(0) <= (d - _parse_like(iso, d)) < span
+        )
+    else:
+        recent = sum(
+            1
+            for iso in state.last_stop_out.values()
+            if 0 <= (d - _parse_like(iso, d)).days < paper.stop_cooldown_days
+        )
     return max(
         paper.min_gross_exposure,
         paper.max_gross_exposure - paper.stop_degross_per_stop * recent,
@@ -761,8 +783,10 @@ class PaperEngine:
 
     def _is_flatten_bar(self, d: BarTs) -> bool:
         """True on the bar that closes the book out for the day (day-trading)."""
-        return self._flatten_time is not None and isinstance(d, datetime) and (
-            d.time() == self._flatten_time
+        return (
+            self._flatten_time is not None
+            and isinstance(d, datetime)
+            and (d.time() == self._flatten_time)
         )
 
     def _entries_allowed(self, d: BarTs) -> bool:

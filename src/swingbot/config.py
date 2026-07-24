@@ -193,6 +193,13 @@ class PaperConfig(BaseModel):
     # The stop just said the model was wrong about this name; instantly
     # re-buying it (or churning back in on the next signal) repeats the loss.
     stop_cooldown_days: int = 10
+    # On an intraday loop the day-based cooldown is the wrong clock: 10 calendar
+    # days is ~130 thirty-minute bars, freezing a name for two weeks of
+    # decisions. When set (and the interval is intraday), the re-entry lockout
+    # and the de-gross window below are this many BARS of elapsed time instead,
+    # so the same discipline runs on the day-trader's clock and a stopped name
+    # becomes tradeable again the same session once the lockout lapses.
+    stop_cooldown_bars: int | None = None
     # Each stop-out inside the cooldown window lowers the gross-exposure cap
     # by this much (floored below). A stop that frees cash which is instantly
     # redeployed into a correlated name is not risk reduction -- it's a
