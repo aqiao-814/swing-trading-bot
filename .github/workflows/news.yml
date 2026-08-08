@@ -64,7 +64,10 @@ jobs:
           cache: pip
 
       - name: Install swingbot
-        run: pip install -e .
+        # gymnasium: swingbot.cli imports dashboard.py -> env/trading_env.py at
+        # module top, which imports gymnasium even though the `news` command
+        # never touches the RL env. Same fix as trade.yml.
+        run: pip install -e . gymnasium
 
       - name: Collect news
         run: |
