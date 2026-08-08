@@ -147,12 +147,32 @@ class PaperConfig(BaseModel):
     benchmark_symbols: list[str] = Field(default_factory=lambda: ["SPY", "QQQ"])
 
     # ---- allocation ----
-    max_positions: int = 10
+    # Cap on the number of names held at once. None = uncapped: the book holds
+    # every name that clears ``min_conviction``, and breadth is limited only by
+    # capital. Sizing is already self-normalising -- targets are conviction-
+    # proportional and then scaled so gross lands on ``max_gross_exposure`` --
+    # so widening the book dilutes each name instead of levering the portfolio.
+    max_positions: int | None = None
     max_position_weight: float = 0.20  # fraction of equity per name
     max_gross_exposure: float = 0.90  # never forced fully invested
     min_conviction: float = 0.15  # |policy output| needed to open
     exit_conviction: float = 0.05  # close when conviction decays below this
-    rebalance_threshold: float = 0.05  # no-trade band on weight drift
+    # No-trade band, as a fraction of the position's own size: rebalance only
+    # once a holding drifts this far from its target relative to
+    # max(|target|, |current|). It MUST be relative rather than an absolute
+    # slice of equity. With an uncapped book a target is ~gross/N -- a few
+    # tenths of a percent across a few hundred names -- so the old absolute
+    # 0.05 band was an order of magnitude wider than the positions it governed:
+    # every holding read as "close enough, don't trade" and kept its full old
+    # weight while fresh entries were sized on top, ratcheting gross to 100% of
+    # cash and quietly voiding max_gross_exposure. At the former 20% position
+    # size 0.25 x 0.20 reproduces exactly the old 0.05 band.
+    # Note the band's inherent cost, which is not a bug and not new: holdings
+    # may sit up to this fraction above target without trading, so realized
+    # gross can exceed max_gross_exposure by up to that same fraction before
+    # cash (never negative) becomes the binding constraint. Lower it to track
+    # the gross target more tightly at the price of more turnover.
+    rebalance_band_frac: float = 0.25
     # Vol-scaled stop: exit when price falls stop_loss_sigma standard
     # deviations of the name's own horizon volatility below cost basis.
     # A fixed-percentage stop is a different distance in sigma for every name
@@ -176,17 +196,18 @@ class PaperConfig(BaseModel):
     # so the daily research/backtest path is unchanged.
     day_trading: bool = False
 
-    # ---- kill switches ----
-    # When any of these fires the engine flattens the book, halts, and stays
-    # halted until 'invest --clear-halt'. The first three watch P&L; the last
-    # watches MODEL HEALTH -- a conviction spread this thin means every score
-    # is saturated and "conviction-ranked" sizing is the sort's tiebreak, so
-    # there is no reason to hold the book at all. A health switch turns "the
-    # model broke" from a post-mortem into an alert. None disables a switch.
-    kill_max_drawdown: float | None = 0.15
-    kill_daily_loss: float | None = 0.04
-    kill_rolling_20d_loss: float | None = 0.10
-    kill_conviction_std: float | None = 0.05
+    # ---- risk ----
+    # There is deliberately NO portfolio kill switch here. A latching halt (fire
+    # on a drawdown, flatten, stay dead until an operator clears it) is a swing-
+    # trading control: it assumes the book is meant to persist and that a human
+    # is on hand to restart it. On a day-trading loop the book is already flat at
+    # every close, the worst single-bar loss is bounded by the per-name stop plus
+    # the gross cap, and a latched halt just means the bot silently stops trading
+    # for days until someone notices. Risk is controlled continuously instead:
+    # per-name vol-scaled stops, post-stop de-grossing, and the gross cap.
+    # Model health is still measured every bar (conviction_std / frac_saturated
+    # in the learning table) and shouted about in the run log -- it just no
+    # longer halts trading.
 
     # ---- stop-loss discipline ----
     # A stopped-out symbol may not be re-entered for this many calendar days.
@@ -200,11 +221,15 @@ class PaperConfig(BaseModel):
     # so the same discipline runs on the day-trader's clock and a stopped name
     # becomes tradeable again the same session once the lockout lapses.
     stop_cooldown_bars: int | None = None
-    # Each stop-out inside the cooldown window lowers the gross-exposure cap
-    # by this much (floored below). A stop that frees cash which is instantly
-    # redeployed into a correlated name is not risk reduction -- it's a
-    # rotation with a realized-loss fee. De-grossing makes the stop real.
-    stop_degross_per_stop: float = 0.10
+    # Stops inside the cooldown window lower the gross-exposure cap: cash a stop
+    # frees should stay cash, not rotate straight into the next correlated name.
+    # The cut is proportional to the FRACTION of the book that stopped out, not
+    # a flat slab per stop -- with ``max_positions`` uncapped a 300-name book
+    # will always have a few names stopped out somewhere, and a per-stop slab
+    # would pin it at the floor permanently. At the old 10-name book size one
+    # stop still de-grosses ~10% of the cap, so this preserves the original
+    # behaviour where it was calibrated. 0 disables de-grossing.
+    stop_degross_fraction: float = 1.0
     min_gross_exposure: float = 0.30
 
     # ---- learning ----

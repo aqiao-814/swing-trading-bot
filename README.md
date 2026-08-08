@@ -3,8 +3,8 @@
 Autonomous **day-trading** paper bot, live at
 **https://aqiao-814.github.io/swingbot-live/**
 
-$100k simulated capital · NASDAQ-100 · 30-minute bars · **flat by every close,
-never a position held overnight** · 30m inception 2026-07-21.
+$100k simulated capital · **~670 liquid US stocks** · 30-minute bars · **flat by
+every close, never a position held overnight** · 30m inception 2026-07-21.
 **Every dollar is simulated** — there are no brokerage credentials and no code
 path that can place a real order. Research history and measured results:
 [docs/FINDINGS.md](docs/FINDINGS.md).
@@ -15,13 +15,15 @@ path that can place a real order. Research history and measured results:
 
 ## How it works — plain English
 
-- On every completed 30-minute bar of the trading day, the bot looks at every
-  NASDAQ-100 stock and scores how strongly its model wants to own it
-  ("conviction").
+- On every completed 30-minute bar of the trading day — 13 decision points per
+  session — the bot scores **~670 liquid US stocks** on how strongly its model
+  wants to own each one ("conviction").
 - It sells anything it has lost conviction in, or that has fallen too far below
   what it paid (a stop-loss sized to each stock's own volatility).
-- It buys the highest-conviction stocks — at most 10 positions, at most 20% of
-  the portfolio in one name, and at least 10% held back as cash.
+- It buys the highest-conviction names. **There is no cap on how many stocks it
+  holds**: position sizes are proportional to conviction and then scaled so
+  total exposure lands at 90% of the portfolio, so a wider book means smaller
+  positions, never borrowed money. At most 20% in any one name.
 - **Day trading, not overnight.** Near the close (the 15:00 ET bar) it sells the
   whole book to zero, and it opens no new position in the last hour that it
   couldn't close again the same day. The portfolio ends every session flat —
@@ -30,9 +32,10 @@ path that can place a real order. Research history and measured results:
   realistic trading costs (spread, slippage, price impact, regulatory fees).
 - After every bar it also **learns**: each stock's realized return nudges the
   model's weights, so the policy adapts continuously.
-- Safety: if it loses too much (in a day, from the peak, or over a month) or its
-  scores degenerate, a kill switch sells everything and halts until a human
-  intervenes.
+- Risk is continuous, not a latching halt: per-name volatility-scaled stops, a
+  re-entry cooldown, a gross-exposure cap that tightens after stop-outs, and
+  above all a book that is flat at every close. There is **no kill switch** —
+  see below.
 - The dashboard shows it all live during market hours: portfolio value, cash,
   every position's P&L, and the full buy/sell log.
 
@@ -48,7 +51,7 @@ of net return `F_{t-1}·r_t − cost·|F_t − F_{t-1}|` — costs live inside t
 gradient. L2 plus a hard `‖w‖ ≤ 1` cap resist tanh saturation. Pretrained on
 ~1y of pre-inception hourly history; one online update per (symbol, bar).
 
-**Bar loop** (`paper/engine.py`, interval-agnostic — `1d` or `60m` via
+**Bar loop** (`paper/engine.py`, interval-agnostic — `1d`, `60m` or `30m` via
 `paper.interval` — idempotent via a `last_processed` watermark; only bars whose
 completion time has passed ever enter it):
 
@@ -59,9 +62,14 @@ completion time has passed ever enter it):
    buy-and-hold SPY / QQQ / equal-weight benchmarks.
 3. **Learn**: one RRL update per symbol from the realized bar return.
 4. **Decide**: score the universe on the bar. Exit on conviction < 0.05 or a
-   2σ·√(20-bar) vol-scaled stop below basis; enter needs conviction ≥ 0.15,
-   top-10 slots. Target weight = f × 20%, gross scaled to ≤ 0.90 — each stop
-   inside a 10-day re-entry cooldown lowers the cap by 0.10 (floor 0.30).
+   2σ·√(20-bar) vol-scaled stop below basis; enter needs conviction ≥ 0.15.
+   **No position-count cap** (`paper.max_positions: null`): every candidate that
+   clears the bar gets a target weight of f × 20%, and the whole book is then
+   scaled so gross lands at ≤ 0.90. Breadth therefore dilutes rather than
+   levers. Stops inside the re-entry cooldown cut the gross cap in proportion to
+   the *fraction* of the book that stopped out (floor 0.30) — a flat per-stop
+   slab would pin a several-hundred-name book at the floor permanently.
+   Targets too thin to buy one whole share are dropped rather than queued.
    5% no-trade band. Orders fill at the *next* bar's open.
 5. **Flat by close** (day-trading, when `paper.day_trading`): on the flatten bar
    — the last bar whose next-open fill still lands in the session (15:00 ET on
@@ -71,9 +79,24 @@ completion time has passed ever enter it):
    Derived from the session's own bar-time grid, so a partial final session
    (a mid-day live run) is never mistaken for a short day. `1d` loops ignore it.
 
-**Kill switches** (flatten + halt until `invest --clear-halt`): single-bar loss
-≥ 4%, drawdown ≥ 15%, rolling 20-bar loss ≥ 10%, or conviction σ < 0.05 (model
-health — scores pinned at ±1 mean ranking has degenerated).
+**No kill switch — deliberately.** A latching halt (fire on a drawdown, flatten,
+stay dead until an operator clears it) is a swing-trading control: it assumes a
+book meant to persist and a human on hand to restart it. Neither holds here. The
+book is already flat at every close, so the loss a halt would prevent is bounded
+by one session; what a halt actually produces is a bot that silently stops
+trading for days — including through the recovery — until someone notices. Risk
+is carried continuously instead: per-name vol-scaled stops, post-stop
+de-grossing, the gross cap, and flat-by-close. Model health (conviction σ,
+saturated fraction) is still computed every bar, logged to the learning table,
+and warned about in the run output — it just no longer stops the bot.
+
+**Universe.** `paper.universe: extended` — S&P 500 ∪ Nasdaq 100 ∪ 176 screened
+high-volume non-index movers, ~670 names. The extras were probed against real
+30m bars and kept only above $5M median 30-minute dollar volume and $5 price:
+the cost model charges a flat 1 bp half-spread, which is roughly honest for a
+liquid name and pure fiction for a $0.40 one, and a backtest that trades thin
+names at megacap costs manufactures profit from a spread it never paid. No ETFs
+— the bot must not be able to buy SPY, the benchmark it is judged against.
 
 **No lookahead by construction**: decisions at close *t* can only fill at open
 *t+1*; features are trailing-only (tests corrupt future bars and assert earlier
@@ -88,15 +111,17 @@ features are bit-identical); a pure-noise churn test must lose money.
 - **`.github/workflows/live.yml`** — every 20 min during market hours: live
   quotes → `live.json` (live P&L between trading runs).
 - Portfolio state persists in the public repo under `state/`; bar data lives in
-  an Actions cache. Manual run: `gh workflow run trade.yml` (`clear_halt=true`
-  to clear a fired kill switch).
+  an Actions cache. Manual run: `gh workflow run trade.yml`.
+- The ~670-name 30m refresh measured ~130 s across 17 bulk requests, so the wide
+  universe uses a couple of minutes of the half-hour budget. Runs are serialised
+  by a concurrency group rather than cancelled, so a slow run delays the next
+  bar's decision instead of corrupting state.
 
 ## Local use
 
 ```bash
-make test                                  # 174 tests
-make invest                                # run the daily loop locally
-python -m swingbot.cli invest --clear-halt # resume after a kill switch
+make test                   # 187 tests
+make invest                 # run the loop locally
 ```
 
 ## Layout

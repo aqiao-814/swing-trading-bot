@@ -10,9 +10,6 @@ and becomes the seed for the live 30-minute loop.
 
 No look-ahead: the learner pretrains only on history strictly before inception,
 then every forward decision uses trailing features and fills at the next open.
-The live kill switches are disabled here on purpose -- they are a production
-safety valve that would freeze a five-year measurement at the first drawdown
-halt; we want to see the model's own multi-year behavior.
 
 Outputs (under ``artifacts/backtest5y``):
   * ``paper/portfolio/*.parquet`` -- full ledger, trades, learning diagnostics
@@ -48,7 +45,7 @@ BENCH_KEYS = {"bench_QQQ": "QQQ", "bench_SPY": "SPY", "bench_EW": "EW"}
 
 
 def build_config() -> Config:
-    """Daily-bar config for the research backtest, kill switches off."""
+    """Daily-bar config for the research backtest."""
     cfg = Config()
     cfg.run_name = "backtest5y"
     cfg.artifacts_root = BT_ROOT
@@ -61,11 +58,11 @@ def build_config() -> Config:
     p.start = INCEPTION
     p.pretrain_years = 3.0
     p.benchmark_symbols = ["SPY", "QQQ"]
-    # Disable the production kill switches for the measurement (see module docs).
-    p.kill_max_drawdown = None
-    p.kill_daily_loss = None
-    p.kill_rolling_20d_loss = None
-    p.kill_conviction_std = None
+    # The seed model this script produces is trained on the daily nasdaq100 book
+    # the live bot inherited, so the measurement keeps that shape: a 10-name cap
+    # here, even though the live loop now runs uncapped over ~670 names. Sizing
+    # is conviction-proportional either way, so the learned weights transfer.
+    p.max_positions = 10
     return cfg
 
 
@@ -229,7 +226,7 @@ def build_findings(engine: PaperEngine) -> dict:
             "end": ts[-1],
             "starting_capital": STARTING_CAPITAL,
             "pretrain_years": engine.paper.pretrain_years,
-            "kill_switches": "disabled (research measurement)",
+            "max_positions": engine.paper.max_positions,
             "model": "ContinualRRL (Moody & Saffell direct reinforcement, shared weights)",
         },
         "overall": overall,

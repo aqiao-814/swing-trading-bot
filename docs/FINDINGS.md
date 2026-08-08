@@ -34,11 +34,13 @@ against zero asks the wrong question in a bull market; rrl xSharpe +0.34
 
 - Correct SEC (0.278 bp) + FINRA TAF fees, with a *magnitude*-asserting test.
 - Vol-scaled stops (2σ of each name's 20-day horizon vol) replacing fixed 10%.
-- Stop discipline: 10-day re-entry cooldown; each stop de-grosses the book by
-  0.10 (floor 0.30) so freed cash stays cash.
+- Stop discipline: 10-day re-entry cooldown; stops de-gross the book in
+  proportion to the fraction of it that stopped out (floor 0.30) so freed cash
+  stays cash. (Originally a flat 0.10 per stop — §11 explains why that had to
+  become breadth-relative.)
 - Saturation guards: L2 + hard ‖w‖ ≤ 1 cap; saturation metrics logged daily.
-- Kill switches incl. conviction-σ **model-health** halt (fires on the live
-  book by design; resume via `invest --clear-halt`).
+- Kill switches incl. conviction-σ **model-health** halt. **Removed in §11**;
+  this line records what was true at the time.
 - `artifacts/trials.jsonl`: one line per evaluated configuration, so DSR's
   `n_trials` cannot be undercounted.
 
@@ -88,8 +90,9 @@ nulls for the cross-sectional pipeline.
 
 Ran the *actual* `PaperEngine` (continual-learning RRL, the live policy) over the
 last five years of daily nasdaq100 bars — `scripts/backtest_5y.py`, kill switches
-off so a safety halt doesn't freeze the measurement. It is both evaluation and
-training: the checkpoint it leaves becomes the seed for the live loop.
+off so a safety halt doesn't freeze the measurement (as of §11 they no longer
+exist anywhere). It is both evaluation and training: the checkpoint it leaves
+becomes the seed for the live loop.
 
 - **2021-07 → 2026-07: +142.2% total (CAGR 19.3%, Sharpe 0.92, maxDD −35.1%),
   vs QQQ +102.1% / SPY +85.8% / equal-weight +100.7%.** Beats the benchmarks —
@@ -242,3 +245,94 @@ its own risk of the Sharpe-0.2 signal not surviving forward — not a same-night
 swap. This is the validated, honest path from "runs" to "modestly profitable,"
 and it replaces §5's open question with a concrete lead: the edge is at the
 short horizon, dollar-neutral, and cost-limited.
+
+## 11. Day-trading rebuild: no kill switch, uncapped book, ~670-name universe (2026-08-08)
+
+Three changes to make the live loop an actual day trader rather than a swing
+book on a fast clock. Each one broke something that had been correct at the old
+scale, which is the interesting part.
+
+**Kill switches removed entirely.** `kill_max_drawdown / kill_daily_loss /
+kill_rolling_20d_loss / kill_conviction_std`, `state.halted`, and
+`invest --clear-halt` are gone. The argument against them is structural, not a
+preference for more risk: a latching halt presupposes a book meant to persist
+and an operator on hand to restart it. Neither holds for a loop that is flat at
+every close. The loss a halt would prevent is already bounded to one session by
+flat-by-close plus the per-name stop; what a halt actually produces is a bot
+that stops trading for days — *including through the recovery* — until a human
+notices. §9's 5-week replay is the evidence: the model-health switch fired two
+hours in and the book sat in cash for five weeks. That was scored as "survival
+by abstention"; on a day-trading mandate it is simply an outage. Risk now runs
+continuously: vol-scaled per-name stops, re-entry cooldown, post-stop
+de-grossing, gross cap, flat by close. Model health is still computed every bar
+and warned about in the run log — it no longer stops the bot.
+`PaperState.load` now drops unknown keys, so the deployed state file (which
+still carries `halted`) survives the deploy instead of crashing the next cron.
+
+**`max_positions: null` — no cap on breadth.** Sizing was already
+self-normalising (targets ∝ conviction, then scaled so gross lands on
+`max_gross_exposure`), so a wider book dilutes rather than levers. Targets too
+thin to buy one whole share are dropped at decision time instead of queued as
+orders that fill zero shares.
+
+**Universe `extended`: ~670 names** (S&P 500 ∪ Nasdaq 100 ∪ 176 screened
+non-index movers), up from 100. **The screen is a correctness control, not
+curation.** `CostConfig` charges a flat 1 bp half-spread on everything; that is
+roughly honest for a megacap and fiction for a $0.15 stock, where one tick is
+hundreds of bp. Trading thin names at megacap costs manufactures profit from a
+spread never paid — the same failure the "no free money on noise" test exists to
+catch. So all 294 candidates were probed on real 30m bars and kept only above
+$5M median 30-minute dollar volume (the 5th percentile of the index names
+already in the universe) and $5 price: **176 kept, 118 dropped**. No ETFs — the
+bot must not be able to buy SPY, the benchmark it is judged against. The same
+probe found **32 tickers with no 30m data at all**; 11 of them were still in the
+index snapshots (ANSS, BK, CMA, CTRA, DFS, FI, HES, HOLX, IPG, JNPR, K) and were
+removed. Refreshing all 820 probed symbols took **129 s across 17 bulk
+requests**, so the wide universe costs ~2 min of the 30-minute cron budget.
+
+### The bug widening the book exposed
+
+A cold-start rehearsal on real 30m bars (670 names, 170 bars, 2026-07-21 →
+08-07) held **197 positions** at peak — and drove **cash to $1.68 on $99k
+equity, gross to 0.99998**. Decision-time gross was a clean 0.90 the whole time,
+so the cap was not being violated where it was computed; it was being voided
+afterwards.
+
+Cause: the no-trade band was an **absolute** 0.05 of equity, calibrated when
+positions were ~20% each (i.e. 25% of position size). In a 200-name book a
+target is gross/N ≈ 0.45%, so the band was ~11× the entire position. Every
+holding read as "close enough, don't trade" and kept its full old weight, while
+fresh entries were sized against the nominal budget on top. Gross ratcheted
+until `_build_affordable_fill` — which shrinks buys to fit cash — became the only
+thing stopping it. No leverage ever occurred (cash stayed positive by
+construction), but `max_gross_exposure` meant nothing and the 10% cash buffer
+was gone.
+
+Fix: the band is now **relative to the position's own size**
+(`rebalance_band_frac = 0.25`, measured against `max(|target|, |current|)`),
+which reproduces the old 0.05 band exactly at the old 20% position size and
+scales correctly at any breadth. Same rehearsal after the fix: **cash floor
+0.0017% → 6.77%, max gross 0.99998 → 0.932**, fills 1958 → 2375 (more
+rebalancing, as intended). A band of any width inherently lets gross run up to
+`band_frac` above target before cash binds; that is documented, not eliminated.
+
+The stop de-gross had the same shape of bug and got the same treatment: a flat
+−0.10 of gross *per stop* pins a several-hundred-name book at the 0.30 floor
+permanently, since a wide book always has a few names stopped out somewhere. It
+is now proportional to the **fraction** of the book that stopped out — again
+identical to the old behaviour at a 10-name book.
+
+**What is not claimed.** The rehearsal above ran from a *cold* policy (no seed),
+and it saturated: conviction σ 0.007, 47% of scores pinned at ±1. It ended
+−1.88% vs SPY +3.32%. That number measures plumbing, not strategy — the live bot
+seeds from the 5-year model with `|u| ≤ 0.7`, which §8 measured at σ ≈ 0.25. It
+does confirm the loop runs end to end at 670 names inside the cron budget, holds
+a wide book, and trades hundreds of times a session. Under the old code that same
+σ 0.007 would have tripped the model-health switch on bar one and the bot would
+have sat in cash for the entire window; that difference is the point of this
+change, and it cuts both ways — **the bot will now keep trading through exactly
+the conditions that used to stop it**, which is a deliberate transfer of risk
+from "misses the recovery" to "keeps losing". Turnover is the other honest cost:
+flat-by-close on a wide book means the whole gross round-trips daily, ~3 bp of
+friction per turn, and there is still no measured cross-sectional signal (§4,
+§10a) to pay for it. The forward record remains the only test.
