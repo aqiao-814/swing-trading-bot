@@ -1,0 +1,152 @@
+# STAGED WORKFLOW -- not active until you install it:
+#
+#     git mv docs/news-workflow.yml .github/workflows/news.yml
+#
+# It is parked here rather than in .github/workflows/ so that adding a job with
+# push-and-merge rights to your repository is your decision, made after reading
+# it, rather than a side effect of a code change. Nothing else in this repo
+# depends on its location -- the trading loop only reads news/signal.json, which
+# `swingbot news` writes wherever it is run.
+#
+# ---------------------------------------------------------------------------
+name: weekend-news
+# Weekend news dig: collect free economy + company news, score it, and merge the
+# resulting signal into main so the next trading week reads it.
+#
+# Saturday and Sunday at 13:00 UTC. The weekend is the right window for this and
+# not merely a convenient one:
+#
+#   * The per-company sweep is ~670 sequential yfinance calls at a deliberate
+#     1s pause -- roughly 20 minutes. That does not fit in the half-hour budget
+#     between weekday trading runs, and it would compete with them for the same
+#     Yahoo quota. On a weekend both are idle.
+#   * The market is closed, so there is no bar to race and no state to corrupt.
+#     This job never touches portfolio state -- it only writes news/.
+#   * Saturday captures the week's close-out coverage; Sunday captures the
+#     weekend's macro and pre-open commentary and lands the freshest possible
+#     signal in main before Monday's open.
+#
+# Both runs are safe to repeat: the article archive dedupes on a content hash,
+# so a re-run adds nothing new and the signal is simply rebuilt from the archive.
+#
+# The trading loop consumes news/signal.json as a BOUNDED TILT on model
+# conviction -- it can resize and reorder the book, but it cannot open a
+# position the price policy did not already want. See NewsConfig in config.py.
+
+on:
+  schedule:
+    - cron: "0 13 * * 6,0"
+  workflow_dispatch:
+    inputs:
+      max_symbols:
+        description: "Cap the per-company sweep (blank = whole universe)"
+        type: string
+        default: ""
+
+concurrency:
+  group: weekend-news
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dig:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install swingbot
+        run: pip install -e .
+
+      - name: Collect news
+        run: |
+          EXTRA=""
+          if [ -n "${{ inputs.max_symbols }}" ]; then
+            EXTRA="--max-symbols ${{ inputs.max_symbols }}"
+          fi
+          # A single retry: the macro tier is reliable, but a transient DNS or
+          # 5xx blip on the company sweep should not cost the whole weekend.
+          python -m swingbot.cli news --out news --config configs/cloud.yaml $EXTRA \
+            || (echo "retrying in 60s" && sleep 60 && \
+                python -m swingbot.cli news --out news --config configs/cloud.yaml $EXTRA)
+
+      - name: Summarise for the commit message
+        id: summary
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("news/signal.json"))
+          syms = d["symbols"]
+          top = sorted(syms.items(), key=lambda kv: -abs(kv[1]["score"]))[:5]
+          print(f"articles={d['total_articles']}")
+          print(f"macro={d['macro']:+.3f}")
+          print(f"nsymbols={len(syms)}")
+          print("top=" + ", ".join(f"{s} {v['score']:+.2f}" for s, v in top))
+          PY
+
+      - name: Open and merge the news PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTICLES: ${{ steps.summary.outputs.articles }}
+          MACRO: ${{ steps.summary.outputs.macro }}
+          NSYMBOLS: ${{ steps.summary.outputs.nsymbols }}
+          TOP: ${{ steps.summary.outputs.top }}
+        run: |
+          set -euo pipefail
+          git config user.name "swingbot"
+          git config user.email "actions@users.noreply.github.com"
+
+          # Nothing changed (a re-run inside the same news cycle): stop before
+          # creating an empty branch and PR.
+          if git diff --quiet -- news/; then
+            echo "no news changes -- nothing to merge"
+            exit 0
+          fi
+
+          BRANCH="news/$(date -u +%Y-%m-%d-%H%M)"
+          git checkout -b "$BRANCH"
+          git add news/
+          git commit -m "news: ${ARTICLES} articles, macro ${MACRO}, ${NSYMBOLS} symbols" \
+                     -m "Strongest: ${TOP}" \
+                     -m "Collected by .github/workflows/news.yml. The trading loop reads news/signal.json as a bounded tilt on model conviction."
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --base main --head "$BRANCH" \
+            --title "news: weekend dig $(date -u +%Y-%m-%d)" \
+            --body "Automated weekend news collection.
+
+          | | |
+          |---|---|
+          | Articles scored | ${ARTICLES} |
+          | Macro tone | ${MACRO} |
+          | Symbols with company news | ${NSYMBOLS} |
+
+          **Strongest signals:** ${TOP}
+
+          Merging publishes \`news/signal.json\` to main, where the next weekday
+          trading run picks it up. The tilt is multiplicative on the policy's own
+          conviction and decays with the signal's age, so a stale or missing file
+          degrades to no-news rather than to a wrong trade."
+
+          # --admin so the merge still lands if branch protection is ever added
+          # to main; harmless when there is none.
+          gh pr merge "$BRANCH" --squash --delete-branch \
+            || gh pr merge "$BRANCH" --squash --delete-branch --admin
+
+      - name: Upload signal as an artifact
+        # Kept even when the PR path no-ops, so a run that collected nothing new
+        # still leaves the evidence of what it saw.
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-signal
+          path: news/
+          retention-days: 30

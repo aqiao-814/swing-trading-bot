@@ -30,6 +30,13 @@ path that can place a real order. Research history and measured results:
   100% cash — so it carries no overnight or weekend gap risk.
 - Orders queue and execute at the **next bar's open** (30 minutes later), with
   realistic trading costs (spread, slippage, price impact, regulatory fees).
+- It also **reads the news**. Every weekend a separate job digs through free
+  economy and company news (CNBC, MarketWatch, the Federal Reserve press wire,
+  plus per-company headlines from Yahoo), scores the tone of each story, and
+  publishes a sentiment score per stock. During the week that score **nudges**
+  how badly the bot wants each name — good news makes it hold more, bad news
+  less. It is a nudge and not a trigger: news can never make the bot buy
+  something its price model had no opinion on.
 - After every bar it also **learns**: each stock's realized return nudges the
   model's weights, so the policy adapts continuously.
 - Risk is continuous, not a latching halt: per-name volatility-scaled stops, a
@@ -90,6 +97,63 @@ de-grossing, the gross cap, and flat-by-close. Model health (conviction σ,
 saturated fraction) is still computed every bar, logged to the learning table,
 and warned about in the run output — it just no longer stops the bot.
 
+**News tilt** (`news/`, `paper.news`). Two collection tiers, both free and
+keyless. *Macro*: eleven bulk RSS feeds (CNBC topics, MarketWatch/Dow Jones, the
+Fed press wire), ~270 articles a pass, unthrottled. *Company*: per-ticker news
+through yfinance. The obvious route — Yahoo's per-ticker RSS endpoint — is
+**not** usable: probed 2026-08-08 it serves a handful of requests then hard-429s
+at the IP level, still refusing after a 300-second cooldown. yfinance reads a
+different (cookie+crumb) endpoint and answers normally.
+
+Tone comes from a Loughran-McDonald-style **financial** lexicon with negation
+and intensity weighting, not a general-purpose one: LM's finding is that most
+"negative" words in general lexicons (*liability*, *tax*, *depreciation*) are
+neutral accounting vocabulary, so a general lexicon reads every 10-K as a
+disaster. Scores decay on a 2-day half-life and are shrunk toward zero by
+`n/(n+3)`, so one headline scoring −1.0 is treated as under-observed rather than
+bearish.
+
+**The company score is de-meaned across the cross-section**, and that step is
+what makes it a signal at all. Measured on the first full-universe run
+(2026-08-08, 5,755 articles, 635 of 670 names covered): mean symbol tone
+**+0.346**, median +0.400, and only **77 of 635** symbols negative. Financial
+copy — earnings-call coverage above all — is overwhelmingly bullish, so the raw
+score answers "is the press positive about this company?", to which the answer
+is nearly always yes, and it orders almost nothing. Subtracting the
+cross-sectional mean asks "does the press like this name *more than average*?"
+(mean 0.000, 263 of 635 negative, σ 0.256) and surfaces downgrades, lawsuits and
+disappointing prints instead of generic optimism. This is the same correction
+`agents/ranker.py` makes by predicting excess rather than raw return: a signal
+that can win by saying yes to everything is not a signal. The uniform component
+is not discarded — it survives in the macro term, where a market-wide mood
+belongs.
+
+The engine applies it as `f' = f · (1 + 0.30 · news · sign(f))` — **multiplicative
+on the policy's own conviction**, so news reorders the ranking, resizes
+positions, and can push a borderline name across the entry or exit threshold,
+but a name the model is neutral on stays out of the book no matter what the
+headlines say. The tilt fades on the signal's own age (a Sunday score is worth
+~1/4 by Tuesday) and a missing or corrupt `signal.json` degrades to no-news
+rather than to an error. Model-health metrics are deliberately computed on the
+*untilted* score, so a quiet news week cannot mask a saturated policy. Every
+decision row records `model_conviction` and `news_score` alongside the final
+`conviction`, which is the only way to ever answer whether news helped.
+
+Symbol resolution is precision-first: mentions count only from cashtags
+(`$NVDA`), exchange-qualified tickers (`NASDAQ: NVDA`), or a curated
+case-sensitive company-name map. Bare uppercase matching is refused because a
+large minority of real tickers are English words — `IT`, `ON`, `ALL`, `KEY`,
+`NOW`, `A`, `T` — and a false mention injects a *wrong* tilt into a real
+position, which is worse than missing the story. Yahoo's own per-ticker labels
+are verified rather than trusted: `yf.Ticker("ADI").news` was observed serving a
+different company's earnings beat.
+
+**No news backtest yet, deliberately stated.** None of the free feeds serve
+history, so the signal cannot be tested retroactively — the article archive
+(`news/articles.parquet`, append-only, raw text kept so it can be rescored when
+the lexicon changes) exists to accumulate the evidence going forward. Until it
+has, the 0.30 tilt weight is a prior, not a measured edge.
+
 **Universe.** `paper.universe: extended` — S&P 500 ∪ Nasdaq 100 ∪ 176 screened
 high-volume non-index movers, ~670 names. The extras were probed against real
 30m bars and kept only above $5M median 30-minute dollar volume and $5 price:
@@ -110,6 +174,13 @@ features are bit-identical); a pure-noise churn test must lose money.
   [swingbot-live](https://github.com/aqiao-814/swingbot-live) (GitHub Pages).
 - **`.github/workflows/live.yml`** — every 20 min during market hours: live
   quotes → `live.json` (live P&L between trading runs).
+- **weekend news** — Saturday and Sunday 13:00 UTC: collect and score free
+  economy + company news, then open and merge a PR putting `news/signal.json`
+  on `main`, where the next weekday trading run reads it. The ~670-name
+  per-company sweep takes ~20 minutes, which is why it runs on a closed market
+  rather than inside the half-hour weekday budget. Staged at
+  [docs/news-workflow.yml](docs/news-workflow.yml); install with
+  `git mv docs/news-workflow.yml .github/workflows/news.yml`.
 - Portfolio state persists in the public repo under `state/`; bar data lives in
   an Actions cache. Manual run: `gh workflow run trade.yml`.
 - The ~670-name 30m refresh measured ~130 s across 17 bulk requests, so the wide
@@ -120,14 +191,16 @@ features are bit-identical); a pure-noise churn test must lose money.
 ## Local use
 
 ```bash
-make test                   # 187 tests
+make test                   # 236 tests
 make invest                 # run the loop locally
+python -m swingbot.cli news --out news --max-symbols 50   # collect news
 ```
 
 ## Layout
 
 ```
 src/swingbot/paper/    the live loop: engine, continual RRL, state, dashboard
+src/swingbot/news/     free news collection, financial-lexicon sentiment, signal
 src/swingbot/          portfolio accounting, execution costs, features, data store
 src/swingbot/{env,backtest,agents}/  research harness (see docs/FINDINGS.md)
 scripts/               site data + live quote exporters
