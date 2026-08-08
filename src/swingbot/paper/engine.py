@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -42,6 +42,7 @@ from swingbot.data.sources import get_source
 from swingbot.data.store import BarStore
 from swingbot.execution import ExecutionModel, MarketContext
 from swingbot.features.technical import build_dataset, feature_columns
+from swingbot.news.signal import NewsSignal
 from swingbot.paper.learner import ContinualRRL
 from swingbot.paper.state import PaperState, PaperStore, PendingOrder
 from swingbot.paper.universe import resolve_universe
@@ -198,9 +199,80 @@ class PaperEngine:
         self.day_trading = self.intraday and self.paper.day_trading
         self._flatten_time: time | None = None  # the intraday flatten decision bar
 
+        # News sentiment, published by the weekend collection workflow. Loaded
+        # once per run and never written to: the trading loop is a pure
+        # consumer. A missing, stale or corrupt file yields None, which
+        # disables the tilt -- news must never be able to stop the bot trading.
+        self.news = self._load_news()
+
     def _iso(self, iso: str) -> BarTs:
         """Parse a stored ISO timestamp at this loop's bar resolution."""
         return datetime.fromisoformat(iso) if self.intraday else date.fromisoformat(iso)
+
+    # ---- news tilt ---------------------------------------------------------
+
+    def _load_news(self) -> NewsSignal | None:
+        cfg = self.paper.news
+        if not cfg.enabled:
+            return None
+        return NewsSignal.read(Path(cfg.signal_path))
+
+    def _news_age_decay(self, d: BarTs) -> float:
+        """Weight of the published signal at bar ``d``, by its own age.
+
+        Collection runs on the weekend and trading runs all week, so by Friday
+        a Sunday signal is four days old. Rather than trusting a four-day-old
+        score at full strength (or discarding it at an arbitrary cutoff), the
+        tilt is faded on the same half-life the scores were built with. Beyond
+        ``max_age_days`` it is dropped entirely.
+
+        A signal timestamped *after* the bar being decided returns 0: that
+        would be news from the future, and the one thing this loop may never do
+        is act on information that did not exist at decision time. This is the
+        guard that makes replaying old bars against a current signal file safe.
+        """
+        if self.news is None:
+            return 0.0
+        cfg = self.paper.news
+        try:
+            as_of = datetime.fromisoformat(self.news.as_of)
+        except (TypeError, ValueError):
+            return 0.0
+        if as_of.tzinfo is None:
+            as_of = as_of.replace(tzinfo=UTC)
+
+        # A daily bar's decision instant is its close, 16:00 ET.
+        bar = d if isinstance(d, datetime) else datetime.combine(d, time(16, 0))
+        bar = bar.replace(tzinfo=_ET) if bar.tzinfo is None else bar
+        age_days = (bar - as_of).total_seconds() / 86400.0
+        if age_days < 0:  # signal is newer than the bar -- would be lookahead
+            return 0.0
+        if age_days > cfg.max_age_days:
+            return 0.0
+        if cfg.half_life_days <= 0:
+            return 1.0
+        return float(math.pow(0.5, age_days / cfg.half_life_days))
+
+    def _tilt(self, symbol: str, f: float, decay: float) -> tuple[float, float]:
+        """Apply the news tilt to one conviction. Returns (tilted f, news score).
+
+        Multiplicative and signed, so good news strengthens a long and weakens
+        a short, and a neutral model view stays neutral. See ``NewsConfig``.
+        """
+        if self.news is None or decay <= 0.0 or f == 0.0:
+            return f, 0.0
+        cfg = self.paper.news
+        news = self.news.score_for(symbol, macro_weight=cfg.macro_weight, demean=cfg.demean)
+        if news == 0.0:
+            return f, 0.0
+        # Floored at 0: bad enough news can damp a conviction all the way to
+        # nothing, but it must never drive the multiplier negative and *invert*
+        # the policy's view -- that would turn a long the model wanted into a
+        # short it never asked for. Unreachable at the default tilt_weight of
+        # 0.30 (the multiplier stays in [0.7, 1.3]); this is the guard for
+        # anyone who raises it past 1.0.
+        adj = max(0.0, 1.0 + cfg.tilt_weight * news * decay * (1.0 if f > 0 else -1.0))
+        return float(np.clip(f * adj, -1.0, 1.0)), news
 
     # ---- data --------------------------------------------------------------
 
@@ -736,13 +808,24 @@ class PaperEngine:
         p = self.paper
         raw_scores: list[float] = []
         scores: dict[str, tuple[float, float]] = {}  # sym -> (f, daily_vol)
+        news_scores: dict[str, float] = {}
+        model_conviction: dict[str, float] = {}
+        news_decay = self._news_age_decay(d)
         for sym in sorted(data):
             sd = data[sym]
             i = sd.idx.get(d)
             if i is None:
                 continue
             f = learner.score(sym, sd.x[i])
+            # Model-health metrics are computed on the UNTILTED score: the
+            # failure they watch for (every conviction pinned at +/-1) is a
+            # property of the policy, and folding news in here would let a
+            # quiet news week mask a saturated model.
             raw_scores.append(f)
+            model_conviction[sym] = f
+            f, news = self._tilt(sym, f, news_decay)
+            if news:
+                news_scores[sym] = news
             if not p.allow_short:
                 f = max(f, 0.0)
             scores[sym] = (f, float(sd.daily_vol[i]))
@@ -771,6 +854,14 @@ class PaperEngine:
                     "allocation": target,
                     "current_weight": weight_of(sym),
                     "result": None,
+                    # Both sides of the tilt are recorded so its contribution is
+                    # measurable after the fact: `conviction` is post-tilt and
+                    # post long-only clamp, `model_conviction` is the policy's
+                    # raw output before either, and `news_score` is the
+                    # sentiment that moved it. Without this pair there is no way
+                    # to ever answer whether news helped.
+                    "model_conviction": model_conviction.get(sym),
+                    "news_score": news_scores.get(sym, 0.0),
                 }
             )
 

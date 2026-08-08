@@ -56,3 +56,22 @@ paper:
   # gross cap down) for weeks of 30-minute decisions. The bot decides on every
   # completed bar and may re-enter the same session once the lockout lapses.
   stop_cooldown_bars: 6
+  # News-sentiment tilt. The weekend workflow collects free economy + company
+  # news into news/signal.json and merges it to main; every weekday trading run
+  # then reads that file out of its own checkout.
+  #
+  # The tilt is multiplicative on the policy's own conviction
+  # (f' = f * (1 + 0.30 * news * sign(f))), so news can reorder the ranking,
+  # resize positions, and push a borderline name across the entry or exit
+  # threshold -- but it can never open a position in a name the price policy is
+  # neutral on. It also fades on a 2-day half-life measured from the signal's
+  # own timestamp, so a Sunday collection is worth ~1/4 of its Sunday strength
+  # by Tuesday and nothing at all after 10 days. A missing or corrupt file
+  # means "no news"; it can never stop the bot trading.
+  news:
+    enabled: true
+    signal_path: news/signal.json
+    tilt_weight: 0.30
+    macro_weight: 0.5
+    half_life_days: 2.0
+    max_age_days: 10.0

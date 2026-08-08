@@ -229,6 +229,50 @@ def dashboard(
 
 
 @app.command()
+def news(
+    out: Path = typer.Option(Path("news"), help="Directory for signal.json + articles.parquet"),
+    universe: str | None = typer.Option(
+        None, help="Universe to resolve symbols against (default: config paper.universe)"
+    ),
+    config: Path | None = typer.Option(None),
+    company: bool = typer.Option(True, help="Also sweep per-company news (slow, best-effort)"),
+    max_symbols: int | None = typer.Option(
+        None, help="Cap the per-company sweep (default: config paper.news.max_symbols)"
+    ),
+    pause: float | None = typer.Option(None, help="Seconds between per-company requests"),
+) -> None:
+    """Collect free economy + company news and publish a sentiment signal.
+
+    Macro feeds (CNBC, MarketWatch/Dow Jones, the Fed press wire) always run;
+    the per-company sweep goes through yfinance and is best-effort. Writes an
+    append-only article archive plus ``signal.json``, which the paper loop reads
+    as a bounded tilt on model conviction.
+    """
+    from swingbot.news import collect as collect_news
+    from swingbot.news import summarize
+    from swingbot.paper.universe import resolve_universe
+
+    cfg = _load_config(config)
+    ncfg = cfg.paper.news
+    symbols = resolve_universe(universe or cfg.paper.universe, cfg)
+    console.print(f"[bold]news[/bold] universe={universe or cfg.paper.universe} ({len(symbols)})")
+
+    sig = collect_news(
+        out_dir=out,
+        universe=symbols,
+        company_news=company,
+        max_symbols=max_symbols if max_symbols is not None else ncfg.max_symbols,
+        pause=pause if pause is not None else ncfg.fetch_pause_seconds,
+        half_life_days=ncfg.half_life_days,
+        prior_count=ncfg.prior_count,
+        lookback_days=ncfg.lookback_days,
+        log_fn=lambda m: console.print(f"  {m}"),
+    )
+    console.print()
+    console.print(summarize(sig, top=15))
+
+
+@app.command()
 def invest(
     strategy: str = typer.Option("rrl", help="Only 'rrl' is implemented"),
     capital: float = typer.Option(100_000.0, help="Simulated starting capital (first run only)"),

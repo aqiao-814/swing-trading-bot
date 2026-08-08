@@ -119,6 +119,63 @@ class BacktestConfig(BaseModel):
     embargo_days: int = 21
 
 
+class NewsConfig(BaseModel):
+    """News-sentiment tilt on the policy's conviction.
+
+    The tilt is deliberately **multiplicative on the model's own view**:
+
+        f' = f * (1 + tilt_weight * news * sign(f))
+
+    so news scales a conviction the policy already holds and can never
+    manufacture one from nothing. A name the model is neutral on (f ~ 0) stays
+    neutral however loud its headlines are. This is the conservative reading of
+    "trade on news": sentiment reorders and resizes the book, and can push a
+    borderline name across the entry or exit threshold, but the decision to
+    have a view at all still belongs to the price-based policy.
+
+    ``tilt_weight`` is the maximum fractional change to conviction, reached
+    only at a saturated news score of +/-1. At the 0.30 default, news moves any
+    single conviction by at most 30%.
+
+    **The tilt decays with the signal's own age.** Collection runs on weekends;
+    trading runs all week. Without age decay a Sunday score of +0.6 would still
+    read +0.6 on Friday, which is a lookahead-adjacent lie about how fresh the
+    evidence is. ``half_life_days`` fades the whole tilt toward zero as the
+    signal ages, so a stale file degrades smoothly to "no news" instead of
+    falling off a cliff at some cutoff.
+    """
+
+    enabled: bool = True
+    # Published by the weekend workflow; read-only to the trading loop. A
+    # missing or unparseable file means "no news" and never an error.
+    signal_path: Path = Path("news/signal.json")
+    tilt_weight: float = 0.30
+    # How much of the market-wide macro tone applies to a name with no company
+    # news of its own. Most of what moves a wide book is macro, not company.
+    macro_weight: float = 0.5
+    # De-mean the company score across the cross-section before tilting.
+    # Measured 2026-08-08 over the full universe: mean symbol tone +0.346, and
+    # only 77 of 635 symbols negative -- financial copy is overwhelmingly
+    # bullish, so the raw score hardly orders the cross-section. De-meaning
+    # asks "better than the average name?" instead of "positive?", the same
+    # correction the ranker makes by predicting excess return. The uniform
+    # component is not lost: it lives in the macro term, where it belongs.
+    demean: bool = True
+    # Age half-life of a published signal, in days. Matches the article decay
+    # half-life used when the signal was built.
+    half_life_days: float = 2.0
+    # Hard cutoff: a signal older than this is ignored outright.
+    max_age_days: float = 10.0
+    # Collection knobs (weekend job only, not read by the trading loop).
+    articles_per_symbol: int = 10
+    fetch_pause_seconds: float = 1.0
+    # Cap the per-ticker sweep. None = the whole universe (~19 min at the
+    # default pause for ~670 names, comfortably inside a weekend run).
+    max_symbols: int | None = None
+    prior_count: float = 3.0
+    lookback_days: float = 14.0
+
+
 class PaperConfig(BaseModel):
     """Forward paper-trading: one persistent simulated portfolio over a universe.
 
@@ -254,6 +311,7 @@ class PaperConfig(BaseModel):
     pretrain_epochs: int = 1
     # Keep at most this many dated checkpoints (latest is always kept).
     max_checkpoints: int = 30
+    news: NewsConfig = Field(default_factory=lambda: NewsConfig())
 
 
 class Config(BaseModel):
