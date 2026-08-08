@@ -32,7 +32,16 @@ paper:
   # sold to zero, filling at the 15:30 open; no new position is opened on the
   # 15:00 or 15:30 bars because it could not be closed again the same day.
   day_trading: true
-  universe: nasdaq100
+  # ~670 liquid US names (S&P 500 + Nasdaq 100 + screened high-volume movers).
+  # The bulk 30m refresh for the whole list measured ~130s in 17 chunked
+  # requests, so the widened universe costs a couple of minutes of the
+  # half-hour budget, not the whole of it.
+  universe: extended
+  # No cap on how many names the book holds. Targets are conviction-
+  # proportional and then scaled to land gross on max_gross_exposure, so a
+  # wider book means thinner positions rather than more leverage; entries too
+  # small to buy a whole share are dropped instead of queued.
+  max_positions: null
   start: '2026-07-21T15:30'
   data_start: '2026-05-24'
   pretrain_years: 0.2

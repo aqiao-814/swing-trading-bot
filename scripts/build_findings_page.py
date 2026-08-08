@@ -279,7 +279,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
   document.getElementById("meta").innerHTML = [
     ["universe", m.universe.toUpperCase()],["model","RRL · shared weights"],
     ["capital","$"+m.starting_capital.toLocaleString()],["bars","daily"],
-    ["kill switches","off (measurement)"]
+    ["book", (m.max_positions ?? "uncapped")+" names"]
   ].map(([k,v])=>`<span><b>${v}</b> ${k}</span>`).join("");
   const excQQQ = o.excess_vs_qqq;
   document.getElementById("honesty").innerHTML =
@@ -454,7 +454,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
       `<code>F_t = tanh(w&middot;x + u&middot;F_{t-1} + b)</code> explosive &mdash; convictions pin to &plusmn;1 within a few `+
       `bars regardless of features. The live 30-minute bot ships a fix for exactly this: it caps <b>|u| &le; 0.7</b> `+
       `so the recurrence stays a contraction, which restores a healthy conviction spread (&sigma; &asymp; 0.25 across `+
-      `the full universe) that the model-health kill switch is happy with.`;
+      `the full universe) &mdash; without which a conviction-ranked book is just an alphabetical one.`;
     const hc=document.getElementById("health-chart");
     // downsample health series to ~260 pts for a light payload path
     const stride=Math.max(1,Math.floor(h.ts.length/260));
@@ -476,7 +476,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
     {t:"Risk",h:"Drawdown deeper than the index",p:`The book drew down ${pct(o.max_drawdown)} against a shallower fall in QQQ, and concentrates in ~10 names at up to 20% each. Higher return came with higher risk, not free alpha.`},
     {t:"Statistics",h:"One seed, no deflation",p:"A single random seed and one configuration. Sharpe "+o.sharpe.toFixed(2)+" is below 1 and below the deflated-Sharpe credibility bar; treat it as a point estimate, not a distribution."},
     {t:"Transfer",h:"Daily bars, 30-minute deployment",p:"This measurement is on daily bars (the only source with 5 years of history). The live bot trades 30-minute bars, whose features live on a different time scale — the seed is refined on 30m history before it trades, but the transfer is a hypothesis, not a proven equivalence."},
-    {t:"Setup",h:"Kill switches were off",p:"The production drawdown / model-health halts are disabled here so a safety stop wouldn't freeze a 5-year measurement. Live, they can flatten the book — realized live results will differ."},
+    {t:"Setup",h:"A narrower book than the live bot",p:"This measurement holds at most 10 nasdaq100 names on daily bars. The live bot is a day trader: ~670 names to choose from, no cap on how many it holds, flat by every close, deciding every 30 minutes. Same policy and same sizing rule, very different turnover and breadth — these numbers do not forecast the live ones."},
   ];
   document.getElementById("caveats").innerHTML = caveats.map(c=>
     `<div class="caveat"><div class="tag">${c.t}</div><h4>${c.h}</h4><p>${c.p}</p></div>`).join("");

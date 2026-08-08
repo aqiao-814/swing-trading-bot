@@ -14,7 +14,7 @@ never be silently mistaken for this one.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -34,7 +34,7 @@ class PendingOrder:
     target_weight: float  # fraction of equity, signed
     conviction: float  # policy output f in [-1, 1]
     expected_reward: float  # predicted next-day net return
-    reason: str  # entry | exit | rebalance | stop_loss | eod_flat | kill_switch
+    reason: str  # entry | exit | rebalance | stop_loss | eod_flat
 
 
 @dataclass
@@ -75,11 +75,6 @@ class PaperState:
     # Last stop-out fill date per symbol (ISO), for re-entry cooldown and
     # post-stop de-grossing.
     last_stop_out: dict[str, str] = field(default_factory=dict)
-    # A fired kill switch: reason string plus the day it tripped. While set,
-    # the engine only ever flattens -- no entries, no rebalances -- until a
-    # human clears it. Surviving restarts is the entire point.
-    halted: str | None = None
-    halted_ts: str | None = None
     version: int = STATE_VERSION
     simulated_capital: bool = True  # always; asserted on load
     updated_utc: str = ""
@@ -141,7 +136,12 @@ class PaperState:
             raise ValueError(f"{path} is not flagged simulated_capital; refusing to load")
         raw["positions"] = [HeldPosition(**p) for p in raw.get("positions", [])]
         raw["pending_orders"] = [PendingOrder(**o) for o in raw.get("pending_orders", [])]
-        return cls(**raw)
+        # Drop keys this version no longer models (e.g. the retired kill-switch
+        # `halted` / `halted_ts`). A live portfolio's state file outlives the
+        # code that wrote it, so a removed field must degrade to "ignored" --
+        # otherwise deploying the removal is what breaks the running bot.
+        known = {f.name for f in fields(cls)}
+        return cls(**{k: v for k, v in raw.items() if k in known})
 
 
 # ---- parquet history ---------------------------------------------------------

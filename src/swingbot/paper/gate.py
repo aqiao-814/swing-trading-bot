@@ -12,8 +12,10 @@ Design decisions, each empirically load-bearing:
 * **The maturity lag is the honesty.** At date ``t`` only ICs from
   ``t - horizon`` and earlier are realized; using anything fresher is
   look-ahead. The cost is that a regime break is detected ~a month late --
-  the gate is a drawdown *limiter*, not a *preventer*, and must be paired
-  with the hard max-drawdown kill switch.
+  the gate is a drawdown *limiter*, not a *preventer*. That month-late
+  detection is also why it is not wired into the live loop, which decides
+  every 30 minutes and is flat by every close (see docs/FINDINGS.md §4, §11);
+  this module is research code for the daily cross-sectional ranker.
 
 * **Binary abstention, not continuous throttling.** Scaling exposure by the
   health index destroys recovery convexity (you are half-off during the

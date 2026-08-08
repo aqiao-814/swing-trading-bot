@@ -20,6 +20,8 @@ import polars as pl
 ROOT = Path(__file__).resolve().parent.parent
 PORTFOLIO = Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio"))
 OUT = Path(os.environ.get("SWINGBOT_SITE", ROOT / "site")) / "data.json"
+# Newest fills kept in data.json. The full history stays in the parquet store.
+TRADE_LIMIT = 1000
 
 
 def _records(name: str, sort_by: str | None = None, descending: bool = False) -> list[dict]:
@@ -54,6 +56,19 @@ def main() -> None:
     decisions = _records("decisions", sort_by="ts")
     learning = _records("learning", sort_by="ts")
 
+    # Win rate over the FULL history, before the list is truncated below --
+    # otherwise the headline stat silently becomes "win rate over the last
+    # TRADE_LIMIT fills" as history grows.
+    closed = [t for t in trades if t.get("action") == "sell" and t.get("realized_pnl") is not None]
+    wins = sum(1 for t in closed if t["realized_pnl"] > 0)
+    n_trades = len(trades)
+    # An uncapped book on 30m bars fills hundreds of times a session (~180/day
+    # measured on a 670-name universe). Exporting every fill forever would grow
+    # data.json into the tens of MB, and the publish step rewrites the whole
+    # file into a git commit every 30 minutes. The page only renders the newest
+    # 200; keep a working buffer and let the parquet history be the archive.
+    trades = trades[:TRADE_LIMIT]
+
     last = ledger[-1] if ledger else {}
     last_day = last.get("ts")
     equity = last.get("equity", state["cash"])
@@ -68,8 +83,6 @@ def main() -> None:
             "inception": state["inception"],
             "last_processed": state["last_processed"],
             "starting_capital": starting,
-            "halted": state["halted"],
-            "halted_ts": state["halted_ts"],
             "n_fills": state["n_fills"],
         },
         "summary": {
@@ -82,6 +95,9 @@ def main() -> None:
             "explicit_costs": state["cumulative_costs"],
             "slippage_costs": state["cumulative_slippage"],
             "n_positions": last.get("n_positions", 0),
+            "n_trades": n_trades,
+            "n_closed_trades": len(closed),
+            "win_rate": wins / len(closed) if closed else None,
         },
         "ledger": ledger,
         "positions": positions,

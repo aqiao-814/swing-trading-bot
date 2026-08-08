@@ -234,7 +234,10 @@ def invest(
     capital: float = typer.Option(100_000.0, help="Simulated starting capital (first run only)"),
     universe: str | None = typer.Option(
         None,
-        help="sp500 | nasdaq100 | sp100 | config | watchlist file (default: config paper.universe)",
+        help=(
+            "extended | sp500 | nasdaq100 | sp100 | config | watchlist file "
+            "(default: config paper.universe)"
+        ),
     ),
     start: str | None = typer.Option(
         None, help="Paper-trading inception date (first run only); default: config paper.start"
@@ -243,9 +246,6 @@ def invest(
     refresh: bool = typer.Option(True, help="Refresh market data before running"),
     as_of: str | None = typer.Option(None, help="Process bars up to this date (for replays/tests)"),
     open_browser: bool = typer.Option(False, "--open", help="Open the dashboard when done"),
-    clear_halt: bool = typer.Option(
-        False, "--clear-halt", help="Operator override: clear a fired kill switch and resume"
-    ),
 ) -> None:
     """Run the autonomous daily paper-investing loop (idempotent, simulated capital).
 
@@ -274,7 +274,6 @@ def invest(
         capital=capital,
         as_of=_date.fromisoformat(as_of) if as_of else None,
         refresh=refresh,
-        clear_halt=clear_halt,
         log=lambda m: console.print(f"[dim]{m}[/dim]"),
     )
 
@@ -283,13 +282,6 @@ def invest(
         _print_invest_day(today)
     else:
         console.print("[yellow]No new completed trading day - portfolio unchanged.[/yellow]")
-
-    if summary.halted:
-        console.print(
-            f"\n[bold red]KILL SWITCH: {summary.halted}[/bold red]\n"
-            f"[red]The book is being flattened and no entries will be made. "
-            f"Investigate, then resume with 'invest --clear-halt'.[/red]"
-        )
 
     # ---- portfolio ----
     ret = summary.total_return

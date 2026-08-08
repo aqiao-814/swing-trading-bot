@@ -236,7 +236,6 @@
 </header>
 
 <div class="wrap">
-  <div class="banner crit" id="haltBanner"><span class="b-ic">⛔</span><span id="haltText"></span></div>
   <div class="banner warn" id="staleBanner"><span class="b-ic">⚠️</span><span id="staleText"></span></div>
 
   <div class="hero rise" style="--i:0">
@@ -263,7 +262,7 @@
     <section>
       <div class="card-head"><h2>Model health</h2></div>
       <div id="healthRows"></div>
-      <div class="mini-note">Kill switches flatten the book automatically: −4% in one bar · −10% over 20 bars · −15% from peak · conviction σ &lt; 0.05 (degenerate scores). Resume requires an operator (<code>invest --clear-halt</code>).</div>
+      <div class="mini-note">Risk is continuous, not a latching halt: the book is flat at every close, every name carries a vol-scaled stop, and recent stop-outs cut the gross-exposure cap. These meters are diagnostics — a collapsed conviction spread means the ranking has degenerated and position sizing is effectively arbitrary.</div>
     </section>
   </div>
 
@@ -451,12 +450,6 @@ function render(){
   tickClock();
 
   // banners
-  const halted = live ? LIVE.halted : M.halted;
-  if (halted){
-    $("haltText").innerHTML = `<b>Kill switch fired${M.halted_ts ? " · " + M.halted_ts : ""}:</b> ${halted} — the book is being flattened and no new entries will be made until an operator clears the halt (<code>invest --clear-halt</code>).`;
-    $("haltBanner").classList.add("show");
-  } else $("haltBanner").classList.remove("show");
-
   const genMs = Date.parse(DATA.generated_utc), now = Date.now();
   const missed = missedRuns(genMs, now);
   if (missed >= 2){
@@ -523,16 +516,14 @@ function renderBot(now, genMs, live){
   NEXT_RUN = nextRunMs(now);
   const nextTxt = NEXT_RUN ?
     new Date(NEXT_RUN).toLocaleString("en-US",{timeZone:"America/New_York",weekday:"short",hour:"numeric",minute:"2-digit"}) + " ET" : "—";
-  const halted = live ? LIVE.halted : M.halted;
+  const cadence = {"30m":"30-minute bars","60m":"hourly bars"}[M.interval] || "daily bars";
   $("botRows").innerHTML = `
-    <div class="srow"><span class="k">State</span><span class="v">${halted
-      ? `<span class="state bad"><span class="sdot"></span>Halted</span>`
-      : `<span class="state ok"><span class="sdot"></span>Active</span>`}</span></div>
+    <div class="srow"><span class="k">State</span><span class="v"><span class="state ok"><span class="sdot"></span>Active</span></span></div>
     <div class="srow"><span class="k">Next bot run</span><span class="v">${nextTxt} <small id="nextIn">${NEXT_RUN ? "· " + inText(NEXT_RUN - now) : ""}</small></span></div>
     <div class="srow"><span class="k">Last bar processed</span><span class="v">${(M.last_processed||"—").slice(0,16).replace("T"," ")} <small>ET</small></span></div>
     <div class="srow"><span class="k">Last publish</span><span class="v">${agoText(now - genMs)}</span></div>
     <div class="srow"><span class="k">Live quotes</span><span class="v">${LIVE ? agoText(now - Date.parse(LIVE.asof_utc)) : "—"}</span></div>
-    <div class="srow"><span class="k">Cadence</span><span class="v">${M.interval === "60m" ? "hourly bars" : "daily bars"} <small>· ${M.universe}</small></span></div>
+    <div class="srow"><span class="k">Cadence</span><span class="v">${cadence} <small>· ${M.universe}</small></span></div>
     <div class="srow"><span class="k">Fills since inception</span><span class="v">${M.n_fills}</span></div>`;
   $("botNote").textContent = "The bot runs ~10 minutes after each completed bar (13:40–21:40 UTC, weekdays); this page re-fetches its data automatically after every run.";
 }
@@ -555,7 +546,7 @@ function renderHealth(){
   const csScale = 0.8;
   $("healthRows").innerHTML =
     meterRow("Conviction σ", cs, cs.toFixed(3), cs/csScale, 0.05/csScale, csSev,
-      "Spread of the model's scores across the universe. Below the red mark (0.05) the ranking is degenerate and the kill switch flattens the book.") +
+      "Spread of the model's scores across the universe. Below the red mark (0.05) the ranking is degenerate — the bot keeps trading, but conviction is no longer telling it apart which name is which.") +
     meterRow("Saturated scores", sat, (100*sat).toFixed(0)+"%", sat, 0.5, satSev,
       "Share of scores pinned at ±1. High saturation means conviction stops being informative.") +
     `<div class="srow"><span class="k">Learner updates</span><span class="v">${(L.n_updates||0).toLocaleString()} <small>+${L.day_updates||0} last bar</small></span></div>
@@ -861,12 +852,19 @@ function renderDecisions(){
 }
 
 function renderTrades(){
-  const t = $("tradeTable"), tr = DATA.trades;
-  const sells = tr.filter(f => f.action === "sell" && f.realized_pnl != null);
-  const wins = sells.filter(f => f.realized_pnl > 0).length;
+  const t = $("tradeTable"), tr = DATA.trades, S = DATA.summary;
+  // Stats come from the exporter, computed over the full parquet history --
+  // DATA.trades is only the newest slice, so deriving them here would silently
+  // report "win rate over the last 1000 fills".
+  let closed = S.n_closed_trades, wins = S.win_rate;
+  if (closed == null){ // older data.json without the fields
+    const sells = tr.filter(f => f.action === "sell" && f.realized_pnl != null);
+    closed = sells.length;
+    wins = closed ? sells.filter(f => f.realized_pnl > 0).length / closed : null;
+  }
   $("tradeSub").textContent = tr.length
     ? `${DATA.meta.n_fills} fills since inception · newest first` +
-      (sells.length ? ` · win rate ${(100*wins/sells.length).toFixed(0)}% over ${sells.length} closed trades` : "")
+      (closed ? ` · win rate ${(100*wins).toFixed(0)}% over ${closed} closed trades` : "")
     : "";
   if (!tr.length){ t.innerHTML = `<tr><td class="empty">No trades yet — the first queued orders fill at the next market open.</td></tr>`; return; }
   t.innerHTML = `<tr><th>date</th><th>symbol</th><th>side</th><th>shares</th><th>fill</th><th>notional</th><th>costs</th><th>realized P&amp;L</th><th>reason</th></tr>` +
@@ -875,7 +873,8 @@ function renderTrades(){
       <td>${fmtQty(f.quantity)}</td><td>${fmt$(f.fill_price)}</td><td>${fmt$(f.notional,false)}</td>
       <td>${fmt$(costs)}</td><td class="num ${cls(f.realized_pnl)}">${f.action==="sell"?fmtSign$(f.realized_pnl):"—"}</td>
       <td class="reason">${f.reason}</td></tr>`; }).join("") +
-    (tr.length > 200 ? `<tr><td class="empty" colspan="9">…${tr.length-200} older fills in data.json</td></tr>` : "");
+    ((S.n_trades ?? tr.length) > 200
+      ? `<tr><td class="empty" colspan="9">…${(S.n_trades ?? tr.length)-200} older fills not shown</td></tr>` : "");
 }
 
 // ---- clock: updated-ago + next-run countdown ------------------------------

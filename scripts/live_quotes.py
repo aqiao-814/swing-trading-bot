@@ -125,7 +125,7 @@ def main() -> None:
     # Provisional view of pending orders filling at today's open. Estimates
     # only -- the engine records the official fill (with costs) after close.
     provisional = []
-    if traded_today and now_et.hour * 60 + now_et.minute >= 9 * 60 + 31 and not state.get("halted"):
+    if traded_today and now_et.hour * 60 + now_et.minute >= 9 * 60 + 31:
         for o in pending:
             if o["decided_ts"] >= today:
                 continue  # decided today; fills at the NEXT open
@@ -163,7 +163,6 @@ def main() -> None:
         "day_pnl_pct": equity / prev_equity - 1.0 if prev_equity > 0 else 0.0,
         "total_pnl": equity - state["starting_capital"],
         "total_return": equity / state["starting_capital"] - 1.0,
-        "halted": state.get("halted"),
         "benchmarks": {
             s: {
                 "price": quotes[s]["price"],

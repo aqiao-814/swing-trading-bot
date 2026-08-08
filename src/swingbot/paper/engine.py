@@ -87,11 +87,19 @@ def stop_cooldown_active(paper: PaperConfig, state: PaperState, symbol: str, d: 
     return (d - _parse_like(last, d)).days < paper.stop_cooldown_days
 
 
-def target_gross_exposure(paper: PaperConfig, state: PaperState, d: BarTs) -> float:
+def target_gross_exposure(
+    paper: PaperConfig, state: PaperState, d: BarTs, *, n_open: int = 0
+) -> float:
     """Gross-exposure cap after recent stop-outs.
 
-    Each stop inside the cooldown window de-grosses the book, so the cash a
-    stop frees stays cash instead of rotating into the next correlated name.
+    Stops inside the cooldown window de-gross the book, so the cash a stop frees
+    stays cash instead of rotating into the next correlated name. The cut is
+    proportional to the fraction of the book that stopped out -- ``n_open`` is
+    the count of names still held, and the stopped names are added back to
+    reconstruct the book those stops came from. Scaling by fraction rather than
+    by raw count is what lets ``max_positions`` be uncapped: a flat slab per
+    stop would drive a 300-name book to the floor and hold it there forever,
+    while at a 10-name book one stop still cuts the cap by roughly a tenth.
     """
     span = _cooldown_span(paper)
     if span is not None and isinstance(d, datetime):
@@ -106,9 +114,12 @@ def target_gross_exposure(paper: PaperConfig, state: PaperState, d: BarTs) -> fl
             for iso in state.last_stop_out.values()
             if 0 <= (d - _parse_like(iso, d)).days < paper.stop_cooldown_days
         )
+    if recent == 0:
+        return paper.max_gross_exposure
+    breadth = max(recent + n_open, 1)
     return max(
         paper.min_gross_exposure,
-        paper.max_gross_exposure - paper.stop_degross_per_stop * recent,
+        paper.max_gross_exposure * (1.0 - paper.stop_degross_fraction * recent / breadth),
     )
 
 
@@ -156,7 +167,6 @@ class RunSummary:
     positions: list[dict] = field(default_factory=list)
     learning: dict = field(default_factory=dict)
     dashboard_path: Path | None = None
-    halted: str | None = None  # fired kill switch, verbatim from state
 
     @property
     def today(self) -> DayReport | None:
@@ -329,7 +339,6 @@ class PaperEngine:
         capital: float = 100_000.0,
         as_of: date | None = None,
         refresh: bool = True,
-        clear_halt: bool = False,
         log=print,
     ) -> RunSummary:
         """Process every unprocessed completed trading day. Idempotent."""
@@ -345,11 +354,6 @@ class PaperEngine:
         calendar = sorted({t for sd in data.values() for t in sd.ts})
         self._set_session_landmarks(calendar)
         state, learner = self._load_or_init(capital, calendar, data, bench_closes, log=log)
-        if clear_halt and state.halted:
-            log(f"[risk] halt cleared by operator (was: {state.halted} on {state.halted_ts})")
-            state.halted = None
-            state.halted_ts = None
-            state.save(self.store.state_path)
 
         last = self._iso(state.last_processed) if state.last_processed else None
         todo = [d for d in calendar if (last is None or d > last)]
@@ -374,7 +378,6 @@ class PaperEngine:
                 last_close[sym] = float(sd.close[past[-1]])
 
         prev_equity = self._ledger_last_equity(state)
-        equity_hist = self._ledger_equity_history()
         if todo:
             log(f"[paper] processing {len(todo)} trading day(s): {todo[0]} .. {todo[-1]}")
         ledger_rows, trade_rows, decision_rows, learning_rows = [], [], [], []
@@ -392,7 +395,6 @@ class PaperEngine:
                 last_close,
                 entry_ts,
                 prev_equity,
-                equity_hist,
                 ledger_rows,
                 trade_rows,
                 decision_rows,
@@ -400,12 +402,6 @@ class PaperEngine:
             )
             summary.days.append(report)
             prev_day = d
-
-        if state.halted:
-            log(
-                f"[risk] HALTED since {state.halted_ts} ({state.halted}) -- "
-                f"book is being flattened; no entries until 'invest --clear-halt'"
-            )
 
         if learning_rows:
             lr = learning_rows[-1]
@@ -454,7 +450,6 @@ class PaperEngine:
         last_close: dict[str, float],
         entry_ts: dict[str, str],
         prev_equity: float,
-        equity_hist: list[float],
         ledger_rows: list,
         trade_rows: list,
         decision_rows: list,
@@ -512,56 +507,13 @@ class PaperEngine:
         # 4. decide: score the whole universe on today's close
         orders, decisions, sat = self._decide(d, state, pf, learner, data, last_close, equity)
 
-        # 5. kill switches: P&L first, then model health. A fired switch
-        # replaces today's decisions wholesale with "flatten everything" and
-        # persists until an operator clears it.
-        if state.halted is None:
-            reason = self._kill_reason(daily_ret, equity, equity_hist, sat)
-            if reason:
-                state.halted = reason
-                state.halted_ts = d.isoformat()
-        if state.halted:
-            orders = []
-            decisions = []
-            for sym in sorted(s for s in pf.positions if not pf.positions[s].is_flat):
-                orders.append(
-                    PendingOrder(
-                        symbol=sym,
-                        decided_ts=d.isoformat(),
-                        target_weight=0.0,
-                        conviction=0.0,
-                        expected_reward=0.0,
-                        reason="kill_switch",
-                    )
-                )
-                decisions.append(
-                    {
-                        "ts": d,
-                        "symbol": sym,
-                        "action": "sell",
-                        "conviction": 0.0,
-                        "expected_reward": 0.0,
-                        "allocation": 0.0,
-                        "current_weight": (
-                            pf.quantity(sym) * last_close.get(sym, 0.0) / equity
-                            if equity > 0
-                            else 0.0
-                        ),
-                        "result": None,
-                    }
-                )
-            # While halted nothing carries over: a stale buy filling tomorrow
-            # would defeat the entire point of the switch.
-            state.pending_orders = orders
-        else:
-            # New decisions supersede same-symbol pending orders; orders for
-            # symbols that printed no bar today (not re-scored) carry over.
-            new_syms = {o.symbol for o in orders}
-            state.pending_orders = orders + [
-                o for o in state.pending_orders if o.symbol not in new_syms
-            ]
+        # 5. queue: new decisions supersede same-symbol pending orders; orders
+        # for symbols that printed no bar today (not re-scored) carry over.
+        new_syms = {o.symbol for o in orders}
+        state.pending_orders = orders + [
+            o for o in state.pending_orders if o.symbol not in new_syms
+        ]
         decision_rows.extend(decisions)
-        equity_hist.append(equity)
 
         # ---- record the day ----
         # float(): market_value / unrealized_pnl are sum() over positions, so a
@@ -612,40 +564,6 @@ class PaperEngine:
         report.learn_updates = len(day_rewards)
         report.learn_mean_reward = float(np.mean(day_rewards)) if day_rewards else 0.0
         return report, equity
-
-    # ---- kill switches ---------------------------------------------------------
-
-    def _kill_reason(
-        self,
-        daily_ret: float,
-        equity: float,
-        equity_hist: list[float],
-        sat: dict[str, float],
-    ) -> str | None:
-        """First kill switch that fires today, or None.
-
-        ``equity_hist`` is strictly *prior* days' equity, so the drawdown
-        compares today against the historical peak and the rolling window
-        against the close 20 trading days back.
-        """
-        p = self.paper
-        if p.kill_daily_loss is not None and daily_ret <= -p.kill_daily_loss:
-            return f"daily_loss {daily_ret:.2%}"
-        peak = max(equity_hist) if equity_hist else equity
-        if p.kill_max_drawdown is not None and peak > 0:
-            dd = equity / peak - 1.0
-            if dd <= -p.kill_max_drawdown:
-                return f"max_drawdown {dd:.2%} from peak {peak:,.0f}"
-        if p.kill_rolling_20d_loss is not None and len(equity_hist) >= 20:
-            roll = equity / equity_hist[-20] - 1.0
-            if roll <= -p.kill_rolling_20d_loss:
-                return f"rolling_20d_loss {roll:.2%}"
-        if p.kill_conviction_std is not None and sat["conviction_std"] < p.kill_conviction_std:
-            return (
-                f"conviction_std {sat['conviction_std']:.4f} < {p.kill_conviction_std} "
-                f"(model health: scores are degenerate)"
-            )
-        return None
 
     # ---- fills -----------------------------------------------------------------
 
@@ -930,8 +848,12 @@ class PaperEngine:
             if self._entries_allowed(d)
             else []
         )
-        slots = max(p.max_positions - len(keep_holds), 0)
-        entries = candidates[:slots]
+        # None = no cap on breadth: every candidate that cleared min_conviction
+        # gets a target, and the gross scaling below decides how thin they are.
+        if p.max_positions is None:
+            entries = candidates
+        else:
+            entries = candidates[: max(p.max_positions - len(keep_holds), 0)]
 
         # ---- size everything: weight proportional to conviction, capped ----
         targets: dict[str, tuple[float, float, float, str]] = {}
@@ -942,15 +864,30 @@ class PaperEngine:
             targets[sym] = (f * p.max_position_weight, f, dvol, "entry")
 
         gross = sum(abs(w) for w, *_ in targets.values())
-        gross_cap = target_gross_exposure(p, state, d)
+        gross_cap = target_gross_exposure(p, state, d, n_open=len(held))
         scale = min(gross_cap / gross, 1.0) if gross > 0 else 1.0
 
         for sym in sorted(targets):
             target, f, dvol, reason = targets[sym]
             target = float(np.clip(target * scale, -p.max_position_weight, p.max_position_weight))
-            drift = abs(target - weight_of(sym))
-            if reason == "rebalance" and drift < p.rebalance_threshold:
-                log_decision(sym, "hold", f, dvol, weight_of(sym))
+            current = weight_of(sym)
+            # Band relative to the position's own size, so it means the same
+            # thing whether the book holds ten names at 20% or three hundred at
+            # 0.3%. Measuring against max(|target|, |current|) also catches a
+            # holding that has grown far past a now-tiny target.
+            band = p.rebalance_band_frac * max(abs(target), abs(current))
+            if reason == "rebalance" and abs(target - current) < band:
+                log_decision(sym, "hold", f, dvol, current)
+                continue
+            # An uncapped book divides the same gross across far more names, so
+            # the thinnest targets no longer buy a whole share. Those orders
+            # would fill zero shares at the next open; dropping them here keeps
+            # the decision log honest about what the bot actually intends to do.
+            # Only entries are dropped -- a *held* name whose target rounds to
+            # zero is a real exit and must still be queued.
+            price = last_close.get(sym, 0.0)
+            if reason == "entry" and (price <= 0 or abs(target) * equity < price):
+                log_decision(sym, "skip", f, dvol, 0.0)
                 continue
             orders.append(
                 PendingOrder(
@@ -1148,13 +1085,6 @@ class PaperEngine:
             return state.starting_capital
         return float(ledger.sort("ts")["equity"][-1])
 
-    def _ledger_equity_history(self) -> list[float]:
-        """Prior days' equity, oldest first -- the kill switches' memory."""
-        ledger = self.store.read("ledger")
-        if ledger.is_empty():
-            return []
-        return ledger.sort("ts")["equity"].to_list()
-
     def _write_positions(self, pf, entry_ts: dict[str, str], last_close: dict[str, float]) -> None:
         rows = []
         equity = pf.equity(last_close)
@@ -1207,7 +1137,6 @@ class PaperEngine:
         summary.last_processed = self._iso(state.last_processed) if state.last_processed else None
         summary.equity = equity
         summary.cash = pf.cash
-        summary.halted = state.halted
         summary.total_return = equity / state.starting_capital - 1.0
         ledger = self.store.read("ledger")
         if not ledger.is_empty():

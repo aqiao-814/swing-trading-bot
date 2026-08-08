@@ -11,6 +11,7 @@ construction free of edge -- which also makes look-ahead detectable.
 
 from __future__ import annotations
 
+import json
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -44,13 +45,6 @@ def make_cfg(tmp: Path) -> Config:
     # Synthetic signals are weak; lower the bar so the tests exercise trading.
     cfg.paper.min_conviction = 0.02
     cfg.paper.exit_conviction = 0.005
-    # Kill switches off by default in tests: the synthetic policy's conviction
-    # spread is legitimately tiny, and most tests exercise normal trading.
-    # TestKillSwitches turns them on selectively.
-    cfg.paper.kill_max_drawdown = None
-    cfg.paper.kill_daily_loss = None
-    cfg.paper.kill_rolling_20d_loss = None
-    cfg.paper.kill_conviction_std = None
     return cfg
 
 
@@ -222,17 +216,32 @@ class TestStopDiscipline:
         assert not stop_cooldown_active(p, state, "BBB", date(2024, 6, 4))
 
     def test_stop_outs_de_gross_the_book(self):
-        p = Config().paper  # gross 0.90, -0.10 per stop, floor 0.30
+        p = Config().paper  # gross 0.90, floor 0.30, degross fraction 1.0
         state = self.fresh_state()
         d = date(2024, 6, 10)
-        assert target_gross_exposure(p, state, d) == pytest.approx(0.90)
+        assert target_gross_exposure(p, state, d, n_open=8) == pytest.approx(0.90)
+        # Two stops out of a ten-name book: 20% of the book, so 20% off the cap.
         state.last_stop_out = {"AAA": "2024-06-05", "BBB": "2024-06-07"}
-        assert target_gross_exposure(p, state, d) == pytest.approx(0.70)
+        assert target_gross_exposure(p, state, d, n_open=8) == pytest.approx(0.72)
         # Stops age out of the window; the cap recovers.
-        assert target_gross_exposure(p, state, date(2024, 7, 1)) == pytest.approx(0.90)
-        # The floor holds no matter how many stops fire.
+        assert target_gross_exposure(p, state, date(2024, 7, 1), n_open=8) == pytest.approx(0.90)
+        # The floor holds even if the entire book stops out at once.
         state.last_stop_out = {f"S{i}": "2024-06-09" for i in range(10)}
-        assert target_gross_exposure(p, state, d) == pytest.approx(0.30)
+        assert target_gross_exposure(p, state, d, n_open=0) == pytest.approx(0.30)
+
+    def test_de_gross_scales_with_book_breadth(self):
+        """The load-bearing property for an uncapped book: the same handful of
+        stops must not cripple a wide book the way it throttles a narrow one.
+        A flat per-stop slab would have pinned the 300-name case at the floor."""
+        p = Config().paper
+        state = self.fresh_state()
+        d = date(2024, 6, 10)
+        state.last_stop_out = {f"S{i}": "2024-06-09" for i in range(5)}
+        narrow = target_gross_exposure(p, state, d, n_open=5)
+        wide = target_gross_exposure(p, state, d, n_open=300)
+        assert narrow == pytest.approx(0.45)  # half the book stopped: half off
+        assert wide > 0.88  # 5 of 305 names: barely a scratch
+        assert wide < p.max_gross_exposure  # but still a real cut
 
     def test_stop_out_recorded_and_no_reentry_within_cooldown(self, tmp_path):
         cfg = make_cfg(tmp_path)
@@ -261,56 +270,189 @@ class TestStopDiscipline:
                 )
 
 
-class TestKillSwitches:
-    """A fired switch flattens the book, halts entries, and survives restarts."""
+def _crash_then_recover(bars: pl.DataFrame, inception: date, depth: float = 0.35) -> pl.DataFrame:
+    """Scale every price after ``inception`` into a sharp crash, then a rebound.
 
-    def test_daily_loss_kill_flattens_and_halts(self, tmp_path):
+    Synthetic bars have no edge and no crashes, so a drawdown deep enough to
+    have tripped the old kill switches has to be constructed. Volume is left
+    alone; only the price path is bent.
+    """
+    ts = bars.sort("ts")["ts"].to_list()
+    after = [i for i, t in enumerate(ts) if t >= inception]
+    crash_len = min(12, max(len(after) // 4, 1))
+    mult = np.ones(len(ts))
+    for k, i in enumerate(after):
+        if k < crash_len:
+            mult[i] = 1.0 - depth * (k + 1) / crash_len
+        else:
+            frac = (k - crash_len + 1) / max(len(after) - crash_len, 1)
+            mult[i] = (1.0 - depth) + (depth + 0.10) * frac
+    m = pl.Series(mult)
+    return bars.sort("ts").with_columns(
+        [(pl.col(c) * m).alias(c) for c in ("open", "high", "low", "close", "adj_close")]
+    )
+
+
+class TestNoLatchingHalt:
+    """There is no kill switch. Losses do not put the bot into a dead state it
+    needs a human to leave -- risk is carried by the per-name stops, the gross
+    cap, and (intraday) being flat at every close."""
+
+    def test_bot_trades_the_recovery_after_a_crash(self, tmp_path):
+        """The behaviour a latching kill switch destroys: crash hard, then
+        recover. A -4%-day / -15%-drawdown switch would have fired during the
+        crash and left the book in cash for the entire rebound, needing a human
+        to notice and clear it. With no switch, the bot must buy again."""
         cfg = make_cfg(tmp_path)
-        cfg.paper.kill_daily_loss = 0.0001  # any down day fires
+        inception = date.fromisoformat(cfg.paper.start)
+        src = SyntheticSource(seed=7, regime_switching=True)
+        store = BarStore(cfg.data.root)
+        for sym in SYMS + cfg.paper.benchmark_symbols:
+            store.write(_crash_then_recover(src.fetch(sym, "2019-01-01", "2024-08-30"), inception))
+
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+
+        ledger = engine.store.read("ledger").sort("ts")
+        equity, days = ledger["equity"].to_list(), ledger["ts"].to_list()
+        peak = max(equity)
+        trough_i = min(range(len(equity)), key=lambda i: equity[i])
+        drawdown = equity[trough_i] / peak - 1.0
+        assert drawdown < -0.04, f"test is vacuous without a real drawdown (got {drawdown:.2%})"
+        # A single-bar loss deep enough to have tripped the old daily switch.
+        assert min(ledger["daily_return"].to_list()) < -0.02
+
+        buys_after_trough = engine.store.read("trades").filter(
+            (pl.col("action") == "buy") & (pl.col("ts") > days[trough_i])
+        )
+        assert buys_after_trough.height > 0, "book never re-entered after the drawdown"
+        assert not engine.store.read("decisions").filter(pl.col("ts") == days[-1]).is_empty()
+
+    def test_state_has_no_halt_field(self, tmp_path):
+        cfg = make_cfg(tmp_path)
+        seed_store(cfg)
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        raw = json.loads(engine.store.state_path.read_text())
+        assert "halted" not in raw and "halted_ts" not in raw
+
+    def test_load_ignores_a_retired_halt_field(self, tmp_path):
+        """A live portfolio's state file outlives the code that wrote it. The
+        deployed bot's state.json still carries `halted`; loading it must drop
+        the key, not crash -- otherwise shipping the removal kills the bot."""
+        cfg = make_cfg(tmp_path)
         seed_store(cfg)
         engine = PaperEngine(cfg)
         engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
 
-        state = PaperState.load(engine.store.state_path)
-        assert state.halted and "daily_loss" in state.halted
-        assert not state.positions  # the flatten orders actually filled
-        halted_day = date.fromisoformat(state.halted_ts)
-        buys_after = engine.store.read("trades").filter(
-            (pl.col("action") == "buy") & (pl.col("ts") > halted_day)
-        )
-        assert buys_after.is_empty()
-
-    def test_model_health_kill_never_lets_the_book_open(self, tmp_path):
-        """conviction_std below the bar means the scores are degenerate; a
-        book allocated by a degenerate ranking has no reason to exist."""
-        cfg = make_cfg(tmp_path)
-        cfg.paper.kill_conviction_std = 10.0  # impossible bar: fires on day one
-        seed_store(cfg)
-        engine = PaperEngine(cfg)
-        summary = engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        raw = json.loads(engine.store.state_path.read_text())
+        raw["halted"] = "max_drawdown -18.00% from peak 100,000"
+        raw["halted_ts"] = "2024-08-01"
+        engine.store.state_path.write_text(json.dumps(raw))
 
         state = PaperState.load(engine.store.state_path)
-        assert state.halted and "conviction_std" in state.halted
-        assert engine.store.read("trades").is_empty()  # never traded at all
-        assert summary.equity == pytest.approx(100_000)
-        assert summary.halted == state.halted
-
-    def test_clear_halt_is_an_explicit_operator_action(self, tmp_path):
-        cfg = make_cfg(tmp_path)
-        cfg.paper.kill_conviction_std = 10.0
-        seed_store(cfg)
+        assert not hasattr(state, "halted")
+        assert state.cash == pytest.approx(raw["cash"])
+        # And the engine runs on it without complaint.
         PaperEngine(cfg).run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
 
-        # A plain re-run must NOT clear the halt.
-        engine2 = PaperEngine(cfg)
-        engine2.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
-        assert PaperState.load(engine2.store.state_path).halted
 
-        engine3 = PaperEngine(cfg)
-        engine3.run(
-            capital=100_000, as_of=AS_OF, refresh=False, clear_halt=True, log=lambda m: None
-        )
-        assert PaperState.load(engine3.store.state_path).halted is None
+class TestUncappedBook:
+    """``max_positions = None`` lets the book hold every name that clears the
+    conviction bar; breadth is limited by capital, never by a slot count."""
+
+    def test_book_exceeds_the_old_ten_name_cap(self, tmp_path):
+        cfg = make_cfg(tmp_path)
+        cfg.data.universe = [f"S{i:02d}" for i in range(24)]
+        cfg.paper.max_positions = None
+        cfg.paper.min_conviction = 0.0  # every name is a candidate
+        cfg.paper.max_position_weight = 0.20
+        src = SyntheticSource(seed=11, regime_switching=True)
+        store = BarStore(cfg.data.root)
+        for sym in cfg.data.universe + cfg.paper.benchmark_symbols:
+            store.write(src.fetch(sym, "2019-01-01", "2024-08-30"))
+
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        ledger = engine.store.read("ledger")
+        assert int(ledger["n_positions"].max()) > 10
+
+    def test_gross_still_respects_the_cap_when_uncapped(self, tmp_path):
+        """Breadth must dilute, not lever. The cap binds on what the bot *asks
+        for*: allocations decided on one bar sum to at most max_gross_exposure
+        no matter how many names clear the bar. (The marked ratio at a later
+        close drifts above that as prices move after the fill -- that is price
+        appreciation on an already-sized book, not leverage, and cash staying
+        non-negative is what proves nothing was borrowed.)"""
+        cfg = make_cfg(tmp_path)
+        cfg.data.universe = [f"S{i:02d}" for i in range(24)]
+        cfg.paper.max_positions = None
+        cfg.paper.min_conviction = 0.0
+        src = SyntheticSource(seed=11, regime_switching=True)
+        store = BarStore(cfg.data.root)
+        for sym in cfg.data.universe + cfg.paper.benchmark_symbols:
+            store.write(src.fetch(sym, "2019-01-01", "2024-08-30"))
+
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+
+        decisions = engine.store.read("decisions")
+        opens = decisions.filter(pl.col("action").is_in(["buy", "rebalance"]))
+        by_bar = opens.group_by("ts").agg(pl.col("allocation").abs().sum().alias("gross"))
+        assert by_bar.height > 0
+        assert (by_bar["gross"] <= cfg.paper.max_gross_exposure + 1e-9).all()
+        assert (opens["allocation"].abs() <= cfg.paper.max_position_weight + 1e-9).all()
+        assert (engine.store.read("ledger")["cash"] >= 0).all()
+
+    def test_wide_book_keeps_a_cash_buffer(self, tmp_path):
+        """Regression: the no-trade band must scale with position size.
+
+        With an absolute band, a wide book's targets (~gross/N) are far smaller
+        than the band, so every holding reads as "close enough" and keeps its
+        old weight while new entries are sized on top. Gross ratchets until cash
+        hits zero and max_gross_exposure means nothing. Observed on real 30m
+        bars before the fix: 197 positions, cash down to $1.68 on $99k equity.
+        """
+        cfg = make_cfg(tmp_path)
+        cfg.data.universe = [f"S{i:02d}" for i in range(40)]
+        cfg.paper.max_positions = None
+        cfg.paper.min_conviction = 0.0  # everything is a candidate: widest book
+        src = SyntheticSource(seed=11, regime_switching=True)
+        store = BarStore(cfg.data.root)
+        for sym in cfg.data.universe + cfg.paper.benchmark_symbols:
+            store.write(src.fetch(sym, "2019-01-01", "2024-08-30"))
+
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        ledger = engine.store.read("ledger")
+        assert int(ledger["n_positions"].max()) > 15, "not actually a wide book"
+        # The band still lets gross run up to band_frac above target, so this
+        # asserts the pathology is gone, not that tracking is perfect: cash is
+        # never squeezed to nothing and the book is never fully invested.
+        cash_frac = float((ledger["cash"] / ledger["equity"]).min())
+        gross = float((ledger["invested"] / ledger["equity"]).max())
+        assert cash_frac > 0.01, f"cash buffer collapsed to {cash_frac:.4%}"
+        assert gross < 0.99, f"book went effectively fully invested ({gross:.4f})"
+
+    def test_unfillable_entries_are_not_queued(self, tmp_path):
+        """With a wide book the thinnest targets buy less than one share. Those
+        are dropped at decision time so the log doesn't promise phantom buys."""
+        cfg = make_cfg(tmp_path)
+        cfg.data.universe = [f"S{i:02d}" for i in range(24)]
+        cfg.paper.max_positions = None
+        cfg.paper.min_conviction = 0.0
+        src = SyntheticSource(seed=11, regime_switching=True, start_price=5000.0)
+        store = BarStore(cfg.data.root)
+        for sym in cfg.data.universe + cfg.paper.benchmark_symbols:
+            store.write(src.fetch(sym, "2019-01-01", "2024-08-30"))
+
+        engine = PaperEngine(cfg)
+        engine.run(capital=100_000, as_of=AS_OF, refresh=False, log=lambda m: None)
+        decisions = engine.store.read("decisions")
+        assert not decisions.filter(pl.col("action") == "skip").is_empty()
+        # Nothing logged as a buy was too small to fill.
+        buys = decisions.filter(pl.col("action") == "buy")
+        assert (buys["allocation"].abs() > 0).all()
 
 
 class TestPersistence:
@@ -439,6 +581,29 @@ class TestDashboardAndUniverse:
         with pytest.raises(ValueError):
             resolve_universe("nope")
 
+    def test_extended_universe_is_the_widest_and_is_a_superset(self):
+        """The bot's default hunting ground: every index name plus screened
+        liquid movers, deduplicated. It must strictly contain the others."""
+        extended = set(resolve_universe("extended"))
+        assert len(extended) > 600
+        assert extended >= set(resolve_universe("sp500"))
+        assert extended >= set(resolve_universe("nasdaq100"))
+        # No ETFs: the bot must not be able to buy its own benchmark.
+        assert not extended & {"SPY", "QQQ", "IWM", "DIA"}
+
+    def test_universe_symbols_are_yahoo_notation(self):
+        """A dot ticker (BRK.B) silently fetches nothing from Yahoo."""
+        for name in ("nasdaq100", "sp100", "sp500", "extended"):
+            for sym in resolve_universe(name):
+                assert "." not in sym and sym == sym.upper() and sym.strip() == sym
+
+    def test_watchlist_and_unknown_name(self, tmp_path):
+        watchlist = tmp_path / "list.txt"
+        watchlist.write_text("# mine\naapl\nMSFT\n\nmsft\n")
+        assert resolve_universe(str(watchlist)) == ["AAPL", "MSFT"]
+        with pytest.raises(ValueError):
+            resolve_universe("nope")
+
 
 # ---- day trading (intraday, flat by close) -----------------------------------
 
@@ -485,10 +650,6 @@ def make_intraday_cfg(tmp: Path) -> Config:
     cfg.paper.pretrain_years = 0.2
     cfg.paper.min_conviction = 0.01  # synthetic edge is weak; keep the book busy
     cfg.paper.exit_conviction = 0.005
-    cfg.paper.kill_max_drawdown = None
-    cfg.paper.kill_daily_loss = None
-    cfg.paper.kill_rolling_20d_loss = None
-    cfg.paper.kill_conviction_std = None
     return cfg
 
 
@@ -654,14 +815,14 @@ class TestIntradayStopCooldownClock:
         assert not stop_cooldown_active(p, state, "BBB", datetime(2026, 3, 2, 10, 30))
 
     def test_degross_window_rolls_in_bars(self):
-        p = self.paper_30m()  # gross 0.90, -0.10 per stop
+        p = self.paper_30m()  # gross 0.90, degross by fraction of the book
         state = TestStopDiscipline.fresh_state()
         state.last_stop_out = {"AAA": "2026-03-02T10:00", "BBB": "2026-03-02T11:30"}
-        d = datetime(2026, 3, 2, 12, 0)
-        assert target_gross_exposure(p, state, d) == pytest.approx(0.70)
+        gross = lambda t: target_gross_exposure(p, state, t, n_open=8)  # noqa: E731
+        assert gross(datetime(2026, 3, 2, 12, 0)) == pytest.approx(0.72)  # 2 of 10
         # AAA ages out at 13:00, BBB at 14:30: the cap recovers the same day.
-        assert target_gross_exposure(p, state, datetime(2026, 3, 2, 13, 30)) == pytest.approx(0.80)
-        assert target_gross_exposure(p, state, datetime(2026, 3, 2, 14, 30)) == pytest.approx(0.90)
+        assert gross(datetime(2026, 3, 2, 13, 30)) == pytest.approx(0.80)  # 1 of 9
+        assert gross(datetime(2026, 3, 2, 14, 30)) == pytest.approx(0.90)  # none left
 
     def test_daily_loop_ignores_the_bar_clock(self):
         p = Config().paper
