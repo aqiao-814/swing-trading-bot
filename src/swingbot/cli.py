@@ -578,5 +578,70 @@ def _build_agent(strategy: str, cols: list[str], train: pl.DataFrame, cfg: Confi
             raise typer.BadParameter(f"unknown strategy '{strategy}'")
 
 
+
+@app.command("trade")
+def trade(
+    capital: float = typer.Option(
+        100_000.0, help="Simulated capital at inception (first run only)"
+    ),
+    universe: str | None = typer.Option(None, help="Default: config paper.universe"),
+    config: Path | None = typer.Option(None),
+    artifacts: Path = typer.Option(Path("artifacts/v2"), help="Where v2 keeps its book"),
+    refresh: bool = typer.Option(True, help="Refresh market data before running"),
+    as_of: str | None = typer.Option(None, help="Process bars completed by this ET instant"),
+    gross: float = typer.Option(1.5, help="Target gross exposure, as a multiple of equity"),
+    leverage: float = typer.Option(2.0, help="Account leverage available to the margin book"),
+) -> None:
+    """Run the v2 loop: cross-sectional long/short on the NautilusTrader engine.
+
+    Idempotent. Each firing restores the persisted book, replays every bar
+    completed since the last run, and persists the result; running it twice on
+    the same bars is a no-op. All capital is SIMULATED.
+
+    v2 replaces the retired v1 loop (`swingbot invest`), which was long-only and
+    flat by every close. See docs/FINDINGS.md for why.
+    """
+    from datetime import datetime as _dt
+    from decimal import Decimal as _D
+
+    from swingbot.nautilus.runner import V2Runner
+    from swingbot.nautilus.signals import SizingConfig
+
+    cfg = _load_config(config)
+    cfg.env.starting_capital = capital
+    runner = V2Runner(
+        cfg,
+        universe=universe,
+        artifacts=artifacts,
+        sizing=SizingConfig(target_gross=gross),
+        leverage=_D(str(leverage)),
+    )
+    if refresh:
+        runner.refresh_data(log=lambda m: console.print(f"[dim]{m}[/dim]"))
+
+    report = runner.run(
+        as_of=_dt.fromisoformat(as_of) if as_of else None,
+        log=lambda m: console.print(f"[dim]{m}[/dim]"),
+    )
+
+    if report.incepted:
+        console.print(f"[bold]Incepted[/bold] at ${capital:,.0f}, all cash, no positions.")
+    if report.bars_processed == 0:
+        console.print("[yellow]No new completed bars — nothing to do.[/yellow]")
+        return
+
+    colour = "green" if report.equity >= cfg.env.starting_capital else "red"
+    console.print(
+        f"\n[bold]{report.bars_processed}[/bold] bar(s) → "
+        f"equity [{colour}]${report.equity:,.2f}[/{colour}] "
+        f"(balance ${report.balance:,.2f})"
+    )
+    console.print(
+        f"book: {report.n_long} long / {report.n_short} short · "
+        f"gross {report.gross:.2f}x · net {report.net:+.2f}x · "
+        f"{report.fills} fills · borrow ${report.borrow_charged:,.2f}"
+    )
+    console.print(f"[dim]watermark {report.last_processed}[/dim]")
+
 if __name__ == "__main__":
     app()

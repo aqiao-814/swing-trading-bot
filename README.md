@@ -1,210 +1,179 @@
 # swingbot
 
-Autonomous **day-trading** paper bot, live at
+Autonomous **long/short** paper-trading bot on the
+[NautilusTrader](https://github.com/nautechsystems/nautilus_trader) engine, live at
 **https://aqiao-814.github.io/swingbot-live/**
 
-$100k simulated capital · **~670 liquid US stocks** · 30-minute bars · **flat by
-every close, never a position held overnight** · 30m inception 2026-07-21.
-**Every dollar is simulated** — there are no brokerage credentials and no code
-path that can place a real order. Research history and measured results:
+$100k simulated capital · **~670 liquid US stocks** · 30-minute bars · **long and
+short, held overnight, on margin** · no kill switch. **Every dollar is
+simulated** — there are no brokerage credentials and no code path that can place
+a real order. Research history and measured results:
 [docs/FINDINGS.md](docs/FINDINGS.md).
 
-> The repository is still named `swing-trading-bot` for historical reasons (it
-> began as a multi-day swing strategy). The live loop is now a **day-trading**
-> loop: it opens and closes every position within the same session.
+> **v1 is retired.** The long-only reinforcement-learning day-trader that ran
+> 2026-07-21 → 2026-08-14 finished at **−3.79%** ($96,211.75) against SPY +3.75%
+> and its own universe's +5.47%. Its frozen record and a full breakdown of how it
+> worked live at [/v1/](https://aqiao-814.github.io/swingbot-live/v1/); the
+> snapshot is [docs/v1-final.json](docs/v1-final.json). Its code remains in
+> `src/swingbot/paper/` as the research harness it grew out of.
+
+## Why v2 exists
+
+v1's plumbing was never the problem. Over 19 sessions the cron never missed a
+bar, the book stayed inside its exposure cap, and it went flat before every
+close exactly as instructed. It simply had no edge: **2,508 closed round-trips
+at a 50.04% win rate**, turning the book over 13.8× and paying a spread on every
+turn. A fair coin that pays to flip.
+
+The research log had already measured why, twice — cross-sectional price and
+volume features on liquid US megacaps produce a rank IC of +0.004 to +0.007
+against a +0.02 go/no-go bar, and the 20-day version of the signal turned out to
+be a 2020–2021 artifact (FINDINGS §4, §10).
+
+But the same work found where the edge **is**: a **3-day** horizon, significant
+(t = 2.64) and regime-persistent through 2022–2026, traded **dollar-neutral
+long/short**, net-positive out-of-sample through roughly 3 bp per side
+(FINDINGS §10a). v1 structurally could not trade it — a long-only book cannot be
+dollar-neutral, and a book that liquidates every afternoon cannot hold a 3-day
+signal. **v2 exists to be able to hold a short overnight.**
+
+It is not a claim of profitability. The edge is thin (Sharpe ≈ 0.2 at realistic
+cost, negative by 5 bp/side) and unproven forward. The forward record is the
+only test.
 
 ## How it works — plain English
 
-- On every completed 30-minute bar of the trading day — 13 decision points per
-  session — the bot scores **~670 liquid US stocks** on how strongly its model
-  wants to own each one ("conviction").
-- It sells anything it has lost conviction in, or that has fallen too far below
-  what it paid (a stop-loss sized to each stock's own volatility).
-- It buys the highest-conviction names. **There is no cap on how many stocks it
-  holds**: position sizes are proportional to conviction and then scaled so
-  total exposure lands at 90% of the portfolio, so a wider book means smaller
-  positions, never borrowed money. At most 20% in any one name.
-- **Day trading, not overnight.** Near the close (the 15:00 ET bar) it sells the
-  whole book to zero, and it opens no new position in the last hour that it
-  couldn't close again the same day. The portfolio ends every session flat —
-  100% cash — so it carries no overnight or weekend gap risk.
-- Orders queue and execute at the **next bar's open** (30 minutes later), with
-  realistic trading costs (spread, slippage, price impact, regulatory fees).
-- It also **reads the news**. Every weekend a separate job digs through free
-  economy and company news (CNBC, MarketWatch, the Federal Reserve press wire,
-  plus per-company headlines from Yahoo), scores the tone of each story, and
-  publishes a sentiment score per stock. During the week that score **nudges**
-  how badly the bot wants each name — good news makes it hold more, bad news
-  less. It is a nudge and not a trigger: news can never make the bot buy
-  something its price model had no opinion on.
-- After every bar it also **learns**: each stock's realized return nudges the
-  model's weights, so the policy adapts continuously.
-- Risk is continuous, not a latching halt: per-name volatility-scaled stops, a
-  re-entry cooldown, a gross-exposure cap that tightens after stop-outs, and
-  above all a book that is flat at every close. There is **no kill switch** —
-  see below.
-- The dashboard shows it all live during market hours: portfolio value, cash,
-  every position's P&L, and the full buy/sell log.
+- Every completed 30-minute bar — 13 a session — the bot scores **~670 liquid US
+  stocks** on how attractive each looks *relative to the others*: cheap against
+  its own last few days (short-term reversal), strong over the last month once
+  you divide out its volatility, calm rather than wild, and liquid enough to
+  trade honestly.
+- Those scores are **de-meaned across the whole universe**, which is what makes
+  this a bet on *which names beat which* rather than on the market going up. It
+  buys the strongest quarter and **shorts the weakest quarter**.
+- Positions are sized **inverse to each name's own volatility**, so two names it
+  likes equally get equal *risk*, not equal dollars. Any one name is capped at
+  4% of the portfolio; total exposure targets 1.5× equity, which the margin
+  account permits and v1 could never use.
+- **It holds overnight.** No flat-by-close, no liquidation, no gap avoidance —
+  which is the whole point, because the signal it trades takes about three days
+  to pay.
+- It **reads the news**. Every weekend a separate job digs through free economy
+  and company news, scores each story with a finance-specific lexicon, and
+  publishes a per-stock score. During the week that score is **added** to the
+  ranking, so bad press is a reason to be *short* a name — a change from v1,
+  where news could only ever make it own less.
+- Orders decided on one bar fill on the **next** one, at realistic cost: spread,
+  slippage, square-root market impact, SEC and FINRA fees, and borrow on every
+  short held overnight.
+- There is **no kill switch**, deliberately (see below).
 
 ## How it works — technical
 
-**Policy.** Single linear RRL unit (Moody–Saffell direct reinforcement):
-`f_t = tanh(w·x_t + u·f_{t-1} + b)` over 19 trailing-only features (z-scored
-multi-horizon returns, realized + Garman-Klass vol, RSI, MACD, Bollinger
-position, MA distances, volume z/ratio, ATR%, fractional differencing), all
-computed per bar. Weights are shared across the universe; each symbol keeps its
-own recurrent state `(F_{t-1}, ∂F/∂θ)`. Reward is the differential Sharpe ratio
-of net return `F_{t-1}·r_t − cost·|F_t − F_{t-1}|` — costs live inside the
-gradient. L2 plus a hard `‖w‖ ≤ 1` cap resist tanh saturation. Pretrained on
-~1y of pre-inception hourly history; one online update per (symbol, bar).
+**Engine.** NautilusTrader 1.230, `AccountType.MARGIN`, `OmsType.NETTING`, one
+`Equity` per ticker at Reg-T margins, `default_leverage=2`. The same engine and
+the same execution semantics run a backtest and the live loop, which is the
+research-to-live parity v1 had to hand-maintain.
 
-**Bar loop** (`paper/engine.py`, interval-agnostic — `1d`, `60m` or `30m` via
-`paper.interval` — idempotent via a `last_processed` watermark; only bars whose
-completion time has passed ever enter it):
+**Alpha** (`nautilus/signals.py`, no Nautilus imports so it is testable alone):
+per-symbol reversal (3d, negated), vol-scaled momentum (20d), realized
+volatility (negated — betting-against-beta), and log dollar volume; each
+z-scored across the cross-section, winsorised at 3σ, combined, then de-meaned
+and rescaled to unit σ. Sizing is `score / σ`, normalised to target gross, capped
+per name, with the net-exposure and gross targets resolved by a short fixed-point
+iteration so the per-name cap is never violated.
 
-1. **Fill** pending orders at the bar's open through `ExecutionModel` —
-   half-spread 1 bp, slippage 0.5 bp, square-root impact, SEC §31 + FINRA TAF
-   on sells. Sells first, buys in conviction order, capped so cash stays ≥ 0.
-2. **Mark** at the bar close: ledger row with equity, P&L, turnover, costs, and
-   buy-and-hold SPY / QQQ / equal-weight benchmarks.
-3. **Learn**: one RRL update per symbol from the realized bar return.
-4. **Decide**: score the universe on the bar. Exit on conviction < 0.05 or a
-   2σ·√(20-bar) vol-scaled stop below basis; enter needs conviction ≥ 0.15.
-   **No position-count cap** (`paper.max_positions: null`): every candidate that
-   clears the bar gets a target weight of f × 20%, and the whole book is then
-   scaled so gross lands at ≤ 0.90. Breadth therefore dilutes rather than
-   levers. Stops inside the re-entry cooldown cut the gross cap in proportion to
-   the *fraction* of the book that stopped out (floor 0.30) — a flat per-stop
-   slab would pin a several-hundred-name book at the floor permanently.
-   Targets too thin to buy one whole share are dropped rather than queued.
-   5% no-trade band. Orders fill at the *next* bar's open.
-5. **Flat by close** (day-trading, when `paper.day_trading`): on the flatten bar
-   — the last bar whose next-open fill still lands in the session (15:00 ET on
-   the 30m loop, since it fills at the 15:30 open) — every holding is sold to
-   zero, overriding the normal decide step. No new position is opened on the
-   15:00 or 15:30 bars, because it could not be flattened again the same day.
-   Derived from the session's own bar-time grid, so a partial final session
-   (a mid-day live run) is never mistaken for a short day. `1d` loops ignore it.
+**The bar loop** (`nautilus/strategy.py`). A cross-sectional strategy needs every
+symbol's bar for one instant before it can rank anything, and acting on the first
+bar of a new timestamp would fill one symbol at a different bar than the other
+669. So the engine is given a synthetic, never-traded **clock instrument** whose
+bars are inserted first. On the clock bar for timestamp T, every real symbol has
+delivered T-1 and none has delivered T — so the whole book fills uniformly at
+T-1's close. The strategy submits the decision it computed one clock tick
+earlier, which gives **exactly one bar of execution delay, measured, not
+assumed**.
 
-**No kill switch — deliberately.** A latching halt (fire on a drawdown, flatten,
-stay dead until an operator clears it) is a swing-trading control: it assumes a
-book meant to persist and a human on hand to restart it. Neither holds here. The
-book is already flat at every close, so the loss a halt would prevent is bounded
-by one session; what a halt actually produces is a bot that silently stops
-trading for days — including through the recovery — until someone notices. Risk
-is carried continuously instead: per-name vol-scaled stops, post-stop
-de-grossing, the gross cap, and flat-by-close. Model health (conviction σ,
-saturated fraction) is still computed every bar, logged to the learning table,
-and warned about in the run output — it just no longer stops the bot.
+**State** (`nautilus/state.py`). Each cron firing is a fresh `BacktestEngine`, so
+the book is serialised to JSON between runs. On a Nautilus margin account
+`balance_total` is cash *plus realized PnL* and is **not** reduced by opening a
+position — a position locks margin instead — so the complete state is
+`(balance_total, {symbol: (signed_qty, avg_px)})`. Restoring seeds that balance,
+replays two synthetic bars at each position's own average price, and rebuilds the
+book with the fee model switched **free** (cleared on a *later* bar, because
+fills settle after the callback that submits them returns). A resumed run
+reproduces an uninterrupted one **to the cent**, and there is a test for it.
 
-**News tilt** (`news/`, `paper.news`). Two collection tiers, both free and
-keyless. *Macro*: eleven bulk RSS feeds (CNBC topics, MarketWatch/Dow Jones, the
-Fed press wire), ~270 articles a pass, unthrottled. *Company*: per-ticker news
-through yfinance. The obvious route — Yahoo's per-ticker RSS endpoint — is
-**not** usable: probed 2026-08-08 it serves a handful of requests then hard-429s
-at the IP level, still refusing after a 300-second cooldown. yfinance reads a
-different (cookie+crumb) endpoint and answers normally.
+**Costs** (`nautilus/costs.py`). Every friction — half-spread, slippage,
+square-root impact, SEC §31, FINRA TAF — is charged as an explicit Nautilus
+commission rather than baked into the fill price. The P&L is identical either
+way, but v1's split made its own cost reporting wrong: money lost to a spread
+never debits cash, so v1 reported $227 of costs against $3,768 of losses on 13.8×
+turnover. Now every dollar of friction is attributable to a fill. Short borrow
+accrues per **bar span** (not per cron firing, which would make the cost depend
+on how often GitHub Actions fired).
 
-Tone comes from a Loughran-McDonald-style **financial** lexicon with negation
-and intensity weighting, not a general-purpose one: LM's finding is that most
-"negative" words in general lexicons (*liability*, *tax*, *depreciation*) are
-neutral accounting vocabulary, so a general lexicon reads every 10-K as a
-disaster. Scores decay on a 2-day half-life and are shrunk toward zero by
-`n/(n+3)`, so one headline scoring −1.0 is treated as under-observed rather than
-bearish.
+**No kill switch — deliberately.** A latching halt assumes an operator on hand to
+clear it. What it actually produces is a bot that stops trading for days —
+*including through the recovery* — until someone notices; an earlier replay had
+exactly that, sitting in cash for five weeks after a model-health switch fired.
+Risk is carried continuously instead: a de-meaned, roughly market-neutral book,
+volatility-scaled sizing, a per-name cap, a bounded gross target, and a liquidity
+floor below which a name is not traded at all. This is a real transfer of risk
+from "misses the recovery" to "keeps losing", made with open eyes.
 
-**The company score is de-meaned across the cross-section**, and that step is
-what makes it a signal at all. Measured on the first full-universe run
-(2026-08-08, 5,755 articles, 635 of 670 names covered): mean symbol tone
-**+0.346**, median +0.400, and only **77 of 635** symbols negative. Financial
-copy — earnings-call coverage above all — is overwhelmingly bullish, so the raw
-score answers "is the press positive about this company?", to which the answer
-is nearly always yes, and it orders almost nothing. Subtracting the
-cross-sectional mean asks "does the press like this name *more than average*?"
-(mean 0.000, 263 of 635 negative, σ 0.256) and surfaces downgrades, lawsuits and
-disappointing prints instead of generic optimism. This is the same correction
-`agents/ranker.py` makes by predicting excess rather than raw return: a signal
-that can win by saying yes to everything is not a signal. The uniform component
-is not discarded — it survives in the macro term, where a market-wide mood
-belongs.
+**Invariants** (`tests/test_nautilus_invariants.py`), all re-proved against the
+new engine:
 
-The engine applies it as `f' = f · (1 + 0.30 · news · sign(f))` — **multiplicative
-on the policy's own conviction**, so news reorders the ranking, resizes
-positions, and can push a borderline name across the entry or exit threshold,
-but a name the model is neutral on stays out of the book no matter what the
-headlines say. The tilt fades on the signal's own age (a Sunday score is worth
-~1/4 by Tuesday) and a missing or corrupt `signal.json` degrades to no-news
-rather than to an error. Model-health metrics are deliberately computed on the
-*untilted* score, so a quiet news week cannot mask a saturated policy. Every
-decision row records `model_conviction` and `news_score` alongside the final
-`conviction`, which is the only way to ever answer whether news helped.
-
-Symbol resolution is precision-first: mentions count only from cashtags
-(`$NVDA`), exchange-qualified tickers (`NASDAQ: NVDA`), or a curated
-case-sensitive company-name map. Bare uppercase matching is refused because a
-large minority of real tickers are English words — `IT`, `ON`, `ALL`, `KEY`,
-`NOW`, `A`, `T` — and a false mention injects a *wrong* tilt into a real
-position, which is worse than missing the story. Yahoo's own per-ticker labels
-are verified rather than trusted: `yf.Ticker("ADI").news` was observed serving a
-different company's earnings beat.
-
-**No news backtest yet, deliberately stated.** None of the free feeds serve
-history, so the signal cannot be tested retroactively — the article archive
-(`news/articles.parquet`, append-only, raw text kept so it can be rescored when
-the lexicon changes) exists to accumulate the evidence going forward. Until it
-has, the 0.30 tilt weight is a prior, not a measured edge.
-
-**Universe.** `paper.universe: extended` — S&P 500 ∪ Nasdaq 100 ∪ 176 screened
-high-volume non-index movers, ~670 names. The extras were probed against real
-30m bars and kept only above $5M median 30-minute dollar volume and $5 price:
-the cost model charges a flat 1 bp half-spread, which is roughly honest for a
-liquid name and pure fiction for a $0.40 one, and a backtest that trades thin
-names at megacap costs manufactures profit from a spread it never paid. No ETFs
-— the bot must not be able to buy SPY, the benchmark it is judged against.
-
-**No lookahead by construction**: decisions at close *t* can only fill at open
-*t+1*; features are trailing-only (tests corrupt future bars and assert earlier
-features are bit-identical); a pure-noise churn test must lose money.
+1. **Execution delay** — every symbol fills on a bar strictly later than the one
+   its decision was computed from, and all on the *same* bar.
+2. **No look-ahead** — Yahoo labels a 30-minute bar by its OPEN and Nautilus
+   fills at the bar's CLOSE, so the bar bridge shifts every timestamp forward by
+   one interval. Tested across a daylight-saving transition, because a fixed
+   offset would misplace every bar for weeks a year.
+3. **No free money on noise** — a costed churn is compared against a *free* run
+   of the identical trades, so the difference is friction exactly and luck cannot
+   pass the test.
+4. **State round-trip** — stop, persist, resume, and land on the same book.
 
 ## Deployment (all free)
 
-- **`.github/workflows/trade.yml`** — every 30 minutes during market hours
-  (13:00–21:30 UTC weekdays): restores state, processes every newly completed 30m bar,
-  exports `data.json`, publishes state + site to
+- **`.github/workflows/trade.yml`** — every 30 minutes during market hours:
+  restores the book, replays every newly completed bar, exports `data.json`, and
+  publishes state + site to
   [swingbot-live](https://github.com/aqiao-814/swingbot-live) (GitHub Pages).
-- **`.github/workflows/live.yml`** — every 20 min during market hours: live
-  quotes → `live.json` (live P&L between trading runs).
-- **weekend news** — Saturday and Sunday 13:00 UTC: collect and score free
-  economy + company news, then open and merge a PR putting `news/signal.json`
-  on `main`, where the next weekday trading run reads it. The ~670-name
-  per-company sweep takes ~20 minutes, which is why it runs on a closed market
-  rather than inside the half-hour weekday budget. Staged at
-  [docs/news-workflow.yml](docs/news-workflow.yml); install with
-  `git mv docs/news-workflow.yml .github/workflows/news.yml`.
-- Portfolio state persists in the public repo under `state/`; bar data lives in
-  an Actions cache. Manual run: `gh workflow run trade.yml`.
-- The ~670-name 30m refresh measured ~130 s across 17 bulk requests, so the wide
-  universe uses a couple of minutes of the half-hour budget. Runs are serialised
-  by a concurrency group rather than cancelled, so a slow run delays the next
-  bar's decision instead of corrupting state.
+- **`.github/workflows/news.yml`** — Saturday and Sunday 13:00 UTC: collects and
+  scores free economy + company news, then opens and merges a PR putting
+  `news/signal.json` on `main`. The ~670-name sweep takes ~20 minutes, which is
+  why it runs on a closed market. v2 holds through weekends, so a weekend signal
+  now lands on a book that is actually open.
+- **`.github/workflows/live.yml`** — live quotes between trading runs.
+- Replay cost is bounded and measured: 670 symbols × 200 bars ≈ 3 s and ~360 MB;
+  the full 60-day window is ~9 s and ~500 MB, comfortably inside the half-hour
+  cron budget.
 
 ## Local use
 
 ```bash
-make test                   # 236 tests
-make invest                 # run the loop locally
-python -m swingbot.cli news --out news --max-symbols 50   # collect news
+make test                       # 251 tests
+swingbot trade                  # run the v2 loop locally
+swingbot news --out news        # collect the weekend news signal
+python scripts/export_site_data.py
 ```
+
+`nautilus_trader` is pinned to **1.230.0**: from 1.231 the macOS wheels target
+macOS 26, so an unpinned install on macOS 15 falls back to a source build and a
+Rust toolchain.
 
 ## Layout
 
 ```
-src/swingbot/paper/    the live loop: engine, continual RRL, state, dashboard
-src/swingbot/news/     free news collection, financial-lexicon sentiment, signal
-src/swingbot/          portfolio accounting, execution costs, features, data store
+src/swingbot/nautilus/  v2: the live loop — instruments, costs, bars, signals,
+                        strategy, state, runner
+src/swingbot/news/      free news collection, financial-lexicon sentiment, signal
+src/swingbot/paper/     v1, retired: the RRL day-trading loop and its learner
+src/swingbot/           portfolio accounting, execution costs, features, data store
 src/swingbot/{env,backtest,agents}/  research harness (see docs/FINDINGS.md)
-scripts/               site data + live quote exporters
-site/                  the hosted dashboard (single static page)
+site/                   the hosted dashboard; site/v1/ is the frozen v1 archive
 ```
 
 ## Non-goals

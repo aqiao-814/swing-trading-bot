@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Swingbot v1 — retired · archive</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗃️</text></svg>">
+<style>
+  :root {
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10); --ring-soft:rgba(11,11,11,.06);
+    --accent:#2a78d6; --accent-wash:rgba(42,120,214,.10);
+    --up:#006300; --down:#d03b3b;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+    --chip-buy:rgba(12,163,12,.12); --chip-sell:rgba(208,59,59,.12);
+    --seg-bg:rgba(11,11,11,.055);
+    --shadow-card:0 1px 2px rgba(0,0,0,.03), 0 10px 30px rgba(0,0,0,.04);
+    --shadow-pop:0 6px 24px rgba(0,0,0,.14);
+    --glass:rgba(249,249,247,.72);
+    --stale:#6b6a65; --stale-wash:rgba(107,106,101,.10);
+  }
+  :root[data-theme="dark"] { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10); --ring-soft:rgba(255,255,255,.06);
+    --accent:#3987e5; --accent-wash:rgba(57,135,229,.12);
+    --up:#0ca30c; --down:#e66767;
+    --seg-bg:rgba(255,255,255,.08);
+    --shadow-card:none;
+    --shadow-pop:0 6px 24px rgba(0,0,0,.5);
+    --glass:rgba(13,13,13,.68);
+    --stale:#9a9891; --stale-wash:rgba(154,152,145,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark;
+      --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10); --ring-soft:rgba(255,255,255,.06);
+      --accent:#3987e5; --accent-wash:rgba(57,135,229,.12);
+      --up:#0ca30c; --down:#e66767;
+      --seg-bg:rgba(255,255,255,.08);
+      --shadow-card:none;
+      --shadow-pop:0 6px 24px rgba(0,0,0,.5);
+      --glass:rgba(13,13,13,.68);
+      --stale:#9a9891; --stale-wash:rgba(154,152,145,.12);
+    }
+  }
+
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--page); color:var(--ink); -webkit-font-smoothing:antialiased;
+    font:15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    padding:0 16px 56px; }
+  .wrap { max-width:1080px; margin:0 auto; }
+  a { color:var(--accent); }
+
+  .top { position:sticky; top:0; z-index:20; margin:0 -16px 18px; padding:12px 16px;
+    background:var(--glass); -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid var(--ring-soft); }
+  .top-inner { max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; }
+  .simchip { font-size:10.5px; font-weight:700; letter-spacing:.06em; padding:3px 8px; border-radius:6px;
+    background:var(--accent-wash); color:var(--accent); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .retchip { font-size:10.5px; font-weight:700; letter-spacing:.06em; padding:3px 8px; border-radius:6px;
+    background:var(--stale-wash); color:var(--stale); border:1px solid color-mix(in srgb, var(--stale) 35%, transparent); }
+  .spacer { flex:1; }
+  .backlink { font-size:12.5px; font-weight:600; text-decoration:none; padding:5px 12px; border-radius:999px;
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent); background:var(--accent-wash); color:var(--accent);
+    white-space:nowrap; }
+  .backlink:hover { text-decoration:underline; }
+  #themeBtn { border:1px solid var(--ring); background:var(--surface); color:var(--ink-2); border-radius:999px;
+    width:32px; height:32px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; }
+  #themeBtn svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
+
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  .rise { animation:rise .55s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 60ms); }
+
+  .banner { border-radius:14px; padding:13px 16px; margin-bottom:14px; font-size:14px;
+    display:flex; align-items:flex-start; gap:11px; line-height:1.5;
+    background:color-mix(in srgb, var(--stale) 9%, var(--surface));
+    border:1px solid color-mix(in srgb, var(--stale) 35%, transparent); }
+  .banner .b-ic { font-size:15px; line-height:1.4; flex:none; }
+
+  section, .tile, .hero { background:var(--surface); border:1px solid var(--ring); border-radius:16px;
+    box-shadow:var(--shadow-card); }
+  section { padding:18px 20px; margin-bottom:14px; }
+  section h2 { font-size:15px; font-weight:650; letter-spacing:-.01em; }
+  .sub { font-size:12.5px; color:var(--muted); margin:2px 0 12px; }
+  section p { font-size:14px; color:var(--ink-2); line-height:1.62; margin:9px 0; }
+  section p b, section li b { color:var(--ink); font-weight:600; }
+
+  .hero { display:flex; flex-wrap:wrap; gap:20px 32px; align-items:flex-end; padding:22px 24px; margin-bottom:14px; }
+  .hero .label { font-size:13px; font-weight:600; color:var(--ink-2); display:flex; align-items:center; gap:8px; }
+  .hero-val { font-size:clamp(34px, 6vw, 48px); font-weight:700; letter-spacing:-.025em; line-height:1.1; margin:4px 0 2px;
+    font-variant-numeric:tabular-nums; }
+  .hero-sub { font-size:14px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 16px; }
+  .hero-right { display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; align-items:center; }
+  .bchip { font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:10px;
+    background:color-mix(in srgb, var(--ink) 4%, transparent); color:var(--ink-2);
+    display:inline-flex; gap:7px; align-items:baseline; }
+  .bchip .num { font-variant-numeric:tabular-nums; }
+  /* Sign colouring applies wherever a signed number lands -- tile values, inline
+     bolds in the prose, table cells -- not only to .num/.delta as on the live
+     dashboard, where every signed figure happens to carry one of those classes. */
+  .up { color:var(--up); } .down { color:var(--down); }
+
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(158px, 1fr)); gap:10px; margin-bottom:14px; }
+  .tile { padding:14px 16px; }
+  .tile .label { font-size:12.5px; font-weight:500; color:var(--ink-2); margin-bottom:5px; }
+  .tile .value { font-size:22px; font-weight:650; letter-spacing:-.015em; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .tile .delta { font-size:12.5px; margin-top:3px; color:var(--muted); }
+
+  /* ---- the how-it-worked loop ---- */
+  .loop { list-style:none; padding:0; margin:14px 0 4px; counter-reset:step; }
+  .loop li { position:relative; padding:0 0 16px 42px; counter-increment:step; }
+  .loop li::before { content:counter(step); position:absolute; left:0; top:0; width:26px; height:26px;
+    border-radius:50%; background:var(--accent-wash); color:var(--accent); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+  .loop li::after { content:""; position:absolute; left:13px; top:29px; bottom:2px; width:1px; background:var(--ring); }
+  .loop li:last-child { padding-bottom:0; }
+  .loop li:last-child::after { display:none; }
+  .loop .st { font-size:14px; font-weight:650; display:block; margin-bottom:2px; }
+  .loop .sd { font-size:13.5px; color:var(--ink-2); line-height:1.6; }
+
+  .facts { list-style:none; padding:0; margin:8px 0 0; }
+  .facts li { position:relative; padding:6px 0 6px 20px; font-size:14px; color:var(--ink-2); line-height:1.6; }
+  .facts li::before { content:""; position:absolute; left:2px; top:14px; width:6px; height:6px; border-radius:50%;
+    background:var(--accent); opacity:.65; }
+
+  .verdict { border-left:3px solid var(--crit); padding:2px 0 2px 15px; margin:14px 0 4px; }
+  .verdict .vh { font-size:14px; font-weight:650; margin-bottom:3px; }
+  .verdict .vb { font-size:13.5px; color:var(--ink-2); line-height:1.62; }
+
+  .legend { display:flex; gap:16px; font-size:12.5px; color:var(--ink-2); margin:2px 0 6px; flex-wrap:wrap; }
+  .legend .key { display:inline-flex; align-items:center; gap:6px; }
+  .chartbox { position:relative; }
+  .tip { position:absolute; pointer-events:none; display:none; background:var(--glass);
+    -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%);
+    border:1px solid var(--ring); box-shadow:var(--shadow-pop); border-radius:10px; padding:9px 11px;
+    font-size:12.5px; z-index:5; min-width:170px; }
+  .tip .t-date { color:var(--ink-2); margin-bottom:5px; font-weight:600; }
+  .tip .t-row { display:flex; justify-content:space-between; gap:14px; }
+  .tip .t-row .v { font-variant-numeric:tabular-nums; font-weight:600; }
+  svg text { font-family:inherit; }
+
+  .tbl-wrap { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; }
+  th { text-align:right; color:var(--muted); font-weight:500; font-size:12px; padding:6px 10px;
+    border-bottom:1px solid var(--grid); white-space:nowrap; }
+  td { text-align:right; padding:8px 10px; border-bottom:1px solid var(--ring-soft);
+    font-variant-numeric:tabular-nums; white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; }
+  tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:color-mix(in srgb, var(--ink) 3%, transparent); }
+  .sym { font-weight:650; }
+  .chip { font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2.5px 8px; border-radius:6px; }
+  .chip.buy { background:var(--chip-buy); color:var(--up); }
+  .chip.sell { background:var(--chip-sell); color:var(--down); }
+  .reason { font-size:12px; color:var(--ink-2); }
+
+  /* ---- v1 -> v2 comparison ---- */
+  .cmp td:nth-child(2) { color:var(--ink-2); }
+  .cmp td:nth-child(3) { font-weight:600; }
+  .cmp th:nth-child(2), .cmp td:nth-child(2),
+  .cmp th:nth-child(3), .cmp td:nth-child(3) { text-align:left; white-space:normal; }
+  .cmp th:nth-child(3) { color:var(--accent); }
+  .cmp td:first-child { color:var(--muted); font-size:12.5px; }
+
+  details { margin-top:10px; }
+  summary { font-size:12.5px; color:var(--muted); cursor:pointer; user-select:none; }
+  footer { font-size:12.5px; color:var(--muted); line-height:1.7; margin-top:22px; }
+  footer b { color:var(--ink-2); font-weight:600; }
+
+  @media (max-width:640px){
+    .hero-val { font-size:32px; }
+    .tile .value { font-size:19px; }
+  }
+  @media (prefers-reduced-motion: reduce){ *, *::before, *::after { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <h1>Swingbot <span style="color:var(--muted);font-weight:600">v1</span></h1>
+    <span class="retchip">RETIRED</span>
+    <span class="simchip">SIMULATED</span>
+    <span class="spacer"></span>
+    <a class="backlink" href="../">← Live bot (v2)</a>
+    <button id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">
+      <svg id="icSun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19"/></svg>
+      <svg id="icMoon" viewBox="0 0 24 24" style="display:none"><path d="M20.2 14.5A8.3 8.3 0 0 1 9.5 3.8a8.3 8.3 0 1 0 10.7 10.7z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner rise">
+    <span class="b-ic">🗃️</span>
+    <span><b>This bot no longer trades.</b> v1 was the long-only reinforcement-learning day-trader
+      that ran from <span id="incDate">—</span> to <span id="endDate">—</span>. Every number on this
+      page is frozen at its final bar and will not change again. The live bot is
+      <a href="../">v2</a>, a long/short strategy on the NautilusTrader engine.</span>
+  </div>
+
+  <div class="hero rise" style="--i:1">
+    <div>
+      <div class="label">Final portfolio value</div>
+      <div class="hero-val" id="heroVal">—</div>
+      <div class="hero-sub">
+        <span id="heroAll"></span>
+        <span id="heroSpan" style="color:var(--muted)"></span>
+      </div>
+    </div>
+    <div class="hero-right" id="benchChips"></div>
+  </div>
+
+  <div class="tiles rise" style="--i:2" id="tiles"></div>
+
+  <section class="rise" style="--i:3">
+    <div class="sub" style="margin-bottom:2px">Frozen record</div>
+    <h2>Equity, every 30-minute bar</h2>
+    <div class="sub">v1 versus buy-and-hold benchmarks over the same window, all starting at $100,000.
+      The equal-weight line is v1's own universe held passively — the fairest comparison, and the one it lost to by the widest margin.</div>
+    <div class="legend" id="chartLegend"></div>
+    <div class="chartbox" id="chartBox"><div class="tip" id="eqTip"></div>
+      <svg id="chart" width="100%" height="320" role="img" aria-label="v1 portfolio equity versus SPY, QQQ and equal-weight buy-and-hold"></svg></div>
+  </section>
+
+  <section class="rise" style="--i:4">
+    <div class="sub" style="margin-bottom:2px">How it worked</div>
+    <h2>One loop, thirteen times a day</h2>
+    <p>v1 traded <b>~670 liquid US stocks</b> on <b>30-minute bars</b>. Each completed bar was a
+      decision point — thirteen per session — and every one of them ran the same five steps.</p>
+    <ol class="loop">
+      <li><span class="st">Fill what was decided last bar</span><span class="sd">Orders queued on the
+        previous bar executed at <b>this bar's open</b>, never at the price that triggered them. Fills
+        paid a half-spread, slippage, square-root price impact, and regulatory fees. That one-bar delay
+        is what made the backtest honest: a decision could never be filled at a price it had already seen.</span></li>
+      <li><span class="st">Mark the book</span><span class="sd">Value every holding at the bar's close,
+        write a ledger row, and mark the buy-and-hold benchmarks alongside it.</span></li>
+      <li><span class="st">Learn</span><span class="sd">Each stock's realized return over the bar became
+        one online update to the model's weights. The policy was never frozen — it adapted continuously,
+        every bar, all day.</span></li>
+      <li><span class="st">Score and decide</span><span class="sd">Rank all ~670 names by
+        <b>conviction</b> — the model's appetite for owning each one. Sell anything whose conviction
+        collapsed or that broke a volatility-scaled stop. Buy the strongest names, sized in proportion
+        to conviction, at most 20% in any one, and scaled so the whole book sat at 90% of the portfolio.
+        No cap on how many names it held — breadth made positions thinner, never borrowed.</span></li>
+      <li><span class="st">Go flat before the close</span><span class="sd">On the 15:00 ET bar the
+        entire book was sold to zero, and nothing new was opened that couldn't be closed the same day.
+        v1 ended <b>every</b> session 100% cash, so it carried no overnight or weekend gap risk at all.</span></li>
+    </ol>
+  </section>
+
+  <section class="rise" style="--i:5">
+    <div class="sub" style="margin-bottom:2px">Under the hood</div>
+    <h2>The parts worth naming</h2>
+    <ul class="facts">
+      <li><b>The policy was a single recurrent unit</b>, not a deep network — Moody–Saffell direct
+        reinforcement learning, <code>f = tanh(w·x + u·f_prev + b)</code> over 19 trailing-only price
+        and volume features. It was trained to maximise a differential Sharpe ratio with trading costs
+        <i>inside</i> the gradient, so the cost of a trade was part of what it learned, not a penalty applied afterwards.</li>
+      <li><b>It read the news.</b> Every weekend a separate job collected free economy and company news,
+        scored each story with a financial-specific sentiment lexicon, and published a per-stock score.
+        During the week that score <i>nudged</i> conviction multiplicatively — it could resize and reorder
+        the book, but it could never open a position the price model was neutral on.</li>
+      <li><b>No kill switch, deliberately.</b> A latching halt assumes a book meant to persist and an
+        operator on hand to restart it; v1 was flat every close and unattended. An earlier replay showed
+        exactly the failure mode: a model-health switch fired two hours in and the book sat in cash for
+        five weeks, including through the recovery. Risk was carried continuously instead — per-name
+        volatility-scaled stops, a re-entry cooldown, de-grossing after stop-outs, and a flat book at every close.</li>
+      <li><b>Look-ahead was impossible by construction</b>, and tested for: features are trailing-only,
+        and a test corrupts future bars then asserts the past is bit-identical. A separate test requires
+        that churning a driftless random walk with costs <i>loses</i> money — no free money on noise.</li>
+    </ul>
+  </section>
+
+  <section class="rise" style="--i:6">
+    <div class="sub" style="margin-bottom:2px">Why it was retired</div>
+    <h2>It worked exactly as designed, and that was the problem</h2>
+    <p>v1's plumbing was never the issue. Across <span id="wSessions">19</span> sessions the cron never
+      missed a bar, the book stayed within its exposure cap, the model kept learning, and it went flat
+      before every close as instructed. It simply had <b>no edge to trade</b>.</p>
+
+    <div class="verdict">
+      <div class="vh">A coin flip, paying costs, <span id="wTurn">13.8</span>× over</div>
+      <div class="vb">v1 closed <b id="wClosed">2,508</b> round-trips at a <b id="wWin">50.0%</b> win
+        rate. That is not a losing strategy — it is <i>no</i> strategy, a fair coin. Meanwhile it turned
+        the entire book over <span id="wTurn2">13.8</span>× in <span id="wSessions2">19</span> sessions.
+        A coin flip is free; a coin flip that pays a spread on every flip bleeds. Final result:
+        <b id="wRet">−3.79%</b> against <b id="wEw">+5.47%</b> for simply holding its own universe.</div>
+    </div>
+
+    <p>None of this was a surprise, which is the important part. The research log had already measured
+      it twice: cross-sectional price-and-volume features on liquid US megacaps produced a rank
+      information coefficient of <b>+0.004 to +0.007</b> against a <b>+0.02</b> go/no-go bar — a miss of
+      roughly 3×. Worse, the 20-day version of the signal turned out to be a <b>2020–2021 artifact</b>,
+      flat to negative in every year since. More feature engineering was not going to fix it.</p>
+
+    <p><b>But the same research found where the edge actually was.</b> Sweeping the prediction horizon
+      turned up a <b>3-day</b> signal that was statistically significant (t = 2.64) <i>and</i>
+      regime-persistent — positive in 2022, 2023, 2024, 2025 and 2026, not just the meme years. Traded
+      as a <b>dollar-neutral long/short</b> book it was net-positive out-of-sample through roughly
+      3 bp per side:</p>
+
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Cost per side</th><th>Net daily</th><th>Ann. Sharpe</th><th>Cumulative (2020–2026)</th></tr></thead>
+      <tbody>
+        <tr><td>0 bp</td><td>+2.54 bp</td><td>+0.39</td><td class="num up">+38.9%</td></tr>
+        <tr><td>1 bp</td><td>+1.94 bp</td><td>+0.30</td><td class="num up">+26.0%</td></tr>
+        <tr><td>2 bp</td><td>+1.34 bp</td><td>+0.21</td><td class="num up">+14.3%</td></tr>
+        <tr><td>3 bp</td><td>+0.74 bp</td><td>+0.11</td><td class="num up">+3.6%</td></tr>
+        <tr><td>5 bp</td><td>−0.45 bp</td><td>−0.07</td><td class="num down">−14.8%</td></tr>
+      </tbody>
+    </table></div>
+    <div class="sub" style="margin-top:8px">Out-of-sample, leak-checked, 1,633 days. Honestly weak —
+      Sharpe ~0.2 at realistic cost, and negative by 5 bp — but positive, and market-neutral rather than
+      dressed-up beta.</div>
+
+    <div class="verdict" style="border-color:var(--accent)">
+      <div class="vh">v1 structurally could not trade it</div>
+      <div class="vb">The edge is <b>dollar-neutral</b>, and v1 was long-only — a long-only book cannot
+        be neutral. The edge is a <b>3-day</b> signal, and v1 liquidated to cash every afternoon — it
+        could not hold a position long enough for the signal to pay. The edge is <b>cost-limited</b> at
+        ~3 bp/side, and v1 round-tripped its entire book daily. Every property that made v1 safe also
+        made this particular edge unreachable. That is why it was retired rather than tuned: the
+        successor needed to be able to <i>hold a short overnight</i>, and no amount of parameter
+        changes gets a long-only day-trader there.</div>
+    </div>
+  </section>
+
+  <section class="rise" style="--i:7">
+    <div class="sub" style="margin-bottom:2px">The successor</div>
+    <h2>What v2 changes</h2>
+    <div class="tbl-wrap"><table class="cmp">
+      <thead><tr><th></th><th>v1 — retired</th><th>v2 — live</th></tr></thead>
+      <tbody>
+        <tr><td>Engine</td><td>Bespoke Python bar loop</td><td>NautilusTrader — Rust-native, event-driven; the same engine and execution semantics run the backtest and the live loop</td></tr>
+        <tr><td>Direction</td><td>Long only</td><td>Long <i>and</i> short — the book can be market-neutral</td></tr>
+        <tr><td>Holding period</td><td>Flat by every close</td><td>Held overnight, so a multi-day signal can actually pay out</td></tr>
+        <tr><td>Exposure</td><td>≤ 90% of cash, never borrowed</td><td>Margin account, leverage permitted</td></tr>
+        <tr><td>Signal</td><td>Recurrent RRL conviction, long-only ranking</td><td>Cross-sectional short-horizon ranker, de-meaned so it is a relative bet rather than a market bet</td></tr>
+        <tr><td>News</td><td>Multiplicative nudge on conviction; could not originate a position</td><td>Additive on the ranked score, so news can originate a short; macro tone tilts net exposure</td></tr>
+        <tr><td>Kill switch</td><td>None, deliberately</td><td>None, deliberately — same argument, same continuous risk controls</td></tr>
+        <tr><td>Capital</td><td>$100,000 simulated</td><td>$100,000 simulated, reset to cash at v2's inception</td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-top:14px"><b>v2 is unproven.</b> The strategy it is built to express was profitable
+      in an out-of-sample backtest at a Sharpe of about 0.2 — thin enough that execution cost decides it,
+      and thin enough that a few weeks of forward results will not settle anything either. v1's honest
+      epitaph is that it ran flawlessly and lost 3.8%; v2 starts with no more right to be believed than
+      that. The forward record is the only test.</p>
+  </section>
+
+  <section class="rise" style="--i:8">
+    <div class="sub" style="margin-bottom:2px">Archive</div>
+    <h2>Final fills</h2>
+    <div class="sub" id="tradeSub">—</div>
+    <div class="tbl-wrap"><table id="tradeTable"></table></div>
+  </section>
+
+  <footer class="rise" style="--i:9">
+    <p><b>Every dollar here was simulated.</b> v1 never held a brokerage account and no code path in it
+      could place a real order. It ran on free infrastructure — GitHub Actions on a 30-minute cron,
+      Yahoo Finance bars, a static page — and its portfolio state lived in a public repository.</p>
+    <p style="margin-top:8px">Source and research log:
+      <a href="https://github.com/aqiao-814/swing-trading-bot" target="_blank" rel="noopener">swing-trading-bot</a>
+      · <a href="https://github.com/aqiao-814/swing-trading-bot/blob/main/docs/FINDINGS.md" target="_blank" rel="noopener">FINDINGS.md</a>
+      (§4 and §10 for the measured non-edge, §10a for the long/short result that motivated v2, §11 for v1's final shape)
+      · <a href="../">v2, live</a></p>
+  </footer>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmtUsd = v => (v < 0 ? "-$" : "$") + Math.abs(v).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtPct = (v, d=2) => (v >= 0 ? "+" : "") + (v*100).toFixed(d) + "%";
+const cls = v => v > 0 ? "up" : v < 0 ? "down" : "";
+
+/* ---- theme ---- */
+const isDark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
+function syncThemeIcon(){ $("icSun").style.display = isDark() ? "" : "none"; $("icMoon").style.display = isDark() ? "none" : ""; }
+$("themeBtn").onclick = () => {
+  document.documentElement.dataset.theme = isDark() ? "light" : "dark";
+  try { localStorage.setItem("sbTheme", document.documentElement.dataset.theme); } catch (e) {}
+  syncThemeIcon(); if (window.__data) draw(window.__data);
+};
+try { const t = localStorage.getItem("sbTheme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+syncThemeIcon();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { syncThemeIcon(); if (window.__data) draw(window.__data); });
+
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---- chart ---- */
+const SERIES = [
+  {key:"eq",  name:"v1",           color:() => cssVar("--accent"), width:2.1},
+  {key:"ew",  name:"Equal-weight", color:() => cssVar("--muted"),  width:1.3, dash:"1 3"},
+  {key:"spy", name:"SPY",          color:() => cssVar("--axis"),   width:1.3},
+  {key:"qqq", name:"QQQ",          color:() => cssVar("--axis"),   width:1.3, dash:"4 3"},
+];
+
+function draw(d) {
+  const curve = d.curve, svg = $("chart");
+  const box = $("chartBox").getBoundingClientRect();
+  const W = Math.max(320, box.width), H = 320;
+  const pad = {t:14, r:56, b:26, l:10};
+  const keys = SERIES.filter(s => curve[0][s.key] !== undefined);
+
+  let lo = Infinity, hi = -Infinity;
+  for (const p of curve) for (const s of keys) { lo = Math.min(lo, p[s.key]); hi = Math.max(hi, p[s.key]); }
+  const span = (hi - lo) || 1; lo -= span*0.06; hi += span*0.06;
+
+  const X = i => pad.l + (i / Math.max(1, curve.length - 1)) * (W - pad.l - pad.r);
+  const Y = v => pad.t + (1 - (v - lo)/(hi - lo)) * (H - pad.t - pad.b);
+
+  let g = "";
+  /* gridlines + right-hand value axis */
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) {
+    const v = lo + (hi-lo)*i/ticks, y = Y(v);
+    g += `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${cssVar("--grid")}" stroke-width="1"/>`;
+    g += `<text x="${(W-pad.r+7).toFixed(1)}" y="${(y+3.5).toFixed(1)}" font-size="10.5" fill="${cssVar("--muted")}">$${Math.round(v/1000)}k</text>`;
+  }
+  /* the $100k line it started at — the only reference that matters */
+  const y0 = Y(d.meta.starting_capital);
+  if (y0 > pad.t && y0 < H - pad.b)
+    g += `<line x1="${pad.l}" y1="${y0.toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${y0.toFixed(1)}" stroke="${cssVar("--axis")}" stroke-width="1" stroke-dasharray="2 3"/>`;
+
+  /* session boundaries */
+  let prevDay = curve[0].ts.slice(0,10);
+  curve.forEach((p, i) => {
+    const day = p.ts.slice(0,10);
+    if (day !== prevDay) {
+      g += `<line x1="${X(i).toFixed(1)}" y1="${pad.t}" x2="${X(i).toFixed(1)}" y2="${(H-pad.b).toFixed(1)}" stroke="${cssVar("--ring-soft")}" stroke-width="1"/>`;
+      prevDay = day;
+    }
+  });
+
+  for (const s of keys) {
+    const dd = curve.map((p,i) => `${i?"L":"M"}${X(i).toFixed(1)} ${Y(p[s.key]).toFixed(1)}`).join(" ");
+    g += `<path d="${dd}" fill="none" stroke="${s.color()}" stroke-width="${s.width}"${s.dash?` stroke-dasharray="${s.dash}"`:""} stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  g += `<line id="cross" x1="0" y1="${pad.t}" x2="0" y2="${H-pad.b}" stroke="${cssVar("--axis")}" stroke-width="1" style="display:none"/>`;
+  g += `<circle id="dot" r="3.5" fill="${cssVar("--accent")}" style="display:none"/>`;
+
+  /* date ticks: first bar of every few sessions */
+  const dayFirst = [];
+  let seen = null;
+  curve.forEach((p,i) => { const dy = p.ts.slice(0,10); if (dy !== seen) { dayFirst.push([i,dy]); seen = dy; } });
+  const stride = Math.ceil(dayFirst.length / 6);
+  dayFirst.filter((_,k) => k % stride === 0).forEach(([i,dy]) => {
+    g += `<text x="${X(i).toFixed(1)}" y="${H-8}" font-size="10.5" fill="${cssVar("--muted")}" text-anchor="middle">${dy.slice(5)}</text>`;
+  });
+
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = g;
+
+  $("chartLegend").innerHTML = keys.map(s => {
+    const last = curve[curve.length-1][s.key], r = last/d.meta.starting_capital - 1;
+    return `<span class="key"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="${s.color()}" stroke-width="${s.width+.4}"${s.dash?` stroke-dasharray="${s.dash}"`:""}/></svg>`
+         + `${s.name} <b class="${cls(r)}" style="font-variant-numeric:tabular-nums">${fmtPct(r)}</b></span>`;
+  }).join("");
+
+  /* hover readout */
+  const tip = $("eqTip"), cross = svg.querySelector("#cross"), dot = svg.querySelector("#dot");
+  const onMove = ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const i = Math.max(0, Math.min(curve.length-1, Math.round(((px / r.width * W) - pad.l) / ((W-pad.l-pad.r) / Math.max(1,curve.length-1)))));
+    const p = curve[i];
+    cross.style.display = dot.style.display = "";
+    cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i));
+    dot.setAttribute("cx", X(i)); dot.setAttribute("cy", Y(p.eq));
+    tip.style.display = "block";
+    tip.innerHTML = `<div class="t-date">${p.ts} · ${p.n} position${p.n===1?"":"s"}</div>`
+      + keys.map(s => { const rr = p[s.key]/d.meta.starting_capital - 1;
+          return `<div class="t-row"><span>${s.name}</span><span class="v ${cls(rr)}">${fmtPct(rr)}</span></div>`; }).join("");
+    const left = Math.min(Math.max(4, px - tip.offsetWidth/2), r.width - tip.offsetWidth - 4);
+    tip.style.left = left + "px"; tip.style.top = "6px";
+  };
+  svg.onmousemove = onMove; svg.ontouchmove = onMove;
+  svg.onmouseleave = svg.ontouchend = () => { tip.style.display = "none"; cross.style.display = dot.style.display = "none"; };
+}
+
+/* ---- render ---- */
+function render(d) {
+  window.__data = d;
+  const s = d.summary, m = d.meta, dv = d.derived;
+
+  $("incDate").textContent = m.inception.slice(0,10);
+  $("endDate").textContent = m.last_processed.slice(0,10);
+
+  // The headline figure stays in ink: it is a balance, not a change. The signed
+  // return directly beneath it carries the colour.
+  $("heroVal").textContent = fmtUsd(s.equity);
+  $("heroAll").innerHTML = `<b class="${cls(s.total_return)}">${fmtPct(s.total_return)}</b> from $${(m.starting_capital/1000).toFixed(0)}k`;
+  $("heroSpan").textContent = `${dv.sessions} sessions · ${dv.bars} bars`;
+
+  $("benchChips").innerHTML = Object.entries(d.benchmarks).map(([k,v]) =>
+    `<span class="bchip">${k === "EW" ? "Equal-weight" : k}<b class="num ${cls(v)}">${fmtPct(v)}</b></span>`).join("");
+
+  const tiles = [
+    ["Versus its own universe", fmtPct(s.total_return - d.benchmarks.EW), "equal-weight buy-and-hold", cls(s.total_return - d.benchmarks.EW)],
+    ["Win rate", (s.win_rate*100).toFixed(1) + "%", `${s.n_closed_trades.toLocaleString()} closed round-trips`, ""],
+    ["Fills", s.n_trades.toLocaleString(), `over ${dv.sessions} sessions`, ""],
+    ["Book turned over", dv.total_turnover.toFixed(1) + "×", `≈ ${(dv.total_turnover/dv.sessions).toFixed(2)}× a session`, ""],
+    ["Max drawdown", fmtPct(dv.max_drawdown), "from running peak", "down"],
+    ["Widest book", dv.peak_positions.toLocaleString(), "positions at once", ""],
+  ];
+  $("tiles").innerHTML = tiles.map(([l,v,d2,c]) =>
+    `<div class="tile"><div class="label">${l}</div><div class="value ${c}">${v}</div><div class="delta">${d2}</div></div>`).join("");
+
+  $("wSessions").textContent = $("wSessions2").textContent = dv.sessions;
+  $("wClosed").textContent = s.n_closed_trades.toLocaleString();
+  $("wWin").textContent = (s.win_rate*100).toFixed(1) + "%";
+  $("wTurn").textContent = $("wTurn2").textContent = dv.total_turnover.toFixed(1);
+  $("wRet").textContent = fmtPct(s.total_return);
+  $("wEw").textContent = fmtPct(d.benchmarks.EW);
+
+  const tr = d.trades_sample || [];
+  $("tradeSub").textContent = d.trades_sample_note + ", newest first. The complete history stays in the repository's parquet store.";
+  $("tradeTable").innerHTML =
+    "<thead><tr><th>Bar</th><th>Symbol</th><th></th><th>Shares</th><th>Fill</th><th>Realized</th><th>Why</th></tr></thead><tbody>"
+    + tr.map(t => `<tr><td>${t.ts}</td><td class="sym">${t.symbol}</td>`
+      + `<td><span class="chip ${t.action}">${t.action}</span></td>`
+      + `<td>${Math.abs(t.quantity).toLocaleString()}</td><td>$${t.fill_price.toFixed(2)}</td>`
+      + `<td class="${cls(t.realized_pnl ?? 0)}">${t.realized_pnl == null ? "—" : fmtUsd(t.realized_pnl)}</td>`
+      + `<td class="reason">${(t.reason || "").replace(/_/g," ")}</td></tr>`).join("")
+    + "</tbody>";
+
+  draw(d);
+}
+
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => window.__data && draw(window.__data), 120); });
+
+fetch("./data.json", {cache:"force-cache"})
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(render)
+  .catch(e => {
+    document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+      `<div class="banner" style="border-color:var(--crit)"><span class="b-ic">⚠️</span><span>Could not load v1's frozen record (${e.message}). The written account below is unaffected.</span></div>`);
+  });
+</script>
+</body>
+</html>
