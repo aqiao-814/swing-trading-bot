@@ -336,3 +336,90 @@ from "misses the recovery" to "keeps losing". Turnover is the other honest cost:
 flat-by-close on a wide book means the whole gross round-trips daily, ~3 bp of
 friction per turn, and there is still no measured cross-sectional signal (§4,
 §10a) to pay for it. The forward record remains the only test.
+
+## 12. v1 retired; rebuilt long/short on NautilusTrader (2026-08-17)
+
+**v1's final record.** The long-only RRL day-trader ran 2026-07-21 → 2026-08-14:
+235 thirty-minute bars over 19 sessions, ending **$96,211.75 (−3.79%)** against
+SPY +3.75%, QQQ +3.20% and equal-weight +5.47% — 9.3 points behind the passive
+version of its own universe. Max drawdown −4.65%, peak breadth 380 names, 5,108
+fills. Frozen in `docs/v1-final.json`, published at `/v1/`.
+
+**The diagnosis is one number: 2,508 closed round-trips at a 50.04% win rate.**
+That is not a losing strategy, it is *no* strategy — a fair coin — and it turned
+the book over 13.8× while paying a spread on every turn. §4 and §10 had already
+measured the absence of edge twice (RankIC +0.004…+0.007 against a +0.02 gate;
+the 20-day signal a 2020–2021 artifact). The forward result is the third
+confirmation, and it removes the last hope that the live loop would behave
+differently from the panel.
+
+**Why a rewrite rather than a retune.** §10a found where the edge actually is: a
+3-day horizon, t = 2.64, positive in every year 2022–2026, traded
+**dollar-neutral long/short**, net-positive through ~3 bp/side. v1 could not
+express it and no parameter change gets it there — a long-only book cannot be
+dollar-neutral, and a book that liquidates every afternoon cannot hold a
+multi-day signal. The two properties that made v1 safe are exactly the two that
+made this edge unreachable.
+
+**v2.** Cross-sectional long/short on the NautilusTrader engine: ~670 names,
+30-minute bars, margin account, leverage 2, gross target 1.5×, positions held
+overnight, no kill switch, fresh inception at $100,000 (v1's ending equity is
+deliberately *not* carried over, so the two records are comparable). The alpha is
+reversal + vol-scaled momentum + inverse-volatility + liquidity, z-scored across
+the cross-section and de-meaned. News enters **additively** on the standardised
+score rather than multiplicatively on conviction — v1's restriction existed
+because a long-only bot's only response to bad news is to own less, which no
+longer applies.
+
+### What the port turned up
+
+Four findings that cost real time and are worth recording, all verified by
+running code rather than by reading docs:
+
+**1. The bar-timestamp trap.** Yahoo labels a 30-minute bar by its **open**;
+NautilusTrader copies the index verbatim into `ts_event`, drives its clock from
+`ts_init`, and feeds each bar to the matching engine *before* the strategy
+callback — so a market order submitted in `on_bar` fills at **that bar's close**.
+Leaving the open label in place therefore fills every order thirty minutes into
+the engine's own future, silently. The bridge shifts by one interval, via a real
+timezone conversion (a fixed −4h offset misplaces every bar for the weeks around
+a DST change).
+
+**2. The clock instrument.** A cross-sectional strategy must act once per
+timestamp, but acting on the first bar of a new timestamp means one symbol's
+matching engine has advanced and 669 have not — that symbol fills at a different
+bar. Inserting a synthetic, never-traded instrument's bars *first* (same-timestamp
+delivery follows insertion order) gives a callback at which every real symbol has
+delivered T-1 and none has delivered T. The whole book then fills uniformly, and
+the execution-delay invariant falls out of the arrangement instead of being
+maintained by hand.
+
+**3. `balance_total` is not cash.** On a Nautilus margin account it is cash plus
+realized PnL and is *not* reduced by opening a position — positions lock margin
+in `balance_locked`. Persisting "cash" the way v1 did would double-count every
+open position. The complete, exact serialisation of the book is
+`(balance_total, {symbol: (signed_qty, avg_px)})`; restoring seeds that balance
+and rebuilds positions on synthetic bars at their own average price, with fees
+switched off. Measured: a resumed run reproduces an uninterrupted one to the
+cent.
+
+**4. Two bugs the tests caught, both invisible without them.** The round-trip
+test initially disagreed by $64: the strategy was **dropping one decision at
+every run boundary** (the last bar's decision has no later bar to fill against,
+and the next run started with none pending). Fixed by having a resumed run begin
+deciding one bar before it begins trading, recomputing that decision from warmup
+data. The remaining $1.20 was **short borrow accruing per cron firing rather than
+per bar span** — so the cost of holding a short overnight depended on how often
+GitHub Actions happened to fire, and a bot that ran twice owed twice. Both are
+the class of bug that a forward record would have quietly absorbed.
+
+Also worth knowing: the default `RiskEngine` rate limit (100 orders/second)
+**denies** most of a 670-name rebalance, `Equity` forbids fractional shares
+outright (the risk engine rejects, it does not round), and `portfolio.net_exposure`
+returns an *absolute* notional despite the name, so a short reports positive.
+
+**What is not claimed.** v2 has no forward record at all. The strategy it is
+built to express was profitable in backtest at a Sharpe of about 0.2 — thin
+enough that execution cost decides it, and thin enough that a few weeks of
+forward results will not settle anything either. v1's honest epitaph is that it
+ran flawlessly and lost 3.8%; v2 starts with no more right to be believed.

@@ -1,4 +1,4 @@
-# Config for the hosted live paper bot (GitHub Actions).
+# Config for the hosted live paper bot (GitHub Actions) -- **v2**.
 # 30-MINUTE cadence: decide on every completed 30-minute bar (13 per session,
 # 09:30..15:30 ET), fill at the next bar's open. The workflow fires every 30
 # minutes from the market open.
@@ -27,11 +27,11 @@ features:
   warmup: 60
 paper:
   interval: 30m
-  # DAY TRADING: flat before every close, never a position held overnight.
-  # On the 15:00 ET bar (second-to-last of the 30m session) the whole book is
-  # sold to zero, filling at the 15:30 open; no new position is opened on the
-  # 15:00 or 15:30 bars because it could not be closed again the same day.
-  day_trading: true
+  # v2 HOLDS OVERNIGHT. `day_trading` is v1's flag and the v2 runner ignores it;
+  # it is set false so a stray read cannot resurrect flat-by-close, which is one
+  # of the two properties that made v1 unable to trade the edge FINDINGS 10a
+  # actually found (the other being long-only).
+  day_trading: false
   # ~670 liquid US names (S&P 500 + Nasdaq 100 + screened high-volume movers).
   # The bulk 30m refresh for the whole list measured ~130s in 17 chunked
   # requests, so the widened universe costs a couple of minutes of the
@@ -60,13 +60,12 @@ paper:
   # news into news/signal.json and merges it to main; every weekday trading run
   # then reads that file out of its own checkout.
   #
-  # The tilt is multiplicative on the policy's own conviction
-  # (f' = f * (1 + 0.30 * news * sign(f))), so news can reorder the ranking,
-  # resize positions, and push a borderline name across the entry or exit
-  # threshold -- but it can never open a position in a name the price policy is
-  # neutral on. It also fades on a 2-day half-life measured from the signal's
-  # own timestamp, so a Sunday collection is worth ~1/4 of its Sunday strength
-  # by Tuesday and nothing at all after 10 days. A missing or corrupt file
+  # v2 applies it ADDITIVELY on the standardised cross-sectional score, so news
+  # can originate a short -- see swingbot/nautilus/signals.py:NewsConfig2 for
+  # the weights, which live in code rather than here because they are in units
+  # of cross-sectional sigma. The macro tone tilts net exposure instead of any
+  # single name. `tilt_weight` below is v1's multiplicative weight and is unused
+  # by v2; `enabled` and `signal_path` still apply. A missing or corrupt file
   # means "no news"; it can never stop the bot trading.
   news:
     enabled: true

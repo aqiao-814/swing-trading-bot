@@ -20,6 +20,9 @@ name: weekend-news
 #     1s pause -- roughly 20 minutes. That does not fit in the half-hour budget
 #     between weekday trading runs, and it would compete with them for the same
 #     Yahoo quota. On a weekend both are idle.
+#   * v2 holds positions overnight and through weekends, so a weekend signal
+#     lands on a book that is actually open -- which is what makes it worth
+#     collecting. v1 was flat by every close and could only ever act on Monday.
 #   * The market is closed, so there is no bar to race and no state to corrupt.
 #     This job never touches portfolio state -- it only writes news/.
 #   * Saturday captures the week's close-out coverage; Sunday captures the
@@ -29,9 +32,13 @@ name: weekend-news
 # Both runs are safe to repeat: the article archive dedupes on a content hash,
 # so a re-run adds nothing new and the signal is simply rebuilt from the archive.
 #
-# The trading loop consumes news/signal.json as a BOUNDED TILT on model
-# conviction -- it can resize and reorder the book, but it cannot open a
-# position the price policy did not already want. See NewsConfig in config.py.
+# The v2 trading loop consumes news/signal.json as an ADDITIVE tilt on the
+# standardised cross-sectional score, plus a market-wide macro tilt on net
+# exposure. That is a deliberate change from v1, which applied news
+# multiplicatively so it could never originate a position: v1 was long-only, so
+# its only way to act on bad news was to own less. v2 can short, which makes
+# "the press has turned on this name" a reason to be short it. See
+# swingbot/nautilus/signals.py (NewsConfig2) for the weights and the decay.
 
 on:
   schedule:
@@ -136,9 +143,9 @@ jobs:
           **Strongest signals:** ${TOP}
 
           Merging publishes \`news/signal.json\` to main, where the next weekday
-          trading run picks it up. The tilt is multiplicative on the policy's own
-          conviction and decays with the signal's age, so a stale or missing file
-          degrades to no-news rather than to a wrong trade."
+          trading run picks it up. The tilt is additive on the standardised
+          cross-sectional score and decays with the signal's age, so a stale or
+          missing file degrades to no-news rather than to a wrong trade."
 
           # --admin so the merge still lands if branch protection is ever added
           # to main; harmless when there is none.
