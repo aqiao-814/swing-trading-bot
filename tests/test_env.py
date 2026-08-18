@@ -16,7 +16,7 @@ import polars as pl
 import pytest
 from gymnasium.utils.env_checker import check_env
 
-from swingbot.config import (
+from tradingbot.config import (
     ActionSpaceKind,
     CostConfig,
     EnvConfig,
@@ -24,9 +24,9 @@ from swingbot.config import (
     RewardKind,
     RiskConfig,
 )
-from swingbot.data.sources import SyntheticSource
-from swingbot.env.trading_env import SwingTradingEnv
-from swingbot.features.technical import build_dataset, feature_columns
+from tradingbot.data.sources import SyntheticSource
+from tradingbot.env.trading_env import TradingEnv
+from tradingbot.features.technical import build_dataset, feature_columns
 
 LONG, FLAT, SHORT = 2, 1, 0
 
@@ -52,9 +52,9 @@ def cfg() -> EnvConfig:
     )
 
 
-def make_env(dataset, cfg, **kw) -> SwingTradingEnv:
+def make_env(dataset, cfg, **kw) -> TradingEnv:
     kw.setdefault("random_start", False)
-    return SwingTradingEnv(dataset, feature_columns(FeatureConfig()), cfg, **kw)
+    return TradingEnv(dataset, feature_columns(FeatureConfig()), cfg, **kw)
 
 
 class TestGymCompliance:
@@ -350,7 +350,7 @@ class TestNullHypothesis:
             ),
             reward=RewardKind.NET_LOG_RETURN,
         )
-        env = SwingTradingEnv(data, feature_columns(FeatureConfig()), c, random_start=False)
+        env = TradingEnv(data, feature_columns(FeatureConfig()), c, random_start=False)
         env.reset()
         # Churn every bar: maximum exposure to costs, zero expected edge.
         for i in range(1000):

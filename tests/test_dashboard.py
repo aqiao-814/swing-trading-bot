@@ -6,12 +6,12 @@ import re
 
 import pytest
 
-from swingbot.agents.baselines import AlwaysFlat, BuyAndHold, RandomAgent
-from swingbot.backtest.runner import evaluate
-from swingbot.config import EnvConfig, FeatureConfig, RiskConfig
-from swingbot.dashboard import _MAX_SERIES, StrategyResult, build_dashboard
-from swingbot.data.sources import SyntheticSource
-from swingbot.features.technical import build_dataset, feature_columns
+from tradingbot.agents.baselines import AlwaysFlat, BuyAndHold, RandomAgent
+from tradingbot.backtest.runner import evaluate
+from tradingbot.config import EnvConfig, FeatureConfig, RiskConfig
+from tradingbot.dashboard import _MAX_SERIES, StrategyResult, build_dashboard
+from tradingbot.data.sources import SyntheticSource
+from tradingbot.features.technical import build_dataset, feature_columns
 
 
 @pytest.fixture(scope="module")

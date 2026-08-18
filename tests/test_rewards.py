@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from swingbot.config import RewardKind
-from swingbot.rewards import DifferentialSharpeRatio, DrawdownPenalized, NetReturn, build_reward
+from tradingbot.config import RewardKind
+from tradingbot.rewards import DifferentialSharpeRatio, DrawdownPenalized, NetReturn, build_reward
 
 
 class TestDifferentialSharpe:

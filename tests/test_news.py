@@ -16,11 +16,11 @@ from pathlib import Path
 
 import pytest
 
-from swingbot.news import store
-from swingbot.news.feeds import Article, dedupe, parse_feed
-from swingbot.news.sentiment import score_article, score_text
-from swingbot.news.signal import NewsSignal, build_signal
-from swingbot.news.tickers import confirms, match_symbols
+from tradingbot.news import store
+from tradingbot.news.feeds import Article, dedupe, parse_feed
+from tradingbot.news.sentiment import score_article, score_text
+from tradingbot.news.signal import NewsSignal, build_signal
+from tradingbot.news.tickers import confirms, match_symbols
 
 NOW = datetime(2026, 8, 8, 12, 0, tzinfo=UTC)
 
@@ -400,8 +400,8 @@ def engine_with_news(tmp_path: Path, sig: NewsSignal | None, **news_cfg):
     constructed purely to exercise ``_tilt`` / ``_news_age_decay`` against real
     config objects rather than a hand-rolled stub that could drift from them.
     """
-    from swingbot.config import Config
-    from swingbot.paper.engine import PaperEngine
+    from tradingbot.config import Config
+    from tradingbot.paper.engine import PaperEngine
 
     cfg = Config()
     cfg.data.root = tmp_path / "data"
@@ -421,7 +421,7 @@ def signal_with(score: float, *, as_of: datetime = NOW, symbol: str = "AAA") -> 
     """A one-symbol signal. ``relative`` is set explicitly because these tests
     build the signal by hand rather than through ``build_signal``, which is
     what normally populates the de-meaned field the engine tilts on."""
-    from swingbot.news.signal import SymbolNews
+    from tradingbot.news.signal import SymbolNews
 
     return NewsSignal(
         as_of=as_of.isoformat(),
@@ -536,10 +536,10 @@ class TestTiltInAFullRun:
     def _run(tmp_path: Path, sig: NewsSignal | None):
         from datetime import date
 
-        from swingbot.config import Config
-        from swingbot.data.sources import SyntheticSource
-        from swingbot.data.store import BarStore
-        from swingbot.paper.engine import PaperEngine
+        from tradingbot.config import Config
+        from tradingbot.data.sources import SyntheticSource
+        from tradingbot.data.store import BarStore
+        from tradingbot.paper.engine import PaperEngine
 
         syms = ["AAA", "BBB", "CCC", "DDD"]
         cfg = Config()
@@ -569,7 +569,7 @@ class TestTiltInAFullRun:
         return eng.store.read("decisions")
 
     def test_decisions_record_both_sides_of_the_tilt(self, tmp_path: Path):
-        from swingbot.news.signal import SymbolNews
+        from tradingbot.news.signal import SymbolNews
 
         # Dated far in the past so the whole replay window sits after it and
         # the age guard does not zero the tilt out.

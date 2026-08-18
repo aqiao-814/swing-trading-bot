@@ -1,5 +1,5 @@
 [project]
-name = "swingbot"
+name = "tradingbot"
 version = "0.1.0"
 description = "Simulated-capital long/short trading bot on NautilusTrader, with a DRL research harness"
 requires-python = ">=3.12,<3.13"
@@ -43,14 +43,14 @@ dev = [
 ]
 
 [project.scripts]
-swingbot = "swingbot.cli:app"
+tradingbot = "tradingbot.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/swingbot"]
+packages = ["src/tradingbot"]
 
 [tool.ruff]
 line-length = 100
@@ -61,14 +61,14 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
 # Typer's API *requires* calling Option()/Argument() in argument defaults.
-"src/swingbot/cli.py" = ["B008"]
+"src/tradingbot/cli.py" = ["B008"]
 # This generator embeds a full CSS/JS web page as a string literal; its lines
 # are web assets, not Python, so the 100-char limit doesn't apply.
 "scripts/build_findings_page.py" = ["E501"]
 # Mostly an embedded HTML/CSS/JS template string; hard-wrapping markup at 100
 # columns hurts readability rather than helping it.
-"src/swingbot/dashboard.py" = ["E501"]
-"src/swingbot/paper/dashboard.py" = ["E501"]
+"src/tradingbot/dashboard.py" = ["E501"]
+"src/tradingbot/paper/dashboard.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

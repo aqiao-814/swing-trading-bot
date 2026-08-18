@@ -11,10 +11,10 @@ import numpy as np
 import polars as pl
 import pytest
 
-from swingbot.config import FeatureConfig
-from swingbot.data.sources import SyntheticSource
-from swingbot.features.fracdiff import ffd_weights, frac_diff_ffd, min_ffd_order
-from swingbot.features.technical import build_dataset, compute_features, feature_columns
+from tradingbot.config import FeatureConfig
+from tradingbot.data.sources import SyntheticSource
+from tradingbot.features.fracdiff import ffd_weights, frac_diff_ffd, min_ffd_order
+from tradingbot.features.technical import build_dataset, compute_features, feature_columns
 
 
 @pytest.fixture(scope="module")
@@ -48,7 +48,7 @@ class TestSyntheticDeterminism:
         env = {**os.environ, "PYTHONPATH": src}
 
         code = (
-            "from swingbot.data.sources import SyntheticSource;"
+            "from tradingbot.data.sources import SyntheticSource;"
             "d=SyntheticSource(seed=42).fetch('AAA','2020-01-01','2020-03-01');"
             "print(round(float(d['close'][-1]), 8))"
         )

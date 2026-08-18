@@ -41,7 +41,7 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install swingbot
+      - name: Install tradingbot
         # gymnasium: EpisodeResult lives in env/trading_env.py, which imports it
         # at module top; the trading loop never uses it and torch stays out.
         # nautilus_trader is pinned: the macOS wheels for 1.231+ are built for
@@ -76,9 +76,9 @@ jobs:
 
       - name: Run the trading bars
         run: |
-          python -m swingbot.cli trade --config configs/cloud.yaml --capital 100000 \
+          python -m tradingbot.cli trade --config configs/cloud.yaml --capital 100000 \
             || (echo "retrying after 90s (data source hiccup?)" && sleep 90 && \
-                python -m swingbot.cli trade --config configs/cloud.yaml --capital 100000)
+                python -m tradingbot.cli trade --config configs/cloud.yaml --capital 100000)
 
       - name: Export dashboard data
         run: python scripts/export_site_data.py
@@ -101,7 +101,7 @@ jobs:
           # The v1 archive is frozen: copied so the page exists, never regenerated.
           cp site/v1/index.html site/v1/data.json /tmp/site/v1/
           cd /tmp/site
-          git config user.name "swingbot"
+          git config user.name "tradingbot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && { echo "nothing to publish"; exit 0; }
@@ -119,7 +119,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           last=$(git log -1 --format=%ct)
           if [ $(( $(date +%s) - last )) -gt $(( 30 * 86400 )) ]; then
-            git config user.name "swingbot"
+            git config user.name "tradingbot"
             git config user.email "actions@users.noreply.github.com"
             date -u > .github/heartbeat
             git add .github/heartbeat

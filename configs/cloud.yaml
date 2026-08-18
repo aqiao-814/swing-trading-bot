@@ -61,7 +61,7 @@ paper:
   # then reads that file out of its own checkout.
   #
   # v2 applies it ADDITIVELY on the standardised cross-sectional score, so news
-  # can originate a short -- see swingbot/nautilus/signals.py:NewsConfig2 for
+  # can originate a short -- see tradingbot/nautilus/signals.py:NewsConfig2 for
   # the weights, which live in code rather than here because they are in units
   # of cross-sectional sigma. The macro tone tilts net exposure instead of any
   # single name. `tilt_weight` below is v1's multiplicative weight and is unused

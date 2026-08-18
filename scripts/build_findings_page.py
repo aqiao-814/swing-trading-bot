@@ -178,7 +178,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
 <div class="wrap"><div class="page">
 
   <header>
-    <div class="eyebrow">Swingbot Research &middot; Walk-Forward Backtest</div>
+    <div class="eyebrow">Trading Bot Research &middot; Walk-Forward Backtest</div>
     <h1 id="headline">Five years, one policy, learning as it goes</h1>
     <p class="dek" id="dek"></p>
     <div class="meta" id="meta"></div>
@@ -484,7 +484,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
   // ---------- footer ----------
   document.getElementById("footer").innerHTML =
     `<span>Generated ${D.generated||""}</span><span>All capital simulated — no real orders</span>`+
-    `<span>swingbot · ContinualRRL</span>`;
+    `<span>tradingbot · ContinualRRL</span>`;
 
   // ---------- render + theme reactivity ----------
   function renderAll(){ rerenders.forEach(f=>f()); }

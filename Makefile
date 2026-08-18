@@ -20,13 +20,13 @@ lint:
 	$(PY) -m ruff format src/ tests/
 
 invest:
-	$(PY) -m swingbot.cli invest --capital 100000
+	$(PY) -m tradingbot.cli invest --capital 100000
 
 fetch:
-	$(PY) -m swingbot.cli fetch
+	$(PY) -m tradingbot.cli fetch
 
 compare:
-	$(PY) -m swingbot.cli compare
+	$(PY) -m tradingbot.cli compare
 
 clean:
 	rm -rf artifacts/ .pytest_cache/ .ruff_cache/

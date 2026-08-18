@@ -49,7 +49,7 @@ jobs:
           cp site/live.json /tmp/site/live.json
           cd /tmp/site
           git remote set-url origin git@github.com:aqiao-814/swingbot-live.git
-          git config user.name "swingbot"
+          git config user.name "tradingbot"
           git config user.email "actions@users.noreply.github.com"
           git add live.json
           git diff --cached --quiet && { echo "unchanged"; exit 0; }

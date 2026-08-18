@@ -5,13 +5,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from swingbot.backtest.validation import (
+from tradingbot.backtest.validation import (
     CombinatorialPurgedCV,
     PurgedKFold,
     Split,
     probability_of_backtest_overfitting,
 )
-from swingbot.metrics import (
+from tradingbot.metrics import (
     deflated_sharpe_ratio,
     excess_sharpe,
     expected_max_sharpe,

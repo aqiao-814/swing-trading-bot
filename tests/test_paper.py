@@ -19,14 +19,14 @@ import numpy as np
 import polars as pl
 import pytest
 
-from swingbot.config import Config
-from swingbot.data.sources import SyntheticSource
-from swingbot.data.store import BarStore
-from swingbot.paper.dashboard import build_paper_dashboard
-from swingbot.paper.engine import PaperEngine, stop_cooldown_active, target_gross_exposure
-from swingbot.paper.learner import ContinualRRL
-from swingbot.paper.state import PaperState
-from swingbot.paper.universe import resolve_universe
+from tradingbot.config import Config
+from tradingbot.data.sources import SyntheticSource
+from tradingbot.data.store import BarStore
+from tradingbot.paper.dashboard import build_paper_dashboard
+from tradingbot.paper.engine import PaperEngine, stop_cooldown_active, target_gross_exposure
+from tradingbot.paper.learner import ContinualRRL
+from tradingbot.paper.state import PaperState
+from tradingbot.paper.universe import resolve_universe
 
 SYMS = ["AAA", "BBB", "CCC", "DDD", "EEE", "FFF"]
 AS_OF = date(2024, 8, 30)

@@ -30,9 +30,9 @@ import polars as pl
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-PORTFOLIO = Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "v2" / "portfolio"))
-DATA_ROOT = Path(os.environ.get("SWINGBOT_DATA", ROOT / "data30"))
-OUT = Path(os.environ.get("SWINGBOT_SITE", ROOT / "site")) / "data.json"
+PORTFOLIO = Path(os.environ.get("TRADINGBOT_PORTFOLIO", ROOT / "artifacts" / "v2" / "portfolio"))
+DATA_ROOT = Path(os.environ.get("TRADINGBOT_DATA", ROOT / "data30"))
+OUT = Path(os.environ.get("TRADINGBOT_SITE", ROOT / "site")) / "data.json"
 
 # Newest fills kept in data.json. The full history stays in the parquet store.
 # A long/short book on 30-minute bars fills hundreds of times a session, and
@@ -72,7 +72,7 @@ def _benchmarks(ledger: list[dict], starting: float) -> dict[str, list[float | N
     if not ledger:
         return {}
     try:
-        from swingbot.data.store import BarStore
+        from tradingbot.data.store import BarStore
     except ImportError:
         return {}
     store = BarStore(DATA_ROOT)
@@ -107,7 +107,7 @@ def _benchmarks(ledger: list[dict], starting: float) -> dict[str, list[float | N
 def main() -> None:
     state_path = PORTFOLIO / "state.json"
     if not state_path.exists():
-        sys.exit("no v2 state.json yet -- run `swingbot trade` first")
+        sys.exit("no v2 state.json yet -- run `tradingbot trade` first")
     state = json.loads(state_path.read_text())
 
     ledger = _records("ledger", sort_by="ts")
