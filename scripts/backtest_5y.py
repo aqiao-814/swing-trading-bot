@@ -31,8 +31,8 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from swingbot.config import Config
-from swingbot.paper.engine import PaperEngine
+from tradingbot.config import Config
+from tradingbot.paper.engine import PaperEngine
 
 ROOT = Path(__file__).resolve().parent.parent
 BT_ROOT = ROOT / "artifacts" / "backtest5y"

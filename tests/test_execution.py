@@ -6,8 +6,8 @@ from datetime import date
 
 import pytest
 
-from swingbot.config import CostConfig
-from swingbot.execution import ExecutionModel, MarketContext
+from tradingbot.config import CostConfig
+from tradingbot.execution import ExecutionModel, MarketContext
 
 TS = date(2024, 1, 2)
 

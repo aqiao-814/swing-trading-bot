@@ -15,15 +15,15 @@ import numpy as np
 import polars as pl
 import pytest
 
-from swingbot.agents.ranker import (
+from tradingbot.agents.ranker import (
     ic_summary,
     rank_ic,
     shuffle_targets_within_date,
     walk_forward_scores,
 )
-from swingbot.features.cross_section import FEATURES, build_panel
-from swingbot.paper.gate import gate_signal, health_index, should_trade
-from swingbot.trials import log_trial, n_trials
+from tradingbot.features.cross_section import FEATURES, build_panel
+from tradingbot.paper.gate import gate_signal, health_index, should_trade
+from tradingbot.trials import log_trial, n_trials
 
 HORIZON = 5
 

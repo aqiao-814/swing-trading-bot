@@ -1,7 +1,7 @@
 """Intraday live view: quotes, live P&L, and provisional open fills.
 
 Runs every few minutes during market hours (dependencies: yfinance only --
-it must NOT import swingbot, so the live workflow can install one package
+it must NOT import tradingbot, so the live workflow can install one package
 and finish in seconds). Reads the committed portfolio state + nightly
 data.json, fetches live quotes for every relevant symbol, and writes
 ``site/live.json`` for the dashboard's intraday layer.
@@ -24,10 +24,10 @@ import yfinance as yf
 
 ROOT = Path(__file__).resolve().parent.parent
 STATE = (
-    Path(os.environ.get("SWINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio"))
+    Path(os.environ.get("TRADINGBOT_PORTFOLIO", ROOT / "artifacts" / "paper" / "portfolio"))
     / "state.json"
 )
-_SITE = Path(os.environ.get("SWINGBOT_SITE", ROOT / "site"))
+_SITE = Path(os.environ.get("TRADINGBOT_SITE", ROOT / "site"))
 DATA = _SITE / "data.json"
 OUT = _SITE / "live.json"
 

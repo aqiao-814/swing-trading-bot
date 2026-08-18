@@ -1,4 +1,4 @@
-# swingbot
+# trading-bot
 
 Autonomous **long/short** paper-trading bot on the
 [NautilusTrader](https://github.com/nautechsystems/nautilus_trader) engine, live at
@@ -15,7 +15,7 @@ a real order. Research history and measured results:
 > and its own universe's +5.47%. Its frozen record and a full breakdown of how it
 > worked live at [/v1/](https://aqiao-814.github.io/swingbot-live/v1/); the
 > snapshot is [docs/v1-final.json](docs/v1-final.json). Its code remains in
-> `src/swingbot/paper/` as the research harness it grew out of.
+> `src/tradingbot/paper/` as the research harness it grew out of.
 
 ## Why v2 exists
 
@@ -52,9 +52,16 @@ only test.
   this a bet on *which names beat which* rather than on the market going up. It
   buys the strongest quarter and **shorts the weakest quarter**.
 - Positions are sized **inverse to each name's own volatility**, so two names it
-  likes equally get equal *risk*, not equal dollars. Any one name is capped at
-  4% of the portfolio; total exposure targets 1.5× equity, which the margin
-  account permits and v1 could never use.
+  likes equally get equal *risk*, not equal dollars.
+- **There are no exposure limits.** No per-name cap, no net-exposure clamp, and
+  no fixed gross target. Book size is set by a **volatility target** instead —
+  gross floats to whatever makes the book's own predicted volatility 35%
+  annualised (~4.4× equity on the live universe, against the old fixed 1.5×), so
+  it levers into a calm cross-section and out of a violent one. Every limit is
+  still *settable* (`--max-gross`, `--max-weight`, `--max-net`); none is set by
+  default. Measured consequence, honestly: over 2026-05-24→08-17 the bigger book
+  lost **more** (−7.2% vs −3.8%), because leverage multiplies a negative realized
+  edge just as faithfully as a positive one. See FINDINGS §13.
 - **It holds overnight.** No flat-by-close, no liquidation, no gap avoidance —
   which is the whole point, because the signal it trades takes about three days
   to pay.
@@ -66,12 +73,13 @@ only test.
 - Orders decided on one bar fill on the **next** one, at realistic cost: spread,
   slippage, square-root market impact, SEC and FINRA fees, and borrow on every
   short held overnight.
-- There is **no kill switch**, deliberately (see below).
+- There is **no kill switch** and no drawdown halt, deliberately (see below).
 
 ## How it works — technical
 
 **Engine.** NautilusTrader 1.230, `AccountType.MARGIN`, `OmsType.NETTING`, one
-`Equity` per ticker at Reg-T margins, `default_leverage=2`. The same engine and
+`Equity` per ticker at Reg-T margins, `default_leverage=20` — a ceiling high
+enough that the vol target, not the broker, decides book size. The same engine and
 the same execution semantics run a backtest and the live loop, which is the
 research-to-live parity v1 had to hand-maintain.
 
@@ -79,9 +87,22 @@ research-to-live parity v1 had to hand-maintain.
 per-symbol reversal (3d, negated), vol-scaled momentum (20d), realized
 volatility (negated — betting-against-beta), and log dollar volume; each
 z-scored across the cross-section, winsorised at 3σ, combined, then de-meaned
-and rescaled to unit σ. Sizing is `score / σ`, normalised to target gross, capped
-per name, with the net-exposure and gross targets resolved by a short fixed-point
-iteration so the per-name cap is never violated.
+and rescaled to unit σ. Sizing is `score / σ`, normalised to unit gross and then
+scaled by whatever gross the **vol target** implies. Predicted book variance is
+
+    (1−ρ)·Σ(wᵢσᵢ)²      idiosyncratic
+  + ρ·(Σwᵢσᵢ)²          one common factor, keyed off the SIGNED risk sum
+  + (residual·Σ|wᵢσᵢ|)²  factor risk that dollar-neutrality does not hedge
+
+The middle term is ~0 for a neutral book and dominant for a directional one, so
+the same target permits a large neutral book and a small directional one. The
+third term is not optional decoration: without it the first two call a 170-name
+neutral book almost riskless and the target levers to 12.3×, understating
+realized vol by 3.3×. At `residual = 0.21` prediction tracks realization to
+1.07–1.16× (FINDINGS §13). Gross and net are then landed **exactly, in closed
+form**, by scaling the long and short sides separately (`aL = (G+N)/2`,
+`bS = (G−N)/2`); the old fixed-point iteration now runs only when a per-name cap
+is explicitly set and actually binding.
 
 **The bar loop** (`nautilus/strategy.py`). A cross-sectional strategy needs every
 symbol's bar for one instant before it can rank anything, and acting on the first
@@ -116,10 +137,16 @@ on how often GitHub Actions fired).
 clear it. What it actually produces is a bot that stops trading for days —
 *including through the recovery* — until someone notices; an earlier replay had
 exactly that, sitting in cash for five weeks after a model-health switch fired.
-Risk is carried continuously instead: a de-meaned, roughly market-neutral book,
-volatility-scaled sizing, a per-name cap, a bounded gross target, and a liquidity
-floor below which a name is not traded at all. This is a real transfer of risk
-from "misses the recovery" to "keeps losing", made with open eyes.
+Risk is *priced*, not *forbidden*: a de-meaned, roughly market-neutral book,
+volatility-scaled sizing, a volatility-targeted gross, and a liquidity floor below
+which a name is not traded at all. This is a real transfer of risk from "misses
+the recovery" to "keeps losing", made with open eyes — and with no exposure caps
+the downside of that trade is now larger, not smaller.
+
+**What is *not* relaxed.** The objective is to maximise simulated P&L, and that
+number is only worth maximising if it is real. So the four invariants below are
+not negotiable, transaction costs are charged in full, and the liquidity floor
+stays: a fill in a name too thin to absorb the order is fiction, not profit.
 
 **Invariants** (`tests/test_nautilus_invariants.py`), all re-proved against the
 new engine:
@@ -155,8 +182,8 @@ new engine:
 
 ```bash
 make test                       # 251 tests
-swingbot trade                  # run the v2 loop locally
-swingbot news --out news        # collect the weekend news signal
+tradingbot trade                  # run the v2 loop locally
+tradingbot news --out news        # collect the weekend news signal
 python scripts/export_site_data.py
 ```
 
@@ -167,12 +194,12 @@ Rust toolchain.
 ## Layout
 
 ```
-src/swingbot/nautilus/  v2: the live loop — instruments, costs, bars, signals,
+src/tradingbot/nautilus/  v2: the live loop — instruments, costs, bars, signals,
                         strategy, state, runner
-src/swingbot/news/      free news collection, financial-lexicon sentiment, signal
-src/swingbot/paper/     v1, retired: the RRL day-trading loop and its learner
-src/swingbot/           portfolio accounting, execution costs, features, data store
-src/swingbot/{env,backtest,agents}/  research harness (see docs/FINDINGS.md)
+src/tradingbot/news/      free news collection, financial-lexicon sentiment, signal
+src/tradingbot/paper/     v1, retired: the RRL day-trading loop and its learner
+src/tradingbot/           portfolio accounting, execution costs, features, data store
+src/tradingbot/{env,backtest,agents}/  research harness (see docs/FINDINGS.md)
 site/                   the hosted dashboard; site/v1/ is the frozen v1 archive
 ```
 

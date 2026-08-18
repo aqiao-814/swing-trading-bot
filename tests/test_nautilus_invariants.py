@@ -42,15 +42,15 @@ from nautilus_trader.model.identifiers import TraderId
 from nautilus_trader.model.objects import Money
 from nautilus_trader.trading.strategy import Strategy
 
-from swingbot.config import CostConfig
-from swingbot.nautilus.bars import (
+from tradingbot.config import CostConfig
+from tradingbot.nautilus.bars import (
     bar_type_for,
     bars_from_frame,
     close_times_ns,
     synthetic_bars,
 )
-from swingbot.nautilus.costs import SwingbotFeeModel
-from swingbot.nautilus.instruments import VENUE, make_equity
+from tradingbot.nautilus.costs import TradingBotFeeModel
+from tradingbot.nautilus.instruments import VENUE, make_equity
 
 CLOCK = "__CLOCK"
 STEP_NS = 30 * 60 * 1_000_000_000
@@ -287,7 +287,7 @@ def _run_churn(seed: int, *, charge_costs: bool) -> tuple[float, float]:
     """Identical trades, with and without the cost model. Returns (balance, charged)."""
     n_bars, n_sym = 60, 6
     start_balance = 1_000_000.0
-    fee = SwingbotFeeModel(CostConfig(), free=not charge_costs)
+    fee = TradingBotFeeModel(CostConfig(), free=not charge_costs)
     eng = _engine(start_balance, fee_model=fee)
 
     grid = _grid(n_bars)
@@ -367,7 +367,7 @@ def test_fee_model_charges_every_friction_and_can_be_switched_free():
     which is what makes the cost column trustworthy.
     """
     costs = CostConfig()
-    fee = SwingbotFeeModel(costs)
+    fee = TradingBotFeeModel(costs)
 
     class _Order:
         side = 1  # BUY
@@ -399,7 +399,7 @@ def test_fee_model_charges_every_friction_and_can_be_switched_free():
 
 def test_sell_side_pays_regulatory_fees_and_buy_side_does_not():
     costs = CostConfig()
-    fee = SwingbotFeeModel(costs)
+    fee = TradingBotFeeModel(costs)
 
     class _Inst:
         quote_currency = USD
@@ -436,7 +436,7 @@ def test_sell_side_pays_regulatory_fees_and_buy_side_does_not():
 
 def _seed_store(root, symbols, grid, seed=11):
     """A synthetic bar store on the given naive-ET grid."""
-    from swingbot.data.store import BarStore
+    from tradingbot.data.store import BarStore
 
     rng = np.random.default_rng(seed)
     frames = []
@@ -472,9 +472,9 @@ def test_resuming_from_persisted_state_reproduces_an_uninterrupted_run(tmp_path)
     the bot's equity curve silently depends on how often GitHub Actions happened
     to fire, which is not a property any backtest should have.
     """
-    from swingbot.config import Config
-    from swingbot.nautilus.runner import V2Runner
-    from swingbot.nautilus.signals import AlphaConfig, SizingConfig
+    from tradingbot.config import Config
+    from tradingbot.nautilus.runner import V2Runner
+    from tradingbot.nautilus.signals import AlphaConfig, SizingConfig
 
     symbols = [f"SYM{i:03d}" for i in range(30)]
     grid = _grid(13 * 30)

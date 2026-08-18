@@ -6,7 +6,7 @@
 # push-and-merge rights to your repository is your decision, made after reading
 # it, rather than a side effect of a code change. Nothing else in this repo
 # depends on its location -- the trading loop only reads news/signal.json, which
-# `swingbot news` writes wherever it is run.
+# `tradingbot news` writes wherever it is run.
 #
 # ---------------------------------------------------------------------------
 name: weekend-news
@@ -38,7 +38,7 @@ name: weekend-news
 # multiplicatively so it could never originate a position: v1 was long-only, so
 # its only way to act on bad news was to own less. v2 can short, which makes
 # "the press has turned on this name" a reason to be short it. See
-# swingbot/nautilus/signals.py (NewsConfig2) for the weights and the decay.
+# tradingbot/nautilus/signals.py (NewsConfig2) for the weights and the decay.
 
 on:
   schedule:
@@ -70,8 +70,8 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install swingbot
-        # gymnasium: swingbot.cli imports dashboard.py -> env/trading_env.py at
+      - name: Install tradingbot
+        # gymnasium: tradingbot.cli imports dashboard.py -> env/trading_env.py at
         # module top, which imports gymnasium even though the `news` command
         # never touches the RL env. Same fix as trade.yml.
         run: pip install -e . gymnasium
@@ -84,9 +84,9 @@ jobs:
           fi
           # A single retry: the macro tier is reliable, but a transient DNS or
           # 5xx blip on the company sweep should not cost the whole weekend.
-          python -m swingbot.cli news --out news --config configs/cloud.yaml $EXTRA \
+          python -m tradingbot.cli news --out news --config configs/cloud.yaml $EXTRA \
             || (echo "retrying in 60s" && sleep 60 && \
-                python -m swingbot.cli news --out news --config configs/cloud.yaml $EXTRA)
+                python -m tradingbot.cli news --out news --config configs/cloud.yaml $EXTRA)
 
       - name: Summarise for the commit message
         id: summary
@@ -111,7 +111,7 @@ jobs:
           TOP: ${{ steps.summary.outputs.top }}
         run: |
           set -euo pipefail
-          git config user.name "swingbot"
+          git config user.name "tradingbot"
           git config user.email "actions@users.noreply.github.com"
 
           # Nothing changed (a re-run inside the same news cycle): stop before

@@ -423,3 +423,57 @@ built to express was profitable in backtest at a Sharpe of about 0.2 — thin
 enough that execution cost decides it, and thin enough that a few weeks of
 forward results will not settle anything either. v1's honest epitaph is that it
 ran flawlessly and lost 3.8%; v2 starts with no more right to be believed.
+
+## 13. Renamed to `tradingbot`; exposure limits removed (2026-08-17)
+
+The project is renamed `swingbot` → `tradingbot` (package, CLI, classes,
+`TraderId`), and the stated objective is now explicit: **maximise simulated
+P&L**. To that end every *exposure* limit in the v2 sizing layer became optional
+and defaults to off — no fixed gross target, no per-name cap, no net-exposure
+clamp, and account leverage raised 2 → 20. Book size is set by a **volatility
+target** instead.
+
+**What was deliberately not removed.** The four invariants of §12, the full cost
+model, and the `min_dollar_volume` liquidity floor. These are not risk limits;
+they are what makes the P&L a measurement. A bot that fills on the bar it decided
+from, or trades names too thin to absorb the order, can print any number you
+like — removing them would not make it earn more, it would make the number stop
+being an earning.
+
+**The one-factor vol model was wrong, and measurably so.** Sizing first predicted
+book volatility as `(1−ρ)·Σ(wᵢσᵢ)² + ρ·(Σwᵢσᵢ)²`. The second term keys off the
+*signed* risk sum, which for a dollar-neutral book is ~0 — so the model declared
+a 170-name neutral book almost riskless and the vol target duly levered it to
+**12.3× gross**. Measured against the realized equity curve it was understating
+volatility by a stable **3.3×** (3.36 / 3.33 / 3.26 at targets of 0.35 / 0.20 /
+0.10 — a systematic bias, not noise). At a 35% target the book was realizing
+**117% annualised vol**.
+
+The fix is a third term, `(residual·Σ|wᵢσᵢ|)²`, charging factor risk in
+proportion to *gross* risk — the sector, liquidity and crowding loadings that a
+cross-sectional reversal book does not net away by being dollar-neutral. At
+`residual = 0.21` prediction tracks realization to within **1.07–1.16×**, erring
+slightly conservative. It is calibrated on this universe, not derived, and should
+be re-measured if the universe, cadence or alpha changes.
+
+**Measured, 670 names, 30m bars, 2026-05-24 → 2026-08-17, identical bars and
+costs across variants:**
+
+| variant | gross | equity | return |
+|---|---|---|---|
+| old: gross 1.5×, cap 4%, net 0.30, lev 2 | 1.43× | $96,176 | −3.82% |
+| new: vol-target 35%, no caps, lev 20 | 4.36× | $92,792 | −7.21% |
+| new: vol-target 20%, no caps, lev 20 | 2.43× | $96,381 | −3.62% |
+| new: vol-target 35%, `max_gross 3×` | 2.94× | $92,351 | −7.65% |
+
+**The finding is monotone and it is not the one that was wanted: over this
+window, loss scales with gross.** That is exactly what theory predicts of
+leverage applied to a negative realized edge, and it is the same conclusion §12
+reached from the other direction — the edge is thin enough (backtest Sharpe ~0.2)
+that nothing in the sizing layer decides the outcome. Removing the limits raises
+the ceiling and lowers the floor; it does not create alpha. Sizing is a
+multiplier on an edge, and a multiplier cannot fix the sign of what it multiplies.
+
+Two and a half months is not a verdict on the alpha, and this window is one draw.
+But it is a verdict on the *mechanism*: there is now no cap standing between a
+bad stretch and the account, which is what "no limitations" means in practice.

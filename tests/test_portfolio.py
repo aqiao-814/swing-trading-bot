@@ -6,7 +6,7 @@ from datetime import date
 
 import pytest
 
-from swingbot.portfolio import Fill, Portfolio, Position
+from tradingbot.portfolio import Fill, Portfolio, Position
 
 TS = date(2024, 1, 2)
 
