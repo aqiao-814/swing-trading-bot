@@ -188,7 +188,7 @@ _TEMPLATE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tradingbot — __SYMBOL__ performance</title>
+<title>Trading Bot — __SYMBOL__ performance</title>
 <style>
   :root {
     color-scheme: light dark;
