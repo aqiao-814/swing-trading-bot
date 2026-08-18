@@ -484,7 +484,7 @@ footer.fine{margin-top:34px; color:var(--muted); font-family:var(--mono); font-s
   // ---------- footer ----------
   document.getElementById("footer").innerHTML =
     `<span>Generated ${D.generated||""}</span><span>All capital simulated — no real orders</span>`+
-    `<span>tradingbot · ContinualRRL</span>`;
+    `<span>Trading Bot · ContinualRRL</span>`;
 
   // ---------- render + theme reactivity ----------
   function renderAll(){ rerenders.forEach(f=>f()); }
