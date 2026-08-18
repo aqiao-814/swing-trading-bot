@@ -457,7 +457,8 @@ slightly conservative. It is calibrated on this universe, not derived, and shoul
 be re-measured if the universe, cadence or alpha changes.
 
 **Measured, 670 names, 30m bars, 2026-05-24 → 2026-08-17, identical bars and
-costs across variants:**
+costs across variants** (a *backtest* over the window the live book later turned
+out to have back-filled — see §14):
 
 | variant | gross | equity | return |
 |---|---|---|---|
@@ -477,3 +478,57 @@ multiplier on an edge, and a multiplier cannot fix the sign of what it multiplie
 Two and a half months is not a verdict on the alpha, and this window is one draw.
 But it is a verdict on the *mechanism*: there is now no cap standing between a
 bad stretch and the account, which is what "no limitations" means in practice.
+
+## 14. The first live book was a back-fill; v2's record reset to $100k (2026-08-18)
+
+**The v2 book published as "live" was not a forward record.** Its state read
+`inception: 2026-05-26`, and it got there in a single cron firing. The run loop
+took every completed bar in the store and called it new:
+
+    new_grid = [t for t in grid if last is None or t > last]
+
+`last` is the watermark, and a freshly incepted book has none — so on the first
+firing the condition is vacuously true for the whole store, which reaches back to
+`data_start`. The bot simulated 2026-05-26 → 08-17 in one pass, **13,571 fills**,
+and landed at a balance of **$78,680**. `paper.start` existed and was still set
+to v1's `2026-07-21T15:30`, but nothing in the v2 runner read it; only the
+retired `invest` command did.
+
+None of that is a *simulation* error — the fills obeyed the execution delay, paid
+full costs, and would round-trip. It is a **provenance** error, and a worse one:
+the number was published on a page that says "live" beside a v1 archive whose
+whole point is that a forward record is the only honest test. A back-fill of the
+window the alpha was developed against is exactly the number not to trust, and it
+was sitting in the position marked "trusted".
+
+**Fix: inception is a floor.** `paper.start` now bounds the tradable grid.
+Sub-floor bars are still read — the alpha needs ~262 bars of lookback and losing
+them would just move the distortion into the signal — but they cannot be traded.
+A book with no watermark can no longer mistake the bar store for its own past.
+
+**The same knob is the reset switch.** A stored book whose inception predates the
+floor is *retired* — moved to `artifacts/v2/retired/<inception>/`, published
+along with everything else — and a fresh $100,000 incepts in its place. Deleting
+would have been easier and wrong: the old curve was published, and the site
+rebuilds equity from those parquets, so leaving them in place would have spliced
+the back-fill onto the forward record and drawn the join as one line.
+
+**v2's forward record therefore starts 2026-08-18**, first tradable bar 09:30
+(filling at its 10:00 close), at $100,000 — the same figure v1 started from, so
+the three records (v1, the §13 back-fill, v2 forward) stay comparable instead of
+one continuing another's drawdown.
+
+Verified against the live book before shipping: the 09:00 ET firing retires the
+old state and writes an untouched $100,000 with no positions; with the floor
+moved into the local store's coverage, the same run replays 270 timestamps of
+warmup and trades only the 6 bars at or above it. Four tests pin it — bars below
+the floor are never traded, moving the floor retires and restarts, a book at or
+above the floor is *never* retired (a switch that re-fired every half hour would
+republish a one-bar-old book as the entire record), and an inception that
+precedes its first tradable bar persists immediately, because the dashboard
+export reads `state.json` and the cron starts firing an hour before the first bar
+closes.
+
+**What this costs.** Three months of apparent history, which was never history.
+The forward record is now days old and says so.
+

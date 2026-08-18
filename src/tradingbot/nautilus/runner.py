@@ -18,6 +18,15 @@ plus an exact state round-trip gets the same answer at constant cost per run:
 resuming from persisted state reproduces an uninterrupted run to the cent, and
 there is a test that asserts it.
 
+**Inception is a floor, not a suggestion.** ``paper.start`` fixes the first
+tradable bar. Bars before it are still read -- the alpha needs ~20 sessions of
+lookback -- but they cannot be traded, so a book with no watermark cannot mistake
+the contents of the bar store for its own history. Moving the floor forward is
+also how the record is reset: the run retires the old book under ``retired/``
+and incepts a new one at full capital. Both halves matter, and the first live
+book proved it, incepting itself at ``data_start`` and back-filling three months
+of trading into what was supposed to be a forward record.
+
 **No kill switch, and no exposure limits.** There is no drawdown halt, no
 daily-loss halt, no model-health halt, and no state flag that can stop the bot.
 There is also no gross cap, no per-name cap and no net-exposure clamp unless a
@@ -76,6 +85,11 @@ _ET = ZoneInfo("America/New_York")
 CLOCK_SYMBOL = "__CLOCK"
 
 
+def _inception_instant(value: str | None) -> datetime | None:
+    """``paper.start`` as a naive-ET instant: ``2026-08-18`` or with a time."""
+    return datetime.fromisoformat(value) if value else None
+
+
 @dataclass
 class RunReport:
     bars_processed: int
@@ -122,6 +136,11 @@ class V2Runner:
         self.bar_store = BarStore(cfg.data.root)
         self.store = PaperStore(artifacts)
         self.state_path = Path(artifacts) / "portfolio" / "state.json"
+        # Inception floor (``paper.start``). Two jobs, and they are the same
+        # job: no bar before this instant is ever traded, and a book that
+        # incepted before it is retired and re-incepted at full capital. See
+        # `_load_or_incept`.
+        self.inception = _inception_instant(self.paper.start)
         self.alpha = alpha or AlphaConfig()
         self.sizing = sizing or SizingConfig()
         self.news_cfg = news_cfg or NewsConfig2()
@@ -185,18 +204,37 @@ class V2Runner:
 
     def run(self, *, as_of: datetime | None = None, log=print) -> RunReport:
         state, incepted = self._load_or_incept(log=log)
+        if incepted:
+            # Persist the empty book at once. Inception happens on the first
+            # firing after the floor, which is generally hours before the first
+            # bar closes below it; without this the dashboard export -- which
+            # reads state.json -- would fail on every firing in between.
+            state.save(self.state_path)
         bars = self._completed_bars(as_of)
         if bars.is_empty():
             log("[run] no completed bars in the store")
             return self._empty_report(state, incepted)
 
         grid = sorted(bars["ts"].unique().to_list())
-        last = (
-            datetime.fromisoformat(state.last_processed) if state.last_processed else None
-        )
-        new_grid = [t for t in grid if last is None or t > last]
+        last = datetime.fromisoformat(state.last_processed) if state.last_processed else None
+        # Two independent gates, and the second one only ever matters at
+        # inception. The watermark stops a bar being traded twice. The
+        # inception floor stops a *fresh* book trading bars that predate it --
+        # without it, a book with no watermark treats the entire bar store as
+        # "new" and back-fills months of simulated trading into what is
+        # supposed to be a forward record, dating its own inception to
+        # whatever `data_start` happens to be. Bars below the floor are still
+        # read: they warm the alpha's lookbacks, they are just not tradable.
+        new_grid = [
+            t
+            for t in grid
+            if (last is None or t > last) and (self.inception is None or t >= self.inception)
+        ]
         if not new_grid:
-            log(f"[run] nothing new; watermark still {state.last_processed}")
+            if self.inception is not None and grid and grid[-1] < self.inception:
+                log(f"[run] waiting for inception at {self.inception.isoformat()}")
+            else:
+                log(f"[run] nothing new; watermark still {state.last_processed}")
             return self._empty_report(state, incepted)
 
         # Bounded replay: enough trailing bars to warm the lookbacks, then the
@@ -206,9 +244,7 @@ class V2Runner:
         first_new_idx = grid.index(new_grid[0])
         window = grid[max(0, first_new_idx - warmup) :]
         frame = bars.filter(pl.col("ts").is_in(window))
-        trade_from_ns = int(
-            close_times_ns(pl.Series("ts", [new_grid[0]]), self.interval)[0]
-        )
+        trade_from_ns = int(close_times_ns(pl.Series("ts", [new_grid[0]]), self.interval)[0])
         # Start deciding one bar earlier than trading, so the first tradable bar
         # inherits a pending decision instead of dropping one. At inception
         # there is no earlier bar and none is dropped.
@@ -301,9 +337,7 @@ class V2Runner:
                 # position still needs bars here to keep the stream aligned;
                 # its price is irrelevant because it is never traded on them.
                 avg = book.get(sym, (0.0, 0.0))[1] or float(by_symbol[sym]["close"][0])
-                data = (
-                    synthetic_bars(bt, inst.price_precision, [avg, avg], restore_ts) + data
-                )
+                data = synthetic_bars(bt, inst.price_precision, [avg, avg], restore_ts) + data
             engine.add_data(data, sort=False)
 
         engine.sort_data()
@@ -352,9 +386,37 @@ class V2Runner:
     # ---- persistence -----------------------------------------------------
 
     def _load_or_incept(self, *, log=print) -> tuple[V2State, bool]:
+        """The persisted book, or a fresh one at full capital.
+
+        A stored book is *retired* rather than restored when it incepted before
+        the configured floor (``paper.start``). That is the reset switch, and it
+        is deliberately the same knob that bounds the first tradable bar:
+        moving the floor forward both ends the old record and stops the new one
+        back-filling itself out of whatever history the bar store holds.
+
+        Retiring moves the old book aside under ``retired/<inception>`` instead
+        of deleting it. It was published; a record that has been published is
+        not something to overwrite silently, and the equity curve on the site
+        is rebuilt from these parquets -- leaving them in place would splice the
+        old book's history onto the new book's and call the join an equity
+        curve.
+        """
         if self.state_path.exists():
-            return V2State.load(self.state_path), False
-        log(f"[run] no v2 state -- incepting at ${self.cfg.env.starting_capital:,.0f}, all cash")
+            state = V2State.load(self.state_path)
+            started = _inception_instant(state.inception)
+            if self.inception is None or started is None or started >= self.inception:
+                return state, False
+            self._retire(state, log=log)
+            reason = (
+                f"book incepted {state.inception} predates the configured "
+                f"inception {self.inception.isoformat()}"
+            )
+        else:
+            reason = "no v2 state"
+        log(
+            f"[run] {reason} -- incepting at "
+            f"${self.cfg.env.starting_capital:,.0f}, all cash, no positions"
+        )
         return (
             V2State.incept(
                 universe=self.universe_name,
@@ -364,6 +426,18 @@ class V2Runner:
             ),
             True,
         )
+
+    def _retire(self, state: V2State, *, log=print) -> None:
+        """Move a superseded book's state and history under ``retired/``."""
+        stamp = (state.inception or "unknown").replace(":", "").replace("-", "")
+        dest = self.store.root / "retired" / stamp
+        dest.mkdir(parents=True, exist_ok=True)
+        moved = []
+        for path in sorted(self.store.portfolio_dir.iterdir()):
+            if path.is_file():
+                path.replace(dest / path.name)
+                moved.append(path.name)
+        log(f"[run] retired the book incepted {state.inception} -> {dest} ({len(moved)} files)")
 
     def _extract(self, engine, strategy, state: V2State, new_grid, incepted, *, log=print):
         account = engine.cache.account_for_venue(VENUE)
@@ -431,7 +505,6 @@ class V2Runner:
             last_processed=state.last_processed,
             incepted=incepted,
         )
-
 
     def _append_history(self, strategy, state: V2State, prices: dict[str, float]) -> None:
         """Append this run's ledger, fills, decisions and positions to parquet."""
