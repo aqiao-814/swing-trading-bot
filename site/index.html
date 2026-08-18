@@ -179,6 +179,10 @@
     <b>This is v2, a new bot.</b> It replaced the long-only reinforcement-learning day-trader on the
     NautilusTrader engine, and it starts from a fresh $100,000 — it does not continue v1's book.
     v1's final record and a breakdown of how it worked are kept in the <a href="./v1/">v1 archive</a>.
+    <b>The record restarts 2026-08-18.</b> The curve shown here before that date was a back-fill —
+    the first run traded the whole bar store in one pass instead of starting forward — so it was
+    retired and re-incepted at $100,000. Why, in full:
+    <a href="https://github.com/aqiao-814/swing-trading-bot/blob/main/docs/FINDINGS.md" target="_blank" rel="noopener">FINDINGS §14</a>.
   </span></div>
 
   <div class="hero rise" style="--i:1">
@@ -269,7 +273,10 @@ let RANGE = "all";
 
 function draw(d) {
   const svg = $("chart"), full = d.ledger;
-  if (!full.length) return;
+  if (!full.length) {
+    $("chartSub").textContent = "No bars yet — the record starts with the first bar at or after inception.";
+    return;
+  }
   const spans = {"1d":13, "1w":65, "1m":273, "all":full.length};
   const n = Math.min(full.length, spans[RANGE] || full.length);
   const from = full.length - n;
@@ -349,7 +356,9 @@ function render(d) {
 
   $("heroVal").textContent = usd(s.equity);
   $("heroAll").innerHTML = `<b class="${cls(s.total_return)}">${pct(s.total_return)}</b> from $${(m.starting_capital/1000).toFixed(0)}k`;
-  $("heroSpan").textContent = `${led.length} bars since ${(m.inception||"").slice(0,10)}`;
+  $("heroSpan").textContent = led.length
+    ? `${led.length} bars since ${(m.inception||"").slice(0,10)}`
+    : "incepted — waiting for the first bar to close";
   $("benchChips").innerHTML = Object.entries(d.benchmarks || {}).map(([k,arr]) => {
     const v = arr.filter(x => x != null); if (!v.length) return "";
     const r = v[v.length-1]/v[0]-1;

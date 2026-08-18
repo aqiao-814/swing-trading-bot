@@ -354,7 +354,7 @@ def test_churning_a_neutral_book_on_driftless_noise_loses_on_average():
     """And the economic statement: constant turnover with no view is a losing game."""
     pnls = [_run_churn(seed, charge_costs=True)[0] for seed in (4, 11, 23, 37, 51)]
     assert sum(pnls) / len(pnls) < 0.0, (
-        f"a market-neutral churner on driftless noise averaged {sum(pnls)/len(pnls):,.2f} "
+        f"a market-neutral churner on driftless noise averaged {sum(pnls) / len(pnls):,.2f} "
         "across seeds -- it must lose"
     )
 
@@ -523,3 +523,158 @@ def test_resuming_from_persisted_state_reproduces_an_uninterrupted_run(tmp_path)
     assert resumed.n_positions == whole.n_positions
     assert resumed.n_long == whole.n_long
     assert resumed.n_short == whole.n_short
+
+
+# ---------------------------------------------------------------------------
+# Invariant 5: inception is a floor
+#
+# A forward record has to start when it says it starts. The first live v2 book
+# did not: with no watermark, every bar in the store read as "new", so the run
+# traded 2026-05-26 -> 08-17 in one firing and dated its own inception to
+# `data_start`. These tests pin both halves of the fix -- that bars below the
+# floor are warmup and never tradable, and that moving the floor forward is
+# what retires a book and starts a new record at full capital.
+# ---------------------------------------------------------------------------
+
+
+def _floor_cfg(data_root, start):
+    from tradingbot.config import Config
+
+    cfg = Config()
+    cfg.data.root = data_root
+    cfg.paper.interval = "30m"
+    cfg.paper.data_start = "2026-01-01"
+    cfg.paper.benchmark_symbols = []
+    cfg.paper.start = start
+    cfg.env.starting_capital = 100_000.0
+    return cfg
+
+
+def _floor_runner(cfg, symbols, artifacts):
+    from tradingbot.nautilus.runner import V2Runner
+    from tradingbot.nautilus.signals import AlphaConfig, SizingConfig
+
+    return V2Runner(
+        cfg,
+        symbols=symbols,
+        artifacts=artifacts,
+        alpha=AlphaConfig(reversal_days=1.0, momentum_days=4.0, vol_days=2.0),
+        sizing=SizingConfig(target_gross=1.4, max_position_weight=0.08),
+    )
+
+
+def test_no_bar_before_the_configured_inception_is_ever_traded(tmp_path):
+    """A fresh book trades from `paper.start`, not from the store's first bar."""
+    symbols = [f"SYM{i:03d}" for i in range(20)]
+    grid = _grid(13 * 25)
+    _seed_store(tmp_path / "data", symbols, grid)
+
+    floor = grid[13 * 20]  # three-quarters in: plenty of warmup below it
+    cfg = _floor_cfg(tmp_path / "data", floor.isoformat())
+    report = _floor_runner(cfg, symbols, tmp_path / "art").run(
+        as_of=grid[-1] + timedelta(minutes=31), log=lambda _m: None
+    )
+
+    from tradingbot.nautilus.state import V2State
+
+    state = V2State.load(tmp_path / "art" / "portfolio" / "state.json")
+    assert state.inception == floor.isoformat(), (
+        f"incepted {state.inception}, not the configured {floor.isoformat()} -- "
+        "the book back-filled itself out of the bar store"
+    )
+    # Only the bars at or above the floor were traded, and they all were.
+    assert report.bars_processed == len([t for t in grid if t >= floor])
+
+    ledger = pl.read_parquet(tmp_path / "art" / "portfolio" / "ledger.parquet")
+    assert ledger["ts"].min() >= floor
+    trades = pl.read_parquet(tmp_path / "art" / "portfolio" / "trades.parquet")
+    assert trades["ts"].min() >= floor
+
+
+def test_moving_the_inception_forward_retires_the_book_and_restarts_at_full_capital(tmp_path):
+    """The reset switch: a new floor ends the old record and starts a new one."""
+    from tradingbot.nautilus.state import V2State
+
+    symbols = [f"SYM{i:03d}" for i in range(20)]
+    grid = _grid(13 * 25)
+    _seed_store(tmp_path / "data", symbols, grid)
+    art = tmp_path / "art"
+
+    old_floor = grid[13 * 10]
+    first = _floor_runner(_floor_cfg(tmp_path / "data", old_floor.isoformat()), symbols, art).run(
+        as_of=grid[13 * 20] + timedelta(minutes=31), log=lambda _m: None
+    )
+    assert first.bars_processed > 0
+    assert first.equity != pytest.approx(100_000.0), "no trading happened; nothing to reset"
+
+    new_floor = grid[13 * 20]
+    resumed = _floor_runner(_floor_cfg(tmp_path / "data", new_floor.isoformat()), symbols, art).run(
+        as_of=grid[-1] + timedelta(minutes=31), log=lambda _m: None
+    )
+
+    assert resumed.incepted, "the superseded book was restored instead of retired"
+    state = V2State.load(art / "portfolio" / "state.json")
+    assert state.starting_capital == 100_000.0
+    assert state.inception == new_floor.isoformat()
+    assert state.n_fills == first.fills or state.n_fills > 0
+    # The old book's history is moved aside, not spliced onto the new curve...
+    ledger = pl.read_parquet(art / "portfolio" / "ledger.parquet")
+    assert ledger["ts"].min() >= new_floor
+    # ...and not destroyed either: it was published, so it is kept.
+    retired = list((art / "retired").glob("*/ledger.parquet"))
+    assert len(retired) == 1
+    assert pl.read_parquet(retired[0])["ts"].min() < new_floor
+
+
+def test_a_book_incepted_on_or_after_the_floor_is_never_retired(tmp_path):
+    """The guard that keeps the switch from firing every half hour.
+
+    A reset that re-triggered on each cron firing would silently republish a
+    one-bar-old book as the whole record, forever.
+    """
+    from tradingbot.nautilus.state import V2State
+
+    symbols = [f"SYM{i:03d}" for i in range(20)]
+    grid = _grid(13 * 25)
+    _seed_store(tmp_path / "data", symbols, grid)
+    art = tmp_path / "art"
+    cfg = _floor_cfg(tmp_path / "data", grid[13 * 20].isoformat())
+
+    _floor_runner(cfg, symbols, art).run(
+        as_of=grid[13 * 22] + timedelta(minutes=31), log=lambda _m: None
+    )
+    before = V2State.load(art / "portfolio" / "state.json")
+    again = _floor_runner(cfg, symbols, art).run(
+        as_of=grid[-1] + timedelta(minutes=31), log=lambda _m: None
+    )
+
+    assert not again.incepted
+    assert V2State.load(art / "portfolio" / "state.json").inception == before.inception
+    assert not (art / "retired").exists()
+
+
+def test_a_book_incepted_before_its_first_tradable_bar_persists_immediately(tmp_path):
+    """Inception fires hours before the first bar closes; the site reads a file.
+
+    The cron starts firing at 09:00 ET and the first 30m bar does not complete
+    until 10:00, so between them the book exists and has traded nothing. If that
+    state were not written, every firing in the gap would fail the dashboard
+    export instead of showing an untouched $100,000.
+    """
+    from tradingbot.nautilus.state import V2State
+
+    symbols = [f"SYM{i:03d}" for i in range(10)]
+    grid = _grid(13 * 5)
+    _seed_store(tmp_path / "data", symbols, grid)
+    art = tmp_path / "art"
+
+    floor = grid[-1] + timedelta(days=7)  # nothing in the store reaches it
+    report = _floor_runner(_floor_cfg(tmp_path / "data", floor.isoformat()), symbols, art).run(
+        as_of=grid[-1] + timedelta(minutes=31), log=lambda _m: None
+    )
+
+    assert report.bars_processed == 0
+    state = V2State.load(art / "portfolio" / "state.json")
+    assert state.account_balance == 100_000.0
+    assert state.positions == []
+    assert state.inception is None and state.last_processed is None

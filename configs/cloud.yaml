@@ -42,7 +42,22 @@ paper:
   # wider book means thinner positions rather than more leverage; entries too
   # small to buy a whole share are dropped instead of queued.
   max_positions: null
-  start: '2026-07-21T15:30'
+  # v2's inception, and the FLOOR on the first tradable bar. Bars before it
+  # are fetched and used to warm the alpha's ~20-session lookbacks; none of
+  # them can be traded. Moving this date forward is the reset switch: the next
+  # run retires the book that incepted earlier (under artifacts/v2/retired/)
+  # and incepts a fresh $100,000, all cash.
+  #
+  # 2026-08-18 is v2's real forward record. The first live book incepted itself
+  # at data_start because nothing gated the tradable grid, and back-filled
+  # 2026-05-26 -> 08-17 -- 13,571 fills, ending at $78,680 -- in a single
+  # firing. That is a backtest, not a forward record, and it is kept as one
+  # (FINDINGS 14). The first tradable bar here is the 09:30 bar, which
+  # completes at 10:00 ET.
+  start: '2026-08-18T09:30'
+  # Kept well before `start`: the alpha needs momentum_days=20 sessions (~262
+  # 30m bars) of warmup before the first tradable bar, and Yahoo only serves
+  # ~60 days of 30m history anyway.
   data_start: '2026-05-24'
   pretrain_years: 0.2
   # The seed is trained on daily bars where the recurrence drifted to u>1 (an

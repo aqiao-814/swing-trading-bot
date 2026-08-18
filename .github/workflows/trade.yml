@@ -67,6 +67,12 @@ jobs:
           # v2 keeps its book under state/v2. There is deliberately no migration
           # from v1's state/paper: v2 incepts fresh at $100k so the two records
           # are comparable rather than one continuing the other's drawdown.
+          #
+          # Restoring is not the same as keeping. The run checks the restored
+          # book's inception against `paper.start` in configs/cloud.yaml and
+          # retires it -- into artifacts/v2/retired/, which is published too --
+          # if it incepted earlier. Bumping that date is the reset switch; this
+          # step stays the same either way.
           if [ -d /tmp/site/state/v2 ]; then
             cp -r /tmp/site/state/v2 artifacts/v2
             echo "restored v2 book through $(python -c "import json;print(json.load(open('artifacts/v2/portfolio/state.json'))['last_processed'])")"

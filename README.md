@@ -5,8 +5,8 @@ Autonomous **long/short** paper-trading bot on the
 **https://aqiao-814.github.io/swingbot-live/**
 
 $100k simulated capital · **~670 liquid US stocks** · 30-minute bars · **long and
-short, held overnight, on margin** · no kill switch. **Every dollar is
-simulated** — there are no brokerage credentials and no code path that can place
+short, held overnight, on margin** · no kill switch. The forward record runs
+from **2026-08-18**. **Every dollar is simulated** — there are no brokerage credentials and no code path that can place
 a real order. Research history and measured results:
 [docs/FINDINGS.md](docs/FINDINGS.md).
 
@@ -59,9 +59,9 @@ only test.
   annualised (~4.4× equity on the live universe, against the old fixed 1.5×), so
   it levers into a calm cross-section and out of a violent one. Every limit is
   still *settable* (`--max-gross`, `--max-weight`, `--max-net`); none is set by
-  default. Measured consequence, honestly: over 2026-05-24→08-17 the bigger book
-  lost **more** (−7.2% vs −3.8%), because leverage multiplies a negative realized
-  edge just as faithfully as a positive one. See FINDINGS §13.
+  default. Measured consequence, honestly: **backtested** over 2026-05-24→08-17
+  the bigger book lost **more** (−7.2% vs −3.8%), because leverage multiplies a
+  negative realized edge just as faithfully as a positive one. See FINDINGS §13.
 - **It holds overnight.** No flat-by-close, no liquidation, no gap avoidance —
   which is the whole point, because the signal it trades takes about three days
   to pay.
@@ -124,6 +124,14 @@ book with the fee model switched **free** (cleared on a *later* bar, because
 fills settle after the callback that submits them returns). A resumed run
 reproduces an uninterrupted one **to the cent**, and there is a test for it.
 
+**Inception** (`paper.start` in `configs/cloud.yaml`) is a *floor*, not a label.
+Bars before it are fetched and feed the alpha's ~20-session lookbacks, but none
+of them can be traded — so a book with no watermark cannot mistake the contents
+of the bar store for its own history. Moving the date forward is also the reset
+switch: the next run retires the earlier book under `artifacts/v2/retired/`
+(kept, not deleted — it was published) and incepts a fresh $100,000. Both halves
+were learned the expensive way; see FINDINGS §14.
+
 **Costs** (`nautilus/costs.py`). Every friction — half-spread, slippage,
 square-root impact, SEC §31, FINRA TAF — is charged as an explicit Nautilus
 commission rather than baked into the fill price. The P&L is identical either
@@ -161,6 +169,9 @@ new engine:
    of the identical trades, so the difference is friction exactly and luck cannot
    pass the test.
 4. **State round-trip** — stop, persist, resume, and land on the same book.
+5. **Inception is a floor** — no bar before `paper.start` is ever tradable, so a
+   fresh book starts a forward record instead of back-filling one out of
+   whatever history the bar store happens to hold.
 
 ## Deployment (all free)
 
@@ -181,7 +192,7 @@ new engine:
 ## Local use
 
 ```bash
-make test                       # 251 tests
+make test                       # 293 tests
 tradingbot trade                  # run the v2 loop locally
 tradingbot news --out news        # collect the weekend news signal
 python scripts/export_site_data.py
