@@ -1,4486 +1,1014 @@
 {
-  "as_of": "2026-10-04T17:20:43.201693+00:00",
-  "macro": 0.154668,
-  "macro_articles": 124,
-  "mean_score": 0.207352,
+  "as_of": "2026-10-10T17:41:06.057389+00:00",
+  "macro": 0.103973,
+  "macro_articles": 130,
+  "mean_score": 0.107643,
   "sources": {
     "cnbc-business": 46,
-    "cnbc-earnings": 15,
-    "cnbc-economy": 14,
-    "cnbc-finance": 7,
-    "cnbc-markets": 28,
-    "cnbc-tech": 26,
-    "fed-press": 4,
-    "mw-bulletins": 11,
-    "mw-markets": 73,
-    "mw-top": 17,
-    "yahoo": 2764
+    "cnbc-earnings": 17,
+    "cnbc-economy": 16,
+    "cnbc-finance": 14,
+    "cnbc-markets": 24,
+    "cnbc-tech": 23,
+    "fed-press": 3,
+    "mw-bulletins": 12,
+    "mw-markets": 76,
+    "mw-top": 19,
+    "yahoo": 226
   },
   "symbols": {
     "A": {
-      "articles": 6,
+      "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.459314,
-      "score": 0.666667,
-      "top_headline": "Agilent (A) Up 9.6% Since Last Earnings Report: Can It Continue?",
-      "weight": 0.085661
-    },
-    "AA": {
-      "articles": 1,
-      "raw_score": -0.5,
-      "relative": -0.332352,
-      "score": -0.125,
-      "top_headline": "What Does Alcoa (AA) Debt Financing Mean For Its Planned Asset Acquisition?",
-      "weight": 0.008373
+      "relative": 0.292357,
+      "score": 0.4,
+      "top_headline": "T. Rowe Price\u2019s New Active Biotech and Small-Cap ETFs Might Change The Case For Investing In TROW",
+      "weight": 0.004551
     },
     "AAPL": {
-      "articles": 21,
-      "raw_score": 0.447662,
-      "relative": 0.184352,
-      "score": 0.391704,
+      "articles": 5,
+      "raw_score": 0.32358,
+      "relative": 0.094595,
+      "score": 0.202238,
       "top_headline": "Trump\u2019s AI lunch included every major tech company. Except Apple",
-      "weight": 0.643209
-    },
-    "ABBV": {
-      "articles": 9,
-      "raw_score": 0.333127,
-      "relative": 0.042493,
-      "score": 0.249845,
-      "top_headline": "ABBV vs. JNJ: One of These Dividend Aristocrats Will Crush the Other Over the Next Decade",
-      "weight": 0.11195
+      "weight": 0.057884
     },
     "ABNB": {
-      "articles": 8,
-      "raw_score": -0.474986,
-      "relative": -0.552796,
-      "score": -0.345444,
-      "top_headline": "Airbnb\u2019s CEO Was Drowning in Meetings. Then He Built an AI \u2018Brain\u2019 That Cut Them in Half.",
-      "weight": 0.107579
-    },
-    "ABT": {
-      "articles": 5,
-      "raw_score": 0.376999,
-      "relative": 0.028272,
-      "score": 0.235625,
-      "top_headline": "What Makes Abbott Laboratories (ABT) an Attractive Opportunity?",
-      "weight": 0.042245
-    },
-    "ACN": {
-      "articles": 6,
-      "raw_score": 0.356276,
-      "relative": 0.030165,
-      "score": 0.237518,
-      "top_headline": "How Much Downside Is Left In Accenture Stock?",
-      "weight": 0.106243
-    },
-    "ADBE": {
-      "articles": 7,
-      "raw_score": 0.640512,
-      "relative": 0.241007,
-      "score": 0.448359,
-      "top_headline": "Adobe Stock And 2 Other AI Stocks To Own",
-      "weight": 0.131898
-    },
-    "ADI": {
-      "articles": 5,
-      "raw_score": 0.971215,
-      "relative": 0.399657,
-      "score": 0.607009,
-      "top_headline": "ADI vs. MCHP: Which Semiconductor Stock Has an Upside Now?",
-      "weight": 0.07953
+      "articles": 1,
+      "raw_score": -0.411765,
+      "relative": -0.210584,
+      "score": -0.102941,
+      "top_headline": "Airbnb (ABNB) CEO Cuts Meetings In Half With AI Management Overhaul",
+      "weight": 0.003164
     },
     "ADM": {
-      "articles": 5,
-      "raw_score": 0.399313,
-      "relative": 0.042218,
-      "score": 0.249571,
-      "top_headline": "These 3 Overlooked Stocks Have Big Money Behind Them",
-      "weight": 0.046802
-    },
-    "ADP": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "ADP (ADP) Stock May Be Close To Fair Value Today",
-      "weight": 0.008775
-    },
-    "ADSK": {
-      "articles": 4,
-      "raw_score": 0.090091,
-      "relative": -0.155871,
-      "score": 0.051481,
-      "top_headline": "Design Software Stocks Q2 In Review: Autodesk (NASDAQ:ADSK) Vs Peers",
-      "weight": 0.047673
-    },
-    "AEE": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Ameren (AEE) Stock May Be Fairly Valued Despite Infrastructure Jobs Study",
-      "weight": 0.034497
-    },
-    "AEHR": {
       "articles": 1,
-      "raw_score": 0.75,
-      "relative": -0.019852,
-      "score": 0.1875,
-      "top_headline": "AEHR at 18.59X Sales: Market Loves Its AI Story, But is Love Blind?",
-      "weight": 0.005426
-    },
-    "AEM": {
-      "articles": 3,
-      "raw_score": 0.862038,
-      "relative": 0.223667,
-      "score": 0.431019,
-      "top_headline": "Can Agnico Eagle Sustain Its Shareholder-Friendly Capital Strategy?",
-      "weight": 0.028448
-    },
-    "AES": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "How Is AES Corporation's Stock Performance Compared to Other Utility Stocks",
-      "weight": 0.002332
-    },
-    "AFL": {
-      "articles": 2,
-      "raw_score": 0.796076,
-      "relative": 0.111078,
-      "score": 0.31843,
-      "top_headline": "Is Aflac (AFL) Fairly Valued Following Mixed Earnings And Another Dividend Increase?",
-      "weight": 0.015311
-    },
-    "AFRM": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Can Affirm Sustain Profitability Amid Funding Cost Pressures?",
-      "weight": 0.012772
-    },
-    "AGI": {
-      "articles": 1,
-      "raw_score": 0.375,
-      "relative": -0.113602,
-      "score": 0.09375,
-      "top_headline": "Will Young-Davidson Setbacks Weigh on Alamos Gold's Performance?",
-      "weight": 0.020934
-    },
-    "AIG": {
-      "articles": 2,
-      "raw_score": 0.649118,
-      "relative": 0.052295,
-      "score": 0.259647,
-      "top_headline": "How AIG Is Protecting Underwriting Quality as Property Pricing Softens",
-      "weight": 0.008851
-    },
-    "AJG": {
-      "articles": 3,
-      "raw_score": 0.697482,
-      "relative": 0.141389,
-      "score": 0.348741,
-      "top_headline": "Is Arthur J. Gallagher (AJG) Still Trading Below Fair Value?",
-      "weight": 0.04796
-    },
-    "AKAM": {
-      "articles": 5,
-      "raw_score": 0.916765,
-      "relative": 0.365626,
-      "score": 0.572978,
-      "top_headline": "Why Akamai Technologies (AKAM) Is Up 9.0% After Massive Anthropic AI Cloud Deal - And What's Next",
-      "weight": 0.116694
-    },
-    "ALAB": {
-      "articles": 2,
-      "raw_score": 0.564019,
-      "relative": 0.018255,
-      "score": 0.225608,
-      "top_headline": "Astera Labs, Inc. (ALAB) Exceeds Market Returns: Some Facts to Consider",
-      "weight": 0.022521
-    },
-    "ALB": {
-      "articles": 2,
-      "raw_score": -0.222451,
-      "relative": -0.296333,
-      "score": -0.088981,
-      "top_headline": "Albemarle (ALB) Falls More Steeply Than Broader Market: What Investors Need to Know",
-      "weight": 0.008961
-    },
-    "ALL": {
-      "articles": 3,
-      "raw_score": 0.075261,
-      "relative": -0.169722,
-      "score": 0.037631,
-      "top_headline": "Allstate (ALL) Stock Still Looks Undervalued Despite Fresh Catastrophe Losses",
-      "weight": 0.106966
-    },
-    "AMAT": {
-      "articles": 6,
-      "raw_score": 0.813242,
-      "relative": 0.334809,
-      "score": 0.542162,
-      "top_headline": "Applied Materials (AMAT), What Is Behind The Fresh Attention Today?",
-      "weight": 0.077137
-    },
-    "AMCR": {
-      "articles": 2,
-      "raw_score": 0.636021,
-      "relative": 0.047056,
-      "score": 0.254408,
-      "top_headline": "Amcor Stock: Is AMCR Outperforming the Consumer Cyclical Sector?",
-      "weight": 0.020806
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "Deere, ADM and Bunge: 3 Farm Stocks Giving Investors Dividends For America\u2019s Harvest",
+      "weight": 0.001748
     },
     "AMD": {
-      "articles": 10,
-      "raw_score": 0.876352,
-      "relative": 0.466764,
-      "score": 0.674117,
-      "top_headline": "Microsoft, Meta, Akamai, Zscaler, Comcast, and More Stocks That Explain Today\u2019s Market",
-      "weight": 0.241274
-    },
-    "AMGN": {
-      "articles": 6,
-      "raw_score": 0.90011,
-      "relative": 0.392721,
-      "score": 0.600073,
-      "top_headline": "Bet on These 5 Dividend Growth Stocks Amid Rising Treasury Yields",
-      "weight": 0.090155
-    },
-    "AMKR": {
       "articles": 4,
-      "raw_score": 0.776071,
-      "relative": 0.236117,
-      "score": 0.443469,
-      "top_headline": "Is Amkor Technology (AMKR) Arizona Expansion A Turning Point For Its U.S. Growth?",
-      "weight": 0.049225
-    },
-    "AMT": {
-      "articles": 7,
-      "raw_score": 0.459209,
-      "relative": 0.114094,
-      "score": 0.321446,
-      "top_headline": "American Tower\u2019s Dividend Strength Hinges on Tower Lease Economics and Data Center Expansion",
-      "weight": 0.104462
+      "raw_score": 1.0,
+      "relative": 0.463786,
+      "score": 0.571429,
+      "top_headline": "Intel CEO Lip-Bu Tan Has Incredible News for AMD Stock Investors",
+      "weight": 0.011648
     },
     "AMZN": {
-      "articles": 23,
-      "raw_score": 0.617938,
-      "relative": 0.339286,
-      "score": 0.546638,
-      "top_headline": "What Does Best Buy (BBY) Fire TV Deal Mean For Its Ad Business?",
-      "weight": 0.399181
-    },
-    "ANET": {
-      "articles": 4,
-      "raw_score": 0.795774,
-      "relative": 0.247376,
-      "score": 0.454728,
-      "top_headline": "Arista Networks (ANET) Draws Fresh AI Attention, Is The Stock Still Cheap?",
-      "weight": 0.097787
-    },
-    "AOS": {
-      "articles": 1,
+      "articles": 6,
       "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "4 Manufacturing Electronics Stocks to Watch on Promising Industry Trends",
-      "weight": 0.019646
-    },
-    "APA": {
-      "articles": 5,
-      "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
-      "top_headline": "APA (APA) Just Gave Investors Something To Think About",
-      "weight": 0.080921
-    },
-    "APD": {
-      "articles": 2,
-      "raw_score": 0.650037,
-      "relative": 0.052663,
-      "score": 0.260015,
-      "top_headline": "Here's What Makes APD Stock an Attractive Investment Option Now",
-      "weight": 0.014709
-    },
-    "APH": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Buy 3 AI-Led Stocks Amid Solid Estimate Revisions and Upside Potential",
-      "weight": 0.061262
-    },
-    "APO": {
-      "articles": 3,
-      "raw_score": 0.574876,
-      "relative": 0.080086,
-      "score": 0.287438,
-      "top_headline": "Apollo Global Management Sees AI, Private Credit and Retirement Driving Growth",
-      "weight": 0.023439
+      "relative": 0.559024,
+      "score": 0.666667,
+      "top_headline": "Amazon overhauls aging devices lineup with higher-priced Alexa tablet, dumping the budget Fire",
+      "weight": 0.366012
     },
     "APP": {
-      "articles": 4,
-      "raw_score": -0.575562,
-      "relative": -0.536245,
-      "score": -0.328893,
-      "top_headline": "AppLovin (APP) Could Be 50% Undervalued Following Rosen Lawsuit Pressure",
-      "weight": 0.127591
-    },
-    "AR": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Data Center Buildout Boosts Natural Gas Use: WMB, AR & KMI to Gain?",
-      "weight": 0.014661
-    },
-    "ARES": {
-      "articles": 2,
-      "raw_score": 0.694687,
-      "relative": 0.070523,
-      "score": 0.277875,
-      "top_headline": "Ares Management (ARES) Could Be 17% Undervalued Following Its $2.4b Logistics Venture",
-      "weight": 0.043862
-    },
-    "ARM": {
-      "articles": 3,
-      "raw_score": 0.421662,
-      "relative": 0.003479,
-      "score": 0.210831,
-      "top_headline": "Arm Holdings (ARM) Stock Gains On AI CPU Demand Surge",
-      "weight": 0.058541
-    },
-    "ARWR": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "ARWR Stock: Goldman Sachs Resumes Coverage With $74 Target As Clinical Catalysts Near",
-      "weight": 0.014329
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "AppLovin Stock Is Down 54% in 2026 and Facing a Class Action. Here\u2019s Where It Could Go",
+      "weight": 0.001689
     },
     "ASML": {
-      "articles": 6,
-      "raw_score": 0.524843,
-      "relative": 0.142543,
-      "score": 0.349896,
-      "top_headline": "ASML (ENXTAM:ASML) Stock Could Be Undervalued Following Fresh AI Demand News",
-      "weight": 0.093478
-    },
-    "ASTS": {
-      "articles": 2,
-      "raw_score": -1.0,
-      "relative": -0.607352,
-      "score": -0.4,
-      "top_headline": "Is AST SpaceMobile (ASTS) A Bargain As Lawsuit And Financing Questions Test Its Valuation?",
-      "weight": 0.020433
-    },
-    "ATI": {
-      "articles": 4,
-      "raw_score": 0.958406,
-      "relative": 0.340308,
-      "score": 0.54766,
-      "top_headline": "ATI (ATI) Upgraded to Strong Buy: Here's Why",
-      "weight": 0.073903
-    },
-    "AU": {
       "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Here's Why AngloGold Ashanti (AU) Fell More Than Broader Market",
-      "weight": 0.003953
-    },
-    "AVAV": {
-      "articles": 2,
-      "raw_score": 0.526783,
-      "relative": 0.003361,
-      "score": 0.210713,
-      "top_headline": "AVAV vs. RTX: Which Aerospace-Defense Stock Offers More Potential?",
-      "weight": 0.020776
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "ASML (ENXTAM:ASML) Stock Could Be Undervalued Following Fresh AI Demand News",
+      "weight": 0.004226
     },
     "AVGO": {
-      "articles": 6,
-      "raw_score": 0.672015,
-      "relative": 0.240658,
-      "score": 0.44801,
-      "top_headline": "NVIDIA (NVDA) vs. Broadcom (AVGO): Which AI Chip Stock Has the Stronger Moat?",
-      "weight": 0.095016
-    },
-    "AVY": {
-      "articles": 3,
-      "raw_score": 0.272334,
-      "relative": -0.071185,
-      "score": 0.136167,
-      "top_headline": "3 Packaging Stocks Worth Watching Despite Industry Pressure",
-      "weight": 0.075422
+      "articles": 2,
+      "raw_score": 0.406509,
+      "relative": 0.054961,
+      "score": 0.162603,
+      "top_headline": "Broadcom vs. Marvell: The AI Supercycle Is Big Enough for Both. Here's the Better Buy.",
+      "weight": 0.006532
     },
     "AWK": {
       "articles": 2,
       "raw_score": 0.676197,
-      "relative": 0.063127,
+      "relative": 0.162836,
       "score": 0.270479,
       "top_headline": "American Water Works (AWK) Stock Looks Fully Priced On Its 14% Three Year Gain",
-      "weight": 0.050203
-    },
-    "AXON": {
-      "articles": 3,
-      "raw_score": -0.183737,
-      "relative": -0.299221,
-      "score": -0.091869,
-      "top_headline": "Axon Enterprise (AXON) Suffers a Larger Drop Than the General Market: Key Insights",
-      "weight": 0.033512
-    },
-    "AXP": {
-      "articles": 3,
-      "raw_score": -0.278917,
-      "relative": -0.346811,
-      "score": -0.139459,
-      "top_headline": "Exclusivity Lite? Everyday Brands Help Sell Near-Premium Credit Cards",
-      "weight": 0.0275
-    },
-    "AZN": {
-      "articles": 3,
-      "raw_score": 0.709991,
-      "relative": 0.147643,
-      "score": 0.354995,
-      "top_headline": "AstraZeneca's Trixeo Secures Approval for Asthma in the EU",
-      "weight": 0.036197
-    },
-    "AZO": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Did Record Q4 Results and Store Expansion Just Shift AutoZone\u2019s (AZO) Investment Narrative?",
-      "weight": 0.064951
+      "weight": 0.006245
     },
     "BA": {
-      "articles": 13,
-      "raw_score": -0.503655,
-      "relative": -0.616572,
-      "score": -0.40922,
+      "articles": 6,
+      "raw_score": -1.0,
+      "relative": -0.774309,
+      "score": -0.666667,
       "top_headline": "Alaska Airlines CEO 'not overly concerned' about new Boeing Max 10 delay",
-      "weight": 0.309053
+      "weight": 0.024559
     },
     "BABA": {
-      "articles": 2,
-      "raw_score": -0.288713,
-      "relative": -0.322837,
-      "score": -0.115485,
-      "top_headline": "What Does Alibaba (BABA) Facing A Securities Fraud Probe Mean Now?",
-      "weight": 0.03631
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Is Alibaba (BABA)\u2019s AI Investment Strategy Sustainable?",
+      "weight": 0.001606
     },
     "BAC": {
-      "articles": 26,
-      "raw_score": -0.027269,
-      "relative": -0.2318,
-      "score": -0.024448,
-      "top_headline": "Microsoft, Meta, Akamai, Zscaler, Comcast, and More Stocks That Explain Today\u2019s Market",
-      "weight": 0.414435
-    },
-    "BALL": {
-      "articles": 1,
-      "raw_score": 0.230769,
-      "relative": -0.14966,
-      "score": 0.057692,
-      "top_headline": "Ball (BALL): Buy, Sell, or Hold Post Q2 Earnings?",
-      "weight": 0.011967
-    },
-    "BAX": {
-      "articles": 1,
-      "raw_score": 0.52381,
-      "relative": -0.0764,
-      "score": 0.130952,
-      "top_headline": "Here's Why You Should Retain Baxter Stock in Your Portfolio for Now",
-      "weight": 0.014824
+      "articles": 3,
+      "raw_score": 0.086532,
+      "relative": -0.064377,
+      "score": 0.043266,
+      "top_headline": "Bank of America drops bombshell verdict on Nike stock",
+      "weight": 0.006844
     },
     "BBY": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "What Does Best Buy (BBY) Fire TV Deal Mean For Its Ad Business?",
-      "weight": 0.097951
-    },
-    "BE": {
-      "articles": 2,
-      "raw_score": -0.058,
-      "relative": -0.230552,
-      "score": -0.0232,
-      "top_headline": "Is Bloom Energy Stock's Drop A Chance To Buy?",
-      "weight": 0.062997
-    },
-    "BEN": {
-      "articles": 2,
-      "raw_score": 0.304419,
-      "relative": -0.085585,
-      "score": 0.121768,
-      "top_headline": "Franklin Resources (BEN) Surged 47.3% in Q2: Why Investors Took Notice",
-      "weight": 0.007921
-    },
-    "BG": {
       "articles": 1,
-      "raw_score": -0.111111,
-      "relative": -0.23513,
-      "score": -0.027778,
-      "top_headline": "Is Bunge (BG) Quietly Redefining Its Risk Profile With Extended US$8.8 Billion Credit Lines?",
-      "weight": 0.004914
-    },
-    "BHP": {
-      "articles": 3,
-      "raw_score": 0.67232,
-      "relative": 0.128808,
-      "score": 0.33616,
-      "top_headline": "Arizona Eagle uncovers deeper shaft, advances McCabe gold redevelopment strategy",
-      "weight": 0.032577
-    },
-    "BIDU": {
-      "articles": 3,
-      "raw_score": -0.720304,
-      "relative": -0.567504,
-      "score": -0.360152,
-      "top_headline": "Moody\u2019s cuts Baidu outlook to negative as AI capital costs weigh on margins",
-      "weight": 0.038642
-    },
-    "BIIB": {
-      "articles": 3,
       "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Biogen (NASDAQ:BIIB) Q2 Earnings: Leading The Therapeutics Pack",
-      "weight": 0.026296
-    },
-    "BKNG": {
-      "articles": 5,
-      "raw_score": -0.134354,
-      "relative": -0.291323,
-      "score": -0.083971,
-      "top_headline": "Emerald Wealth Partners Added Booking Holdings (BKNG) as AI Creates New Growth Opportunities",
-      "weight": 0.072665
-    },
-    "BLDR": {
-      "articles": 3,
-      "raw_score": 0.061846,
-      "relative": -0.176429,
-      "score": 0.030923,
-      "top_headline": "Builders FirstSource (BLDR) Joins A Small Cap Value Index",
-      "weight": 0.018737
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "What Does Best Buy (BBY) Fire TV Deal Mean For Its Ad Business?",
+      "weight": 0.008744
     },
     "BLK": {
-      "articles": 4,
-      "raw_score": 0.581338,
-      "relative": 0.124841,
-      "score": 0.332193,
-      "top_headline": "Six Investing Pros Weigh In on Surging Yields\u2014and How to Trade Them",
-      "weight": 0.072157
-    },
-    "BMNR": {
-      "articles": 1,
+      "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Why Is BitMine Immersion Stock Surging Monday?",
-      "weight": 0.010345
-    },
-    "BMY": {
-      "articles": 7,
-      "raw_score": 0.540592,
-      "relative": 0.171062,
-      "score": 0.378414,
-      "top_headline": "New Strong Buy Stocks for September 24th",
-      "weight": 0.071636
-    },
-    "BN": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Lorne Steinberg Wealth Management Favors Brookfield (BN) as a Global Asset Management Compounder",
-      "weight": 0.006949
+      "relative": 0.292357,
+      "score": 0.4,
+      "top_headline": "Six Investing Pros Weigh In on Surging Yields\u2014and How to Trade Them",
+      "weight": 0.005398
     },
     "BOOT": {
-      "articles": 3,
-      "raw_score": 0.779486,
-      "relative": 0.182391,
-      "score": 0.389743,
-      "top_headline": "Boot Barn Holdings (BOOT) On 70 Store Growth Plans And The Valuation Debate",
-      "weight": 0.132383
-    },
-    "BR": {
       "articles": 1,
-      "raw_score": 0.545455,
-      "relative": -0.070989,
-      "score": 0.136364,
-      "top_headline": "Tokenized Equities and AI Disruption Threaten Broadridge Financial Solutions\u2019 (BR) Market Share",
-      "weight": 0.010293
+      "raw_score": 0.649123,
+      "relative": 0.054638,
+      "score": 0.162281,
+      "top_headline": "Boot Barn Holdings (BOOT) On 70 Store Growth Plans And The Valuation Debate",
+      "weight": 0.010349
     },
     "BRK-B": {
-      "articles": 13,
-      "raw_score": -0.122955,
-      "relative": -0.307253,
-      "score": -0.099901,
-      "top_headline": "Warren Buffett Steps Down as Berkshire Hathaway Chairman After Warning U.S. Dollar Is \u2018Going to Hell\u2019",
-      "weight": 0.18711
-    },
-    "BRO": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Brown & Brown (BRO) Appoints Erik Templin To Lead North America Employee Benefits",
-      "weight": 0.003094
-    },
-    "BSX": {
       "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Will Boston Scientific's Upcoming Launches Fuel the Next Growth Phase?",
-      "weight": 0.006815
-    },
-    "BURL": {
-      "articles": 2,
-      "raw_score": 0.797653,
-      "relative": 0.111709,
-      "score": 0.319061,
-      "top_headline": "Burlington Stores (BURL) Looks 30% Below Fair Value, Is The Premium P/E Still Justified?",
-      "weight": 0.035408
-    },
-    "BWXT": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Nuclear Energy Stocks Rally as Demand for Reliable Clean Power Grows",
-      "weight": 0.020185
-    },
-    "BX": {
-      "articles": 4,
-      "raw_score": -0.334175,
-      "relative": -0.398309,
-      "score": -0.190957,
-      "top_headline": "Blackstone (BX) Stock Seems Reasonable On A 30% One Year Fall",
-      "weight": 0.105553
-    },
-    "BXP": {
-      "articles": 1,
-      "raw_score": -0.090909,
-      "relative": -0.23008,
-      "score": -0.022727,
-      "top_headline": "Is BXP Stock Underperforming the Dow?",
-      "weight": 0.014909
+      "raw_score": -1.0,
+      "relative": -0.507643,
+      "score": -0.4,
+      "top_headline": "Warren Buffett Steps Down as Chairman of Berkshire Hathaway: Here Are 3 of His Biggest Investing Lessons You Need to Know",
+      "weight": 0.003051
     },
     "C": {
-      "articles": 7,
-      "raw_score": 1.0,
-      "relative": 0.492648,
-      "score": 0.7,
-      "top_headline": "Citi\u2019s Profit Is Up 45%, and Its Stock Is Up 13% This Year, So What Is Left to Earn?",
-      "weight": 0.110843
-    },
-    "CAG": {
-      "articles": 4,
-      "raw_score": 0.500223,
-      "relative": 0.078489,
-      "score": 0.285842,
-      "top_headline": "Conagra Brands (CAG) Releases Snacking Report As Bold Flavor Trends Come Into Focus",
-      "weight": 0.055068
-    },
-    "CAH": {
-      "articles": 3,
-      "raw_score": 0.752112,
-      "relative": 0.168704,
-      "score": 0.376056,
-      "top_headline": "Cardinal Health vs. McKesson: Which Healthcare Stock Is Better?",
-      "weight": 0.054114
-    },
-    "CARR": {
       "articles": 1,
-      "raw_score": -0.428571,
-      "relative": -0.314495,
-      "score": -0.107143,
-      "top_headline": "Carrier Global (CARR) Guidance Puts Its Undervalued Narrative Back In Focus",
-      "weight": 0.015159
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Citigroup Upgraded Its Outlook. Is It Already Priced In?",
+      "weight": 0.002668
     },
     "CAT": {
-      "articles": 7,
-      "raw_score": 0.422775,
-      "relative": 0.08859,
-      "score": 0.295942,
-      "top_headline": "Can Caterpillar (CAT) Keep Growing as Construction Slows? AI May Hold the Key",
-      "weight": 0.095141
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "Atlas Energy Solutions (AESI) Expands Into AI Power, Is 33% Undervalued?",
+      "weight": 0.00143
     },
     "CAVA": {
-      "articles": 4,
-      "raw_score": 0.810987,
-      "relative": 0.256069,
-      "score": 0.463421,
-      "top_headline": "CAVA (CAVA) Stock Still Looks Above Fair Value Despite Buyback News",
-      "weight": 0.10615
-    },
-    "CBRE": {
-      "articles": 3,
-      "raw_score": 0.440933,
-      "relative": 0.013114,
-      "score": 0.220466,
-      "top_headline": "Is CBRE Group (CBRE) Undervalued After Its New Texas Data Center Contract?",
-      "weight": 0.074208
-    },
-    "CCEP": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "Coca-Cola Europacific Partners (ENXTAM:CCEP) Stock Could Be 37% Undervalued On Cash Flow",
-      "weight": 0.016305
-    },
-    "CCJ": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Here's Why Cameco (CCJ) Fell More Than Broader Market",
-      "weight": 0.005477
+      "top_headline": "CAVA (CAVA) Stock Still Looks Above Fair Value Despite Buyback News",
+      "weight": 0.010054
     },
     "CCL": {
-      "articles": 13,
-      "raw_score": 0.280018,
-      "relative": 0.020162,
-      "score": 0.227515,
-      "top_headline": "Ahead of Carnival Earnings, Here's What Barchart Data Says Comes Next for CCL Stock",
-      "weight": 0.263761
-    },
-    "CDE": {
       "articles": 1,
-      "raw_score": -0.354839,
-      "relative": -0.296062,
-      "score": -0.08871,
-      "top_headline": "Should You Sell Your Coeur Mining Stock Now?",
-      "weight": 0.034882
-    },
-    "CDNS": {
-      "articles": 6,
-      "raw_score": 0.472389,
-      "relative": 0.107574,
-      "score": 0.314926,
-      "top_headline": "Cadence Design Systems (CDNS) Unveils AI RTL Generation Agent",
-      "weight": 0.073699
-    },
-    "CE": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Celanese (CE) Announces Chemical Price Increases. Can Margins Improve?",
-      "weight": 0.008646
-    },
-    "CEG": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Constellation vs. Vistra: Which AI Power Stock Is the Better Buy?",
-      "weight": 0.027421
-    },
-    "CELH": {
-      "articles": 3,
-      "raw_score": -0.504224,
-      "relative": -0.459464,
-      "score": -0.252112,
-      "top_headline": "What Is The One Risk Every Celsius Investor Should Know?",
-      "weight": 0.02837
-    },
-    "CF": {
-      "articles": 4,
-      "raw_score": -0.514356,
-      "relative": -0.50127,
-      "score": -0.293918,
-      "top_headline": "CF Industries Holdings (CF) Is Down 6.1% After Trump Floats Cheaper Belarus Potash Imports Proposal",
-      "weight": 0.023579
-    },
-    "CFG": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Citizens Financial Stock: Is CFG Outperforming the Financial Sector?",
-      "weight": 0.007364
-    },
-    "CG": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "Is Carlyle Group (CG) A Bargain After Exiger's AI Platform Launch?",
-      "weight": 0.004706
-    },
-    "CHD": {
-      "articles": 1,
-      "raw_score": 0.375,
-      "relative": -0.113602,
-      "score": 0.09375,
-      "top_headline": "Church & Dwight (CHD) Could Be 9% Undervalued On Its Growth Narrative",
-      "weight": 0.009974
-    },
-    "CHRW": {
-      "articles": 2,
-      "raw_score": -0.400613,
-      "relative": -0.367598,
-      "score": -0.160245,
-      "top_headline": "C.H. Robinson Worldwide (CHRW) Stock Dropped, So What Is Driving Attention Now?",
-      "weight": 0.046613
-    },
-    "CHTR": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "An 8-Day Losing Streak Has Charter Communications Stock Down 20%",
-      "weight": 0.0154
-    },
-    "CHWY": {
-      "articles": 7,
-      "raw_score": 0.522605,
-      "relative": 0.158472,
-      "score": 0.365824,
-      "top_headline": "Chewy (CHWY) Stock Looks Above Fair Value On Earnings Today",
-      "weight": 0.172704
-    },
-    "CIFR": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "CIFR Stock Gains After Cipher Extends Barber Lake Lease To 20 Years, Contracted Revenue Tops $9B",
-      "weight": 0.032226
-    },
-    "CINF": {
-      "articles": 2,
-      "raw_score": 0.874689,
-      "relative": 0.142523,
-      "score": 0.349876,
-      "top_headline": "Cincinnati Financial (CINF) Declares Dividend As Undervalued Narrative Faces A Tougher Cash Flow View",
-      "weight": 0.043548
+      "raw_score": 0.25,
+      "relative": -0.045143,
+      "score": 0.0625,
+      "top_headline": "Bank of America cuts Carnival stock target as key cost surges",
+      "weight": 0.003523
     },
     "CL": {
-      "articles": 5,
-      "raw_score": 0.820423,
-      "relative": 0.305412,
-      "score": 0.512764,
-      "top_headline": "Is Colgate-Palmolive (CL) Trading Below Fair Value On Cash Flow?",
-      "weight": 0.102185
-    },
-    "CLF": {
       "articles": 1,
-      "raw_score": -0.2,
-      "relative": -0.257352,
-      "score": -0.05,
-      "top_headline": "Cleveland-Cliffs (CLF) Stock Sinks As Market Gains: Here's Why",
-      "weight": 0.003929
-    },
-    "CLS": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Celestica (CLS) Ascends While Market Falls: Some Facts to Note",
-      "weight": 0.003925
-    },
-    "CLSK": {
-      "articles": 5,
-      "raw_score": 0.192569,
-      "relative": -0.086997,
-      "score": 0.120355,
-      "top_headline": "Wall Street Bulls Look Optimistic About CleanSpark (CLSK): Should You Buy?",
-      "weight": 0.037308
-    },
-    "CLX": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "The Clorox Company Stock: Is CLX Underperforming the Consumer Staples Sector?",
-      "weight": 0.003551
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Colgate-Palmolive Has Paid a Dividend Since 1895. Does That Streak Still Deserves Your Money?",
+      "weight": 0.003393
     },
     "CMCSA": {
-      "articles": 13,
-      "raw_score": -0.127163,
-      "relative": -0.310672,
-      "score": -0.10332,
-      "top_headline": "Microsoft, Meta, Akamai, Zscaler, Comcast, and More Stocks That Explain Today\u2019s Market",
-      "weight": 0.253564
-    },
-    "CME": {
       "articles": 2,
-      "raw_score": 0.632089,
-      "relative": 0.045484,
-      "score": 0.252836,
-      "top_headline": "Is CME Group (CME) A Bargain Following Its New Leveraged Loan Futures Launch?",
-      "weight": 0.031845
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
+      "top_headline": "Comcast\u2019s Dividend Keeps Growing While the Market Treats It Like a Melting Ice Cube",
+      "weight": 0.005127
     },
     "CMG": {
-      "articles": 2,
-      "raw_score": -0.65656,
-      "relative": -0.469976,
-      "score": -0.262624,
-      "top_headline": "Chipotle Stock: Here\u2019s the Truth About the 2026 Buybacks That are Quietly Masking a 5% Profit Decline",
-      "weight": 0.016481
-    },
-    "CMI": {
       "articles": 1,
-      "raw_score": 0.52381,
-      "relative": -0.0764,
-      "score": 0.130952,
-      "top_headline": "Cummins (CMI) Looks Undervalued On Paper, Is The Pullback A Buying Opportunity?",
-      "weight": 0.010392
-    },
-    "CNC": {
-      "articles": 3,
       "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "What Does Centene (CNC) Gain From Its Credentialing Push And Emergency Response?",
-      "weight": 0.035071
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "OpenAI's revenue scare, Delta earnings, what investors think of a Starbucks-Chipotle deal and more in Morning Squawk",
+      "weight": 0.109626
     },
     "COF": {
-      "articles": 3,
-      "raw_score": -0.858433,
-      "relative": -0.636569,
-      "score": -0.429217,
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
       "top_headline": "Capital One Financial (COF) Joins Banks Warning On AI Shopping Agent Risks",
-      "weight": 0.102349
-    },
-    "COHR": {
-      "articles": 2,
-      "raw_score": 0.206106,
-      "relative": -0.12491,
-      "score": 0.082442,
-      "top_headline": "Coherent Has Ripped 59% in 2026: Is It Too Late to Buy COHR Stock Now?",
-      "weight": 0.017724
+      "weight": 0.007979
     },
     "COIN": {
-      "articles": 8,
-      "raw_score": 0.246884,
-      "relative": -0.0278,
-      "score": 0.179552,
-      "top_headline": "Coinbase (COIN) Gets a Path to Tokenized Stocks in the US. But Can It Turn That Into Revenue?",
-      "weight": 0.149388
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Riot Frees $494 Million in Bitcoin From Coinbase Loan: Will It Sell?",
+      "weight": 0.00177
     },
     "COO": {
-      "articles": 4,
-      "raw_score": 0.104872,
-      "relative": -0.147425,
-      "score": 0.059927,
-      "top_headline": "COO Unveils New Innovation Hub & Lens Launch Plans to Aid CooperVision",
-      "weight": 0.078961
-    },
-    "COP": {
-      "articles": 2,
-      "raw_score": 0.186588,
-      "relative": -0.132717,
-      "score": 0.074635,
-      "top_headline": "Does COP\u2019s Low Forward P/E and Rising Estimates Change The Bull Case For ConocoPhillips (COP)?",
-      "weight": 0.049922
-    },
-    "COR": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Cencora Sees Specialty Strategy Fueling Growth Into Fiscal 2027",
-      "weight": 0.013309
-    },
-    "CORZ": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "What Could Core Scientific (CORZ) Gain From Hiring Jay Elms As CCO?",
-      "weight": 0.010751
+      "articles": 1,
+      "raw_score": -0.2,
+      "relative": -0.157643,
+      "score": -0.05,
+      "top_headline": "Is Cooper Companies (COO) Undervalued After Opening Its New Vision Centre?",
+      "weight": 0.005479
     },
     "COST": {
-      "articles": 18,
-      "raw_score": 0.665995,
-      "relative": 0.3635,
-      "score": 0.570853,
-      "top_headline": "COST Q4 Earnings Beat Estimates on Sales and Digital Strength",
-      "weight": 0.373949
-    },
-    "CPB": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Q2 Rundown: Campbell's (NASDAQ:CPB) Vs Other Shelf-Stable Food Stocks",
-      "weight": 0.005189
-    },
-    "CPRT": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "Copart, Inc. (CPRT) Stock Drops Despite Market Gains: Important Facts to Note",
-      "weight": 0.015586
-    },
-    "CPT": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Camden Property Trust (CPT) Stock Looks Cheap Against Future Cash Flow",
-      "weight": 0.016781
+      "articles": 3,
+      "raw_score": 0.975836,
+      "relative": 0.380275,
+      "score": 0.487918,
+      "top_headline": "AI agents like Muse can shop for you. Here's what that means for retail stocks",
+      "weight": 0.116845
     },
     "CRDO": {
-      "articles": 4,
-      "raw_score": 0.349495,
-      "relative": -0.007641,
-      "score": 0.199711,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Can Credo Technology (CRDO) Turn 1.6T Optical Transceivers Into Its Next AI Growth Driver?",
-      "weight": 0.083243
-    },
-    "CRM": {
-      "articles": 10,
-      "raw_score": 0.284722,
-      "relative": 0.011664,
-      "score": 0.219017,
-      "top_headline": "What Is Salesforce No Longer Telling You?",
-      "weight": 0.148971
-    },
-    "CROX": {
-      "articles": 2,
-      "raw_score": 0.450321,
-      "relative": -0.027224,
-      "score": 0.180128,
-      "top_headline": "Crocs (CROX) Stock Looks Cheap After Its 54% Run",
-      "weight": 0.053073
-    },
-    "CRS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Carpenter Technology (CRS) Stock Looks Cheap Based On Cash Flow",
-      "weight": 0.005584
-    },
-    "CRWD": {
-      "articles": 13,
-      "raw_score": 0.339166,
-      "relative": 0.06822,
-      "score": 0.275572,
-      "top_headline": "CRWD Stock Slips: US Department Of Justice Reportedly Closes Investigation Of CrowdStrike Deals",
-      "weight": 0.171953
-    },
-    "CSCO": {
-      "articles": 7,
-      "raw_score": 0.781731,
-      "relative": 0.339859,
-      "score": 0.547212,
-      "top_headline": "Arista vs. Cisco: Is Faster AI Growth Worth Twice the Earnings Multiple?",
-      "weight": 0.102562
-    },
-    "CTAS": {
-      "articles": 6,
-      "raw_score": 0.89365,
-      "relative": 0.388414,
-      "score": 0.595766,
-      "top_headline": "Cintas (CTAS) Stock May Be 6% Undervalued Following Raised Guidance",
-      "weight": 0.134872
-    },
-    "CTVA": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "ADM vs. CTVA: Two Agricultural Leaders With Very Different Moats",
-      "weight": 0.003506
-    },
-    "CVNA": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Wall Street Bulls Look Optimistic About Carvana (CVNA): Should You Buy?",
-      "weight": 0.003484
+      "weight": 0.003274
     },
     "CVS": {
-      "articles": 9,
-      "raw_score": 0.377955,
-      "relative": 0.076114,
-      "score": 0.283466,
-      "top_headline": "CVS Health (CVS) Reclaims Its 200 Day EMA, Is The Stock Still A Bargain?",
-      "weight": 0.174389
-    },
-    "CVX": {
-      "articles": 8,
-      "raw_score": 0.647706,
-      "relative": 0.263707,
-      "score": 0.471059,
-      "top_headline": "Chevron Stock And 2 Top Dividend Stocks",
-      "weight": 0.158358
-    },
-    "CW": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Can Rising Aerospace and Defense Demand Drive Curtiss-Wright's Growth?",
-      "weight": 0.042222
-    },
-    "CYTK": {
       "articles": 2,
-      "raw_score": 0.661717,
-      "relative": 0.057335,
-      "score": 0.264687,
-      "top_headline": "Cytokinetics Maps MYQORZO Expansion, Heart Failure Pipeline at Bernstein Conference",
-      "weight": 0.034905
-    },
-    "D": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Dominion Energy (D) Registers a Bigger Fall Than the Market: Important Facts to Note",
-      "weight": 0.003953
+      "raw_score": 0.268528,
+      "relative": -0.000231,
+      "score": 0.107411,
+      "top_headline": "CVS Health (CVS) Reclaims Its 200 Day EMA, Is The Stock Still A Bargain?",
+      "weight": 0.007318
     },
     "DAL": {
-      "articles": 2,
-      "raw_score": -0.017207,
-      "relative": -0.214235,
-      "score": -0.006883,
-      "top_headline": "Delta Air Lines quietly ends 17 routes while adding new flights",
-      "weight": 0.003697
-    },
-    "DASH": {
-      "articles": 4,
-      "raw_score": 0.577857,
-      "relative": 0.122852,
-      "score": 0.330204,
-      "top_headline": "DoorDash paying record $131.5 million for underpaid delivery workers",
-      "weight": 0.041554
-    },
-    "DDOG": {
-      "articles": 5,
-      "raw_score": 0.727252,
-      "relative": 0.24718,
-      "score": 0.454532,
-      "top_headline": "Datadog (DDOG) Rallies On AI Demand, Is The Stock Still Cheap?",
-      "weight": 0.128998
+      "articles": 1,
+      "raw_score": 0.294118,
+      "relative": -0.034113,
+      "score": 0.073529,
+      "top_headline": "Delta Air Lines cuts 2026 forecast on fuel surge, but CEO says demand is still strong",
+      "weight": 0.681487
     },
     "DE": {
-      "articles": 2,
-      "raw_score": 0.320942,
-      "relative": -0.078976,
-      "score": 0.128377,
-      "top_headline": "Is Deere (DE) Stock Reasonable After Its Strong Q2 Beat?",
-      "weight": 0.041401
-    },
-    "DECK": {
-      "articles": 3,
-      "raw_score": -0.459837,
-      "relative": -0.437271,
-      "score": -0.229919,
-      "top_headline": "Deckers (DECK) Declines More Than Market: Some Information for Investors",
-      "weight": 0.021289
-    },
-    "DG": {
-      "articles": 6,
-      "raw_score": 0.37681,
-      "relative": 0.043854,
-      "score": 0.251207,
-      "top_headline": "HSBC Upgrades Dollar General (DG) and Lifts its Target to $160",
-      "weight": 0.093851
-    },
-    "DGX": {
-      "articles": 6,
-      "raw_score": 0.504902,
-      "relative": 0.129249,
-      "score": 0.336602,
-      "top_headline": "Quest Diagnostics Stock Gains 36.3% YTD: What's Behind the Rally?",
-      "weight": 0.101684
-    },
-    "DHR": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Danaher (DHR) Stock Looks Reasonable On Label Free Detection Growth",
-      "weight": 0.0117
-    },
-    "DIS": {
-      "articles": 9,
-      "raw_score": -0.092061,
-      "relative": -0.276398,
-      "score": -0.069046,
-      "top_headline": "Disney laying off around 300 employees in latest cuts under new CEO Josh D'Amaro",
-      "weight": 0.230911
-    },
-    "DKNG": {
-      "articles": 3,
-      "raw_score": 0.433833,
-      "relative": 0.009564,
-      "score": 0.216917,
-      "top_headline": "DraftKings (DKNG) In Focus After Shareholders Back Multibillion Dollar Gaming Merger",
-      "weight": 0.111671
-    },
-    "DKS": {
-      "articles": 3,
-      "raw_score": -0.342826,
-      "relative": -0.378765,
-      "score": -0.171413,
-      "top_headline": "DICK'S Sporting Goods (DKS) Stock Fair Value Falls After Analyst Target Cuts And Foot Locker Worries",
-      "weight": 0.07012
-    },
-    "DLR": {
-      "articles": 2,
-      "raw_score": 0.820333,
-      "relative": 0.120781,
-      "score": 0.328133,
-      "top_headline": "Is Digital Realty Trust (DLR) Below Fair Value After Its AI Push?",
-      "weight": 0.02254
-    },
-    "DLTR": {
-      "articles": 5,
-      "raw_score": 0.245099,
-      "relative": -0.054166,
-      "score": 0.153187,
-      "top_headline": "Will Dollar Tree's Strategic Initiatives and Store Expansions Aid?",
-      "weight": 0.062962
-    },
-    "DOC": {
-      "articles": 2,
-      "raw_score": 0.464969,
-      "relative": -0.021365,
-      "score": 0.185988,
-      "top_headline": "How Investors May Respond To Healthpeak Properties (DOC) Upgrading Its 2026 Cash-Flow Guidance",
-      "weight": 0.056138
-    },
-    "DOCN": {
-      "articles": 3,
-      "raw_score": 0.711019,
-      "relative": 0.148157,
-      "score": 0.355509,
-      "top_headline": "DigitalOcean Holdings (DOCN) Beat Expectations And Raised Guidance, Is The Upside Already Priced In?",
-      "weight": 0.026325
-    },
-    "DOCU": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Productivity Software Stocks Q2 Highlights: DocuSign (NASDAQ:DOCU)",
-      "weight": 0.005219
-    },
-    "DOV": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Dover (DOV) Stock May Be Below Fair Value On Cash Flow",
-      "weight": 0.003009
-    },
-    "DOW": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Dow Inc. (DOW) Rises As Market Takes a Dip: Key Facts",
-      "weight": 0.007297
-    },
-    "DPZ": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Reflecting On Traditional Fast Food Stocks\u2019 Q2 Earnings: Domino's (NASDAQ:DPZ)",
-      "weight": 0.023774
-    },
-    "DRI": {
-      "articles": 4,
-      "raw_score": 0.371167,
-      "relative": 0.004743,
-      "score": 0.212096,
-      "top_headline": "DRI Q3 Deep Dive: Margin Pressures and Consumer Trends Shape Restaurant Performance",
-      "weight": 0.088365
-    },
-    "DTE": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "DTE Energy Co's Dividend Analysis",
-      "weight": 0.015841
-    },
-    "DUK": {
-      "articles": 4,
-      "raw_score": 0.14278,
-      "relative": -0.125763,
-      "score": 0.081589,
-      "top_headline": "What Is Duke Energy (DUK) Changing With Joyce Mullen And Great Falls?",
-      "weight": 0.079528
-    },
-    "DUOL": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Can DUOL's Green Machine Sustain Its Strong User Growth Momentum?",
-      "weight": 0.022029
-    },
-    "DVA": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.457352,
+      "relative": -0.357643,
       "score": -0.25,
-      "top_headline": "DaVita HealthCare (DVA) Registers a Bigger Fall Than the Market: Important Facts to Note",
-      "weight": 0.005491
+      "top_headline": "Deere, ADM and Bunge: 3 Farm Stocks Giving Investors Dividends For America\u2019s Harvest",
+      "weight": 0.001748
     },
-    "DVN": {
-      "articles": 1,
-      "raw_score": 0.428571,
-      "relative": -0.100209,
-      "score": 0.107143,
-      "top_headline": "DVN Stock Rises As Top Shareholder Reportedly Calls For Sale \u2014 What\u2019s Behind The Activist Push?",
-      "weight": 0.007173
-    },
-    "DXCM": {
+    "DIS": {
       "articles": 3,
-      "raw_score": 0.46237,
-      "relative": 0.023833,
-      "score": 0.231185,
-      "top_headline": "DexCom (DXCM) Stock Looks Cheap Based On Future Cash Flow",
-      "weight": 0.048254
+      "raw_score": 0.646364,
+      "relative": 0.215539,
+      "score": 0.323182,
+      "top_headline": "Disney+ to stream upcoming Super Bowl",
+      "weight": 0.079453
+    },
+    "DRI": {
+      "articles": 1,
+      "raw_score": 0.230769,
+      "relative": -0.04995,
+      "score": 0.057692,
+      "top_headline": "Better Dividend Bet: DRI or SBUX? The Cash Flow Numbers Reveal a Clear Winner",
+      "weight": 0.005133
     },
     "EA": {
       "articles": 1,
       "raw_score": 0.933333,
-      "relative": 0.025981,
+      "relative": 0.125691,
       "score": 0.233333,
       "top_headline": "On Holding (ONON) Is Up 9.9% After Buyback, Mbapp\u00e9 Deal And Board Move - Has The Bull Case Changed?",
-      "weight": 0.075243
-    },
-    "EBAY": {
-      "articles": 3,
-      "raw_score": 0.944211,
-      "relative": 0.264753,
-      "score": 0.472105,
-      "top_headline": "eBay (EBAY) Reports Strong Revenue Growth And Depop Deal, Is Fair Value Already Priced In?",
-      "weight": 0.049842
+      "weight": 0.009359
     },
     "EFX": {
-      "articles": 2,
-      "raw_score": -0.618301,
-      "relative": -0.454672,
-      "score": -0.24732,
+      "articles": 1,
+      "raw_score": -0.692308,
+      "relative": -0.28072,
+      "score": -0.173077,
       "top_headline": "Equifax (EFX) Stock Still Looks Undervalued Despite Its 41% Slide",
-      "weight": 0.085667
-    },
-    "EG": {
-      "articles": 1,
-      "raw_score": 0.411765,
-      "relative": -0.104411,
-      "score": 0.102941,
-      "top_headline": "EG Stock Trading at a Discount to Industry at 0.92X: Time to Hold?",
-      "weight": 0.010502
-    },
-    "EIX": {
-      "articles": 1,
-      "raw_score": 0.142857,
-      "relative": -0.171638,
-      "score": 0.035714,
-      "top_headline": "Edison International (EIX) Stock May Look Reasonable Following Grid Resilience Report",
-      "weight": 0.017889
-    },
-    "EL": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Unpacking Q2 Earnings: Est\u00e9e Lauder (NYSE:EL) In The Context Of Other Personal Care Stocks",
-      "weight": 0.003999
-    },
-    "ELF": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Wall Street Bulls Look Optimistic About e.l.f. Beauty (ELF): Should You Buy?",
-      "weight": 0.003484
-    },
-    "EMR": {
-      "articles": 3,
-      "raw_score": 0.580808,
-      "relative": 0.083052,
-      "score": 0.290404,
-      "top_headline": "Is Emerson Electric (EMR) Getting Too Stretched After Its 84% Run?",
-      "weight": 0.072482
+      "weight": 0.006555
     },
     "ENPH": {
-      "articles": 6,
-      "raw_score": -0.139824,
-      "relative": -0.300568,
-      "score": -0.093216,
-      "top_headline": "Enphase (ENPH) Wins 80 Utility Approvals. Can Easier Installation Boost Battery Sales?",
-      "weight": 0.148704
-    },
-    "ENTG": {
       "articles": 1,
-      "raw_score": 0.245283,
-      "relative": -0.146031,
-      "score": 0.061321,
-      "top_headline": "Entegris (ENTG) Looks 13% Below Fair Value, Is The P E Premium Too High?",
-      "weight": 0.027795
-    },
-    "EOG": {
-      "articles": 2,
-      "raw_score": -0.129862,
-      "relative": -0.259297,
-      "score": -0.051945,
-      "top_headline": "COP vs. EOG: Which Energy Dividend Actually Survives the Next Oil Crash?",
-      "weight": 0.038999
-    },
-    "EQIX": {
-      "articles": 3,
-      "raw_score": 0.863731,
-      "relative": 0.224513,
-      "score": 0.431865,
-      "top_headline": "Equinix (EQIX) Positions to Benefit from Exponential Data Growth and Early-Stage Enterprise AI",
-      "weight": 0.029718
+      "raw_score": -0.081081,
+      "relative": -0.127913,
+      "score": -0.02027,
+      "top_headline": "Enphase Energy (ENPH) Stock Looks Near Fair Value On Cash Flow",
+      "weight": 0.006066
     },
     "EQT": {
-      "articles": 3,
-      "raw_score": 0.836723,
-      "relative": 0.211009,
-      "score": 0.418362,
-      "top_headline": "What Does EQT (EQT) Record Lateral Mean For Its Gas Recovery Plans?",
-      "weight": 0.123903
-    },
-    "ES": {
-      "articles": 2,
-      "raw_score": -0.144341,
-      "relative": -0.265089,
-      "score": -0.057737,
-      "top_headline": "Eversource Energy (ES) Could Be 14% Undervalued After Its Recent Selloff",
-      "weight": 0.050636
-    },
-    "ESS": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Favorable Supply/Demand Backdrop Positions Essex Property Trust (ESS) For Growth",
-      "weight": 0.014475
-    },
-    "ETN": {
-      "articles": 5,
-      "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
-      "top_headline": "Eaton Adds European Power Capacity as Data Center Demand Keeps Rising",
-      "weight": 0.088153
-    },
-    "ETR": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "Entergy (ETR) Could Be 19% Undervalued Following Its Grid Modernization Push",
-      "weight": 0.009817
-    },
-    "ETSY": {
-      "articles": 1,
-      "raw_score": -0.454545,
-      "relative": -0.320989,
-      "score": -0.113636,
-      "top_headline": "Why Etsy (ETSY) Stock Is Trading Lower Today",
-      "weight": 0.023162
-    },
-    "EVR": {
-      "articles": 2,
-      "raw_score": 0.863336,
-      "relative": 0.137982,
-      "score": 0.345334,
-      "top_headline": "GS vs. EVR: Which Investment Bank Stock Offers Greater Upside?",
-      "weight": 0.024808
-    },
-    "EVRG": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Can Rising Data Center Demand Drive Evergy's Long-Term Growth?",
-      "weight": 0.035457
-    },
-    "EXEL": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Exelixis (EXEL) Gets FDA Review Extension For Zanzalintinib \u10d2\u10d0\u10dc\u10d0\u10ea\u10ee\u10d0\u10d3 tometastatic Colorectal Cancer",
-      "weight": 0.001785
-    },
-    "EXPD": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "3 Reasons to Sell EXPD and 1 Stock to Buy Instead",
-      "weight": 0.017143
-    },
-    "EXPE": {
-      "articles": 5,
-      "raw_score": -0.705783,
-      "relative": -0.648466,
-      "score": -0.441114,
-      "top_headline": "Bulls vs. Bears: How to Interpret Unusual Options Activity in Expedia Stock",
-      "weight": 0.049867
+      "raw_score": 0.736842,
+      "relative": 0.076568,
+      "score": 0.184211,
+      "top_headline": "EQT (EQT) Sets A Record Well Length, Is It Still A Bargain?",
+      "weight": 0.007043
     },
     "F": {
-      "articles": 5,
-      "raw_score": -0.143978,
-      "relative": -0.297338,
-      "score": -0.089986,
-      "top_headline": "Hyundai\u2019s Hybrid Surge and Expected U.S. Sales Lead Over Ford Might Change The Case For Investing In Ford Motor (F)",
-      "weight": 0.113684
-    },
-    "FANG": {
       "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "Diamondback Energy (FANG) Stock Drops Despite Market Gains: Important Facts to Note",
-      "weight": 0.003953
-    },
-    "FAST": {
-      "articles": 1,
-      "raw_score": 0.662921,
-      "relative": -0.041622,
-      "score": 0.16573,
-      "top_headline": "Fastenal (FAST) Earned A Zacks Upgrade, Is The Stock Now Pricey?",
-      "weight": 0.015594
+      "raw_score": -0.666667,
+      "relative": -0.274309,
+      "score": -0.166667,
+      "top_headline": "Ford Halted F-150 Output at Dearborn in Q3\u2019s Final Week. Here\u2019s What 7x Forward Earnings Already Prices In",
+      "weight": 0.003279
     },
     "FCEL": {
-      "articles": 4,
-      "raw_score": -0.084601,
-      "relative": -0.255696,
-      "score": -0.048344,
+      "articles": 1,
+      "raw_score": -0.428571,
+      "relative": -0.214786,
+      "score": -0.107143,
       "top_headline": "FuelCell Energy (FCEL) Is Down 8.9% After Securities Suits Alleging Misleading Capacity And CEPA Disclosures",
-      "weight": 0.062334
-    },
-    "FCX": {
-      "articles": 5,
-      "raw_score": 0.440938,
-      "relative": 0.068234,
-      "score": 0.275586,
-      "top_headline": "Can Freeport-McMoRan's Growth Projects Drive the Next Expansion Wave?",
-      "weight": 0.084033
-    },
-    "FDS": {
-      "articles": 4,
-      "raw_score": 0.81847,
-      "relative": 0.260345,
-      "score": 0.467697,
-      "top_headline": "FactSet to Report Q4 Earnings: What's in Store for the Stock?",
-      "weight": 0.100539
+      "weight": 0.005887
     },
     "FDX": {
-      "articles": 2,
-      "raw_score": -0.914179,
-      "relative": -0.573024,
-      "score": -0.365671,
-      "top_headline": "What Does FedEx (FDX) New Authenticated Delivery Service Mean For High Value Shipments?",
-      "weight": 0.044078
-    },
-    "FE": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "FirstEnergy (FE) Upgraded to Buy: Here's What You Should Know",
-      "weight": 0.042723
-    },
-    "FFIV": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "AI Security, Institutional Inflows Push F5 Shares Up 75% YTD",
-      "weight": 0.013866
-    },
-    "FICO": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.457352,
+      "relative": -0.357643,
       "score": -0.25,
-      "top_headline": "FICO Stock Has Fallen 43% From Its Peak. Does the Selloff Make Sense?",
-      "weight": 0.001426
-    },
-    "FIS": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "FIS Modernizes Retirement Recordkeeping With Cloud-Native Platform",
-      "weight": 0.024573
-    },
-    "FITB": {
-      "articles": 3,
-      "raw_score": 0.19061,
-      "relative": -0.112047,
-      "score": 0.095305,
-      "top_headline": "Are You Looking for a High-Growth Dividend Stock?",
-      "weight": 0.048209
-    },
-    "FIVE": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Five Below Maps Growth With Store Revamp, Customer Focus and $600M Buyback",
-      "weight": 0.008381
-    },
-    "FLEX": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Flex Ltd. Stock: Is FLEX Outperforming the Technology Sector?",
-      "weight": 0.006634
-    },
-    "FMC": {
-      "articles": 1,
-      "raw_score": -0.266667,
-      "relative": -0.274019,
-      "score": -0.066667,
-      "top_headline": "FMC (FMC) Stock Looks Cheap Against Sales After Its 87% Fall",
-      "weight": 0.016619
-    },
-    "FNV": {
-      "articles": 3,
-      "raw_score": 0.869419,
-      "relative": 0.227357,
-      "score": 0.43471,
-      "top_headline": "Franco-Nevada (TSX:FNV) Royalty Growth Narrative Keeps Fair Value In Focus",
-      "weight": 0.047174
-    },
-    "FOXA": {
-      "articles": 1,
-      "raw_score": 0.69697,
-      "relative": -0.03311,
-      "score": 0.174242,
-      "top_headline": "Fox (FOXA) Rebounds On Roku Deal Hopes, Is The Stock Still A Bargain?",
-      "weight": 0.033077
-    },
-    "FROG": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Q2 Earnings Highlights: JFrog (NASDAQ:FROG) Vs The Rest Of The Software Development Stocks",
-      "weight": 0.010952
-    },
-    "FRT": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "FRT- A Dividend King in the Retail REIT Subsector",
-      "weight": 0.003082
-    },
-    "FSLR": {
-      "articles": 6,
-      "raw_score": -0.67938,
-      "relative": -0.660272,
-      "score": -0.45292,
-      "top_headline": "Solar Stocks Slide as High Borrowing Costs Weigh on Project Financing: First Solar Sinks 8%, SolarEdge Falls 5%, Enphase Energy Drops 4%",
-      "weight": 0.099552
+      "top_headline": "What Does FedEx (FDX) New Authenticated Delivery Service Mean For High Value Shipments?",
+      "weight": 0.005247
     },
     "FTNT": {
-      "articles": 3,
-      "raw_score": 0.782003,
-      "relative": 0.183649,
-      "score": 0.391002,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Is Fortinet (FTNT) Fully Valued On Its New York Hub Expansion?",
-      "weight": 0.08518
-    },
-    "GD": {
-      "articles": 5,
-      "raw_score": 0.801144,
-      "relative": 0.293363,
-      "score": 0.500715,
-      "top_headline": "GD vs. LMT: Which Defense Dividend Stock Will Crush Retirement Income Goals?",
-      "weight": 0.055422
-    },
-    "GE": {
-      "articles": 6,
-      "raw_score": 0.217171,
-      "relative": -0.062571,
-      "score": 0.144781,
-      "top_headline": "GE Aerospace Faces Margin Pressure From Rising Costs: Can It Recover?",
-      "weight": 0.069878
-    },
-    "GEHC": {
-      "articles": 3,
-      "raw_score": -0.408137,
-      "relative": -0.411421,
-      "score": -0.204068,
-      "top_headline": "GE HealthCare (GEHC) is Down 28% and Wall Street is Starting to Buy. Is the Selloff Finally Over?",
-      "weight": 0.022987
-    },
-    "GEN": {
-      "articles": 2,
-      "raw_score": -0.298997,
-      "relative": -0.326951,
-      "score": -0.119599,
-      "top_headline": "Gen Digital (GEN) Wants to Buy GoDaddy. So Why Did Its Own Stock Crash 12%?",
-      "weight": 0.045958
-    },
-    "GEV": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "GE Vernova vs. Duke Energy: Which Power Stock Is a Better Pick Today?",
-      "weight": 0.015269
-    },
-    "GFS": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "GFS Augments Photonics Portfolio: Will SMART Partnership Boost Growth?",
-      "weight": 0.019294
-    },
-    "GILD": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "BMY vs GILD: Which Biotech Stock Looks More Attractive Now?",
-      "weight": 0.001804
-    },
-    "GIS": {
-      "articles": 3,
-      "raw_score": 0.546633,
-      "relative": 0.065964,
-      "score": 0.273316,
-      "top_headline": "General Mills (GIS) Beats Q1 Estimates, But Its Growth Problem Remains",
-      "weight": 0.101371
-    },
-    "GL": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Globe Life's Health Premium Growth Strengthens 2026 Outlook",
-      "weight": 0.014477
-    },
-    "GLW": {
-      "articles": 3,
-      "raw_score": 0.231936,
-      "relative": -0.091384,
-      "score": 0.115968,
-      "top_headline": "Lumentum Jumped Nearly 10% While Corning Barely Moved. Is the AI Optics Trade Splitting Apart?",
-      "weight": 0.03602
+      "weight": 0.006849
     },
     "GM": {
-      "articles": 9,
-      "raw_score": -0.55921,
-      "relative": -0.626759,
-      "score": -0.419407,
+      "articles": 3,
+      "raw_score": -0.730009,
+      "relative": -0.472647,
+      "score": -0.365004,
       "top_headline": "General Motors Q3 sales drop 5.5%, while Toyota buoyed by EVs, hybrids",
-      "weight": 0.26149
-    },
-    "GNRC": {
-      "articles": 2,
-      "raw_score": 0.119006,
-      "relative": -0.15975,
-      "score": 0.047602,
-      "top_headline": "Generac Rallies on Power Deal With Amazon. How to Play GNRC Stock Now.",
-      "weight": 0.022933
+      "weight": 0.023162
     },
     "GOOGL": {
-      "articles": 21,
-      "raw_score": 0.259904,
-      "relative": 0.020064,
-      "score": 0.227416,
+      "articles": 7,
+      "raw_score": 0.182781,
+      "relative": 0.020304,
+      "score": 0.127947,
       "top_headline": "Can Google's new model really catch up to OpenAI and Anthropic at the frontier?",
-      "weight": 0.783091
-    },
-    "GPC": {
-      "articles": 2,
-      "raw_score": 0.232286,
-      "relative": -0.114438,
-      "score": 0.092914,
-      "top_headline": "4 Dividend-Friendly Auto Stocks to Weather the Industry Challenges",
-      "weight": 0.010964
-    },
-    "GPN": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Can Global Payments Gain From Growing Consumer Trust in AI Commerce?",
-      "weight": 0.022672
-    },
-    "GRMN": {
-      "articles": 3,
-      "raw_score": 0.904138,
-      "relative": 0.244717,
-      "score": 0.452069,
-      "top_headline": "Here is Why Garmin (GRMN) is a Good Investment at Today\u2019s Price",
-      "weight": 0.024721
+      "weight": 0.077268
     },
     "GS": {
-      "articles": 15,
-      "raw_score": 0.477712,
-      "relative": 0.190741,
-      "score": 0.398094,
-      "top_headline": "Goldman Sachs Earned $20.98 a Share in One Quarter, So Why Has the Stock Slid Since July?",
-      "weight": 0.382724
-    },
-    "HAL": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Wall Street Analysts Look Bullish on Halliburton (HAL): Should You Buy?",
-      "weight": 0.013534
-    },
-    "HALO": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Strength Seen in Halozyme Therapeutics (HALO): Can Its 3.3% Jump Turn into More Strength?",
-      "weight": 0.020673
-    },
-    "HAS": {
       "articles": 3,
-      "raw_score": 0.763286,
-      "relative": 0.174291,
-      "score": 0.381643,
-      "top_headline": "Hasbro (HAS) Exceeds Market Returns: Some Facts to Consider",
-      "weight": 0.017426
-    },
-    "HBAN": {
-      "articles": 2,
-      "raw_score": 0.245106,
-      "relative": -0.10931,
-      "score": 0.098042,
-      "top_headline": "Huntington Rewards Shareholders With Higher 2027 Buyback Plan",
-      "weight": 0.019585
-    },
-    "HCA": {
-      "articles": 4,
-      "raw_score": 0.548154,
-      "relative": 0.105879,
-      "score": 0.313231,
-      "top_headline": "Can HCA Sustain Earnings Growth Despite a Changing Service Mix?",
-      "weight": 0.042081
+      "raw_score": -0.357919,
+      "relative": -0.286602,
+      "score": -0.178959,
+      "top_headline": "India\u2019s central bank hikes rates for the first time since 2023 as inflation risks build",
+      "weight": 0.279605
     },
     "HD": {
-      "articles": 8,
-      "raw_score": 0.383973,
-      "relative": 0.071901,
-      "score": 0.279253,
+      "articles": 2,
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
       "top_headline": "Is Home Depot\u2019s Dividend Safe if Housing Stays Frozen?",
-      "weight": 0.168307
-    },
-    "HEI": {
-      "articles": 3,
-      "raw_score": 0.5358,
-      "relative": 0.060548,
-      "score": 0.2679,
-      "top_headline": "The Bull Case For HEICO (HEI) Could Change Following Analyst Upgrades Amid Strong Fundamentals Learn Why",
-      "weight": 0.039158
+      "weight": 0.004988
     },
     "HIMS": {
-      "articles": 6,
-      "raw_score": 0.015965,
-      "relative": -0.196709,
-      "score": 0.010643,
+      "articles": 2,
+      "raw_score": -0.552131,
+      "relative": -0.328495,
+      "score": -0.220852,
       "top_headline": "Hims & Hers Health (HIMS) Unveils AI Native Weight Loss Care Platform",
-      "weight": 0.154175
+      "weight": 0.007061
     },
     "HLT": {
       "articles": 1,
       "raw_score": -0.6,
-      "relative": -0.357352,
+      "relative": -0.257643,
       "score": -0.15,
       "top_headline": "Hilton Worldwide Holdings (HLT) Leans Into Sports Tourism While Fair Value Stays In View",
-      "weight": 0.040419
+      "weight": 0.005028
     },
     "HON": {
-      "articles": 6,
-      "raw_score": 0.510207,
-      "relative": 0.132786,
-      "score": 0.340138,
+      "articles": 2,
+      "raw_score": 0.536874,
+      "relative": 0.107107,
+      "score": 0.214749,
       "top_headline": "Honeywell (HON) Stock May Be Undervalued After Marine Corps Security Win",
-      "weight": 0.18325
-    },
-    "HOOD": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "HOOD at the 5-Year Mark: Diversification to Fuel the Next Growth Phase",
-      "weight": 0.007017
-    },
-    "HPE": {
-      "articles": 4,
-      "raw_score": 0.489634,
-      "relative": 0.072438,
-      "score": 0.279791,
-      "top_headline": "NVIDIA\u2019s Next AI Chip Ramp Could Open the Door to Another Major Stock Move",
-      "weight": 0.059913
-    },
-    "HPQ": {
-      "articles": 9,
-      "raw_score": 0.779327,
-      "relative": 0.377143,
-      "score": 0.584495,
-      "top_headline": "Why Is HP (HPQ) Up 5.1% Since Last Earnings Report?",
-      "weight": 0.138564
-    },
-    "HRL": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Can Hormel Foods' Protein Portfolio Win Over Value-Seeking Consumers?",
-      "weight": 0.021336
+      "weight": 0.014979
     },
     "HSIC": {
-      "articles": 2,
-      "raw_score": 0.488558,
-      "relative": -0.011929,
-      "score": 0.195423,
-      "top_headline": "Henry Schein (HSIC) Stock Looks Below Fair Value Even After A 31% Gain",
-      "weight": 0.050462
-    },
-    "HSY": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Winners And Losers Of Q2: Hershey (NYSE:HSY) Vs The Rest Of The Shelf-Stable Food Stocks",
-      "weight": 0.002663
-    },
-    "HUBS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "HubSpot\u2019s AI Adoption Is Rising. Can It Turn Usage Into Revenue Growth?",
-      "weight": 0.047063
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "Henry Schein (HSIC) Extends Credit Facility, Is The Stock Still Undervalued?",
+      "weight": 0.001605
     },
     "HUM": {
-      "articles": 3,
-      "raw_score": 0.885438,
-      "relative": 0.235367,
-      "score": 0.442719,
+      "articles": 1,
+      "raw_score": 0.795918,
+      "relative": 0.091337,
+      "score": 0.19898,
       "top_headline": "Humana (HUM) Jumped, But What Is Drawing Fresh Attention Now?",
-      "weight": 0.12643
-    },
-    "HUT": {
-      "articles": 5,
-      "raw_score": 0.707634,
-      "relative": 0.234919,
-      "score": 0.442271,
-      "top_headline": "UBS turns bullish on five AI data center stocks",
-      "weight": 0.045015
-    },
-    "HWM": {
-      "articles": 1,
-      "raw_score": 0.767442,
-      "relative": -0.015492,
-      "score": 0.19186,
-      "top_headline": "Howmet vs. Textron: Which Aerospace & Defense Stock Should You Bet On?",
-      "weight": 0.012829
-    },
-    "IBM": {
-      "articles": 7,
-      "raw_score": -0.116951,
-      "relative": -0.289218,
-      "score": -0.081866,
-      "top_headline": "International Business Machines (IBM) Faces Probe Over Z Mainframe Disclosure Risks",
-      "weight": 0.145984
-    },
-    "ICE": {
-      "articles": 2,
-      "raw_score": 0.400369,
-      "relative": -0.047205,
-      "score": 0.160148,
-      "top_headline": "Intercontinental Exchange Sees Multiple Growth Opportunities, RBC Says",
-      "weight": 0.018122
-    },
-    "IDXX": {
-      "articles": 1,
-      "raw_score": -0.255814,
-      "relative": -0.271306,
-      "score": -0.063953,
-      "top_headline": "Should You Continue to Hold IDXX Stock in Your Portfolio?",
-      "weight": 0.013812
-    },
-    "IEX": {
-      "articles": 1,
-      "raw_score": 0.854839,
-      "relative": 0.006357,
-      "score": 0.21371,
-      "top_headline": "Is Strong Q2 Guidance And Dividend Consistency Reshaping The Investment Case For IDEX (IEX)?",
-      "weight": 0.023722
-    },
-    "ILMN": {
-      "articles": 2,
-      "raw_score": 0.86034,
-      "relative": 0.136784,
-      "score": 0.344136,
-      "top_headline": "Illumina Stock Surges 94.9% YTD: What's Behind the Rally?",
-      "weight": 0.049024
-    },
-    "INCY": {
-      "articles": 3,
-      "raw_score": 0.029211,
-      "relative": -0.192747,
-      "score": 0.014605,
-      "top_headline": "Incyte (INCY) Stock Could Be 34% Above Fair Value After EADV Data",
-      "weight": 0.042155
-    },
-    "INSM": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "FDA Accepts Insmed's Filing Seeking Label Expansion for Arikayce",
-      "weight": 0.008871
+      "weight": 0.008828
     },
     "INTC": {
-      "articles": 9,
-      "raw_score": 0.923638,
-      "relative": 0.485376,
-      "score": 0.692728,
+      "articles": 2,
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
       "top_headline": "Intel CEO Lip-Bu Tan Has Incredible News for AMD Stock Investors",
-      "weight": 0.151188
+      "weight": 0.005382
     },
     "INTU": {
-      "articles": 8,
-      "raw_score": 0.272082,
-      "relative": -0.009475,
-      "score": 0.197877,
-      "top_headline": "Intuit (INTU) Is Getting Existing Customers to Spend More. Now It Needs More Customers",
-      "weight": 0.150716
-    },
-    "INVH": {
       "articles": 2,
-      "raw_score": 0.375733,
-      "relative": -0.057059,
-      "score": 0.150293,
-      "top_headline": "Invitation Homes Inc's Dividend Analysis",
-      "weight": 0.017878
+      "raw_score": 0.297634,
+      "relative": 0.011411,
+      "score": 0.119054,
+      "top_headline": "Intuit (INTU) Is Getting Existing Customers to Spend More. Now It Needs More Customers",
+      "weight": 0.007858
     },
     "IONQ": {
-      "articles": 5,
-      "raw_score": -0.283796,
-      "relative": -0.384724,
-      "score": -0.177372,
+      "articles": 2,
+      "raw_score": -0.490128,
+      "relative": -0.303694,
+      "score": -0.196051,
       "top_headline": "IonQ (IONQ) Just Landed Nvidia Less Than 2 Years After Jensen Huang\u2019s 30-Year Quantum Warning",
-      "weight": 0.102461
-    },
-    "IONS": {
-      "articles": 4,
-      "raw_score": 0.207333,
-      "relative": -0.088876,
-      "score": 0.118476,
-      "top_headline": "Ionis Delivers Positive Late-Stage Results for Two Partnered Drugs",
-      "weight": 0.039707
-    },
-    "IP": {
-      "articles": 2,
-      "raw_score": -0.033225,
-      "relative": -0.220642,
-      "score": -0.01329,
-      "top_headline": "Is International Paper\u2019s Scale Now Limiting Capital Allocation Effectiveness And Profitability Potential (IP)?",
-      "weight": 0.044363
-    },
-    "IR": {
-      "articles": 2,
-      "raw_score": 0.436255,
-      "relative": -0.03285,
-      "score": 0.174502,
-      "top_headline": "Ingersoll Rand Sees Broad Demand Recovery, Long-Cycle Orders Accelerate",
-      "weight": 0.05214
-    },
-    "IREN": {
-      "articles": 7,
-      "raw_score": 0.147511,
-      "relative": -0.104094,
-      "score": 0.103258,
-      "top_headline": "Nebius Surges 6%, CoreWeave Treads Water as JPMorgan Upgrade Flags Rising Compute Pricing; IREN Slides 4%",
-      "weight": 0.116916
-    },
-    "IRM": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Jim Cramer on Iron Mountain (IRM): \u201cIt\u2019s Been an Incredible Stock\u201d",
-      "weight": 0.001392
-    },
-    "ISRG": {
-      "articles": 9,
-      "raw_score": 0.554561,
-      "relative": 0.208568,
-      "score": 0.41592,
-      "top_headline": "Can This Number Push ISRG Stock Higher?",
-      "weight": 0.086107
-    },
-    "IVZ": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Invesco (IVZ) Opens QQQ Suite To Overseas Growth With First International ETF",
-      "weight": 0.042142
-    },
-    "J": {
-      "articles": 1,
-      "raw_score": -0.090909,
-      "relative": -0.23008,
-      "score": -0.022727,
-      "top_headline": "Jacobs Solutions Stock: Is J Underperforming the Industrial Sector?",
-      "weight": 0.003379
-    },
-    "JBHT": {
-      "articles": 1,
-      "raw_score": 0.578947,
-      "relative": -0.062615,
-      "score": 0.144737,
-      "top_headline": "J.B. Hunt Sees Strong Freight Demand as Rising Costs Pressure Q3 Earnings",
-      "weight": 0.016244
-    },
-    "JBL": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Why Jabil (JBL) Stock Is Trading Up Today",
-      "weight": 0.057133
-    },
-    "JCI": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Johnson Controls International PLC's Dividend Analysis",
-      "weight": 0.005042
-    },
-    "JD": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Here's Why JD.com, Inc. (JD) Fell More Than Broader Market",
-      "weight": 0.005471
+      "weight": 0.008217
     },
     "JKHY": {
-      "articles": 2,
-      "raw_score": 0.281987,
-      "relative": -0.094558,
-      "score": 0.112795,
+      "articles": 1,
+      "raw_score": 0.285714,
+      "relative": -0.036214,
+      "score": 0.071429,
       "top_headline": "What\u2019s Going On With Jack Henry & Associates (JKHY)?",
-      "weight": 0.072998
-    },
-    "JNJ": {
-      "articles": 8,
-      "raw_score": 0.468161,
-      "relative": 0.133129,
-      "score": 0.340481,
-      "top_headline": "ABBV vs. JNJ: One of These Dividend Aristocrats Will Crush the Other Over the Next Decade",
-      "weight": 0.134327
-    },
-    "JOBY": {
-      "articles": 3,
-      "raw_score": -0.177191,
-      "relative": -0.295948,
-      "score": -0.088596,
-      "top_headline": "Can Joby Aviation (JOBY) Justify Its Valuation As Autonomy Progress Takes Shape?",
-      "weight": 0.058847
+      "weight": 0.007801
     },
     "JPM": {
-      "articles": 10,
-      "raw_score": 0.773023,
-      "relative": 0.387281,
-      "score": 0.594633,
-      "top_headline": "Nebius Surges 6%, CoreWeave Treads Water as JPMorgan Upgrade Flags Rising Compute Pricing; IREN Slides 4%",
-      "weight": 0.120229
-    },
-    "KDP": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Is KDP\u2019s New GHOST Energy x A&W Flavor a Clue to Its Brand Expansion Strategy?",
-      "weight": 0.014509
-    },
-    "KEYS": {
       "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Buy 3 AI-Led Stocks Amid Solid Estimate Revisions and Upside Potential",
-      "weight": 0.069465
-    },
-    "KGC": {
-      "articles": 3,
-      "raw_score": -0.479879,
-      "relative": -0.447292,
-      "score": -0.239939,
-      "top_headline": "Gold Is High, So Why Did Kinross (KGC) Just Fall 12%?",
-      "weight": 0.081174
-    },
-    "KHC": {
-      "articles": 3,
-      "raw_score": 0.069445,
-      "relative": -0.17263,
-      "score": 0.034723,
-      "top_headline": "Week\u2019s Best: Top Dividend Stocks for a Rocky Market",
-      "weight": 0.060876
-    },
-    "KIM": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Kimco Realty (KIM) Leasing Story Keeps Fair Value In Focus Ahead Of Conference",
-      "weight": 0.007551
-    },
-    "KKR": {
-      "articles": 3,
-      "raw_score": 0.482492,
-      "relative": 0.033894,
-      "score": 0.241246,
-      "top_headline": "Brookfield Has an Enviable Record of Boosting Profits. Its Stock Looks Cheap.",
-      "weight": 0.046522
-    },
-    "KLAC": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Teradyne Strengthens AI Test Portfolio: Can It Beat KLAC & COHU?",
-      "weight": 0.052346
-    },
-    "KLIC": {
-      "articles": 2,
-      "raw_score": 0.368563,
-      "relative": -0.059927,
-      "score": 0.147425,
-      "top_headline": "KLIC Up 93.6% in a Year: Should Investors Bet on the Stock Now?",
-      "weight": 0.015737
-    },
-    "KMB": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "PG vs. KMB: Bigger Yield Isn\u2019t Everything. Here\u2019s Which Stock Truly Delivers for Retirees",
-      "weight": 0.009854
+      "raw_score": 0.82521,
+      "relative": 0.222441,
+      "score": 0.330084,
+      "top_headline": "JPMorgan makes bullish call in fixed income space, suggests it's a once in a generation opportunity",
+      "weight": 0.48277
     },
     "KMI": {
-      "articles": 5,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Kinder Morgan (KMI) Could Be 14% Undervalued Following Its Recent Pullback",
-      "weight": 0.128461
-    },
-    "KMX": {
-      "articles": 5,
-      "raw_score": 0.349576,
-      "relative": 0.011133,
-      "score": 0.218485,
-      "top_headline": "Why CarMax (KMX) Is Down 5.0% After Third Round Of Corporate Layoffs For Cost Savings",
-      "weight": 0.048842
+      "weight": 0.010959
     },
     "KO": {
-      "articles": 14,
-      "raw_score": 0.770659,
-      "relative": 0.427308,
-      "score": 0.63466,
-      "top_headline": "Surging International Sales And Coca-Cola Partnership Could Be A Game Changer For Monster Beverage (MNST)",
-      "weight": 0.205553
+      "articles": 2,
+      "raw_score": 0.029765,
+      "relative": -0.095737,
+      "score": 0.011906,
+      "top_headline": "What Could Rob Gehring's Return Mean For Coca-Cola (KO) Investors?",
+      "weight": 0.002697
     },
     "KR": {
-      "articles": 3,
-      "raw_score": 0.470308,
-      "relative": 0.027802,
-      "score": 0.235154,
-      "top_headline": "Kroger Health Leadership Change Could Be A Game Changer For Kroger (KR)",
-      "weight": 0.068206
-    },
-    "KTOS": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Kratos Defense vs. Draganfly: Which Drone Stock Has More Potential?",
-      "weight": 0.034929
-    },
-    "KVUE": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Kenvue Inc's Dividend Analysis",
-      "weight": 0.003361
-    },
-    "LDOS": {
-      "articles": 2,
-      "raw_score": 0.349941,
-      "relative": -0.067376,
-      "score": 0.139976,
-      "top_headline": "Leidos Holdings (LDOS) Lands Army Contract, Is The Stock Trading Below Fair Value?",
-      "weight": 0.048006
-    },
-    "LEU": {
-      "articles": 2,
-      "raw_score": 0.199935,
-      "relative": -0.127378,
-      "score": 0.079974,
-      "top_headline": "Q2 Earnings Outperformers: Centrus Energy (NYSE:LEU) And The Rest Of The Mixed or Offshore Upstream E&P Stocks",
-      "weight": 0.011803
-    },
-    "LH": {
-      "articles": 2,
-      "raw_score": -0.040615,
-      "relative": -0.223598,
-      "score": -0.016246,
-      "top_headline": "Quest Diagnostics, Labcorp Shares Fall as Medicare Signals Cuts in Payment Rates for Lab Services",
-      "weight": 0.014057
-    },
-    "LHX": {
-      "articles": 3,
-      "raw_score": 0.045216,
-      "relative": -0.184744,
-      "score": 0.022608,
-      "top_headline": "L3Harris (LHX) Stock May Be 45% Undervalued On Fraud Investigation News",
-      "weight": 0.064764
-    },
-    "LII": {
-      "articles": 2,
-      "raw_score": -0.363634,
-      "relative": -0.352806,
-      "score": -0.145454,
-      "top_headline": "Lennox is Down 38% and Trading at 52-Week Lows. Bargain or Value Trap?",
-      "weight": 0.019073
-    },
-    "LIN": {
-      "articles": 3,
-      "raw_score": 0.392409,
-      "relative": -0.011148,
-      "score": 0.196205,
-      "top_headline": "Linde Has Quietly Compounded for Years. These 3 Stocks Share Its Stickiest Advantage",
-      "weight": 0.030704
-    },
-    "LITE": {
-      "articles": 5,
-      "raw_score": 0.923565,
-      "relative": 0.369876,
-      "score": 0.577228,
-      "top_headline": "Applied Optoelectronics Rides on AI Boom: Can It Beat LITE and FN?",
-      "weight": 0.095828
+      "raw_score": 0.142857,
+      "relative": -0.071928,
+      "score": 0.035714,
+      "top_headline": "Is Kroger (KR) Undervalued On Its Kroger Health Leadership Change?",
+      "weight": 0.005243
     },
     "LLY": {
-      "articles": 15,
-      "raw_score": 0.405295,
-      "relative": 0.130394,
-      "score": 0.337746,
-      "top_headline": "Eli Lilly says closely watched combo obesity regimen boosts weight loss in mid-stage trial",
-      "weight": 0.230634
-    },
-    "LMT": {
-      "articles": 9,
-      "raw_score": 1.0,
-      "relative": 0.542648,
-      "score": 0.75,
-      "top_headline": "GD vs. LMT: Which Defense Dividend Stock Will Crush Retirement Income Goals?",
-      "weight": 0.108186
-    },
-    "LNG": {
       "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "5 Energy Stocks Positioned for a Prolonged Iran War",
-      "weight": 0.019023
+      "raw_score": -0.322328,
+      "relative": -0.236574,
+      "score": -0.128931,
+      "top_headline": "Eli Lilly says closely watched combo obesity regimen boosts weight loss in mid-stage trial",
+      "weight": 0.010964
     },
     "LOW": {
-      "articles": 4,
-      "raw_score": -0.066512,
-      "relative": -0.245359,
-      "score": -0.038007,
-      "top_headline": "Lowe's (LOW) Stock Looks Reasonable On a 25% One Year Slide",
-      "weight": 0.070539
-    },
-    "LRCX": {
-      "articles": 6,
-      "raw_score": 0.704882,
-      "relative": 0.262569,
-      "score": 0.469921,
-      "top_headline": "Lam Research (LRCX) Following Higher 2026 Outlook And Packaging Growth Is It Still Undervalued",
-      "weight": 0.10689
-    },
-    "LSCC": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Why Are Lattice Semiconductor (LSCC) Shares Soaring Today",
-      "weight": 0.004188
+      "raw_score": -0.351351,
+      "relative": -0.195481,
+      "score": -0.087838,
+      "top_headline": "Lowe's (LOW) Stock Looks Reasonable On a 25% One Year Slide",
+      "weight": 0.005634
     },
     "LULU": {
-      "articles": 2,
-      "raw_score": -0.435505,
-      "relative": -0.381554,
-      "score": -0.174202,
-      "top_headline": "Alo is defying China\u2019s consumer slowdown, selling $1.5 million in one minute and planning 8 more stores",
-      "weight": 0.021853
-    },
-    "LUNR": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Intuitive Machines (LUNR) Rockets Higher as Analyst Bets on 100% Upside",
-      "weight": 0.012793
-    },
-    "LUV": {
-      "articles": 2,
-      "raw_score": 0.27875,
-      "relative": -0.095852,
-      "score": 0.1115,
-      "top_headline": "Southwest Airlines (LUV) Is Up 5.7% After Pivot To High-Margin Seat And Add-On Fees",
-      "weight": 0.012669
-    },
-    "LW": {
-      "articles": 2,
-      "raw_score": 0.801579,
-      "relative": 0.11328,
-      "score": 0.320632,
-      "top_headline": "Lamb Weston Cost Savings Top $100M as Focus to Win Gains Traction",
-      "weight": 0.031674
-    },
-    "LYFT": {
-      "articles": 3,
-      "raw_score": 0.41376,
-      "relative": -0.000472,
-      "score": 0.20688,
-      "top_headline": "Why Is Lyft (LYFT) Recasting Its Future With A New CFO And AV Push?",
-      "weight": 0.021645
-    },
-    "M": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "Macy's (M) Could Be a Great Choice",
-      "weight": 0.007095
+      "top_headline": "From BJ\u2019s to Lululemon, retailers are trimming assortments to boost business",
+      "weight": 0.307063
     },
     "MA": {
-      "articles": 7,
-      "raw_score": 0.331599,
-      "relative": 0.024767,
-      "score": 0.232119,
-      "top_headline": "Cardano News: Mastercard and Fireblocks Just Two of the Latest Developments for ADA",
-      "weight": 0.134351
-    },
-    "MAA": {
-      "articles": 2,
-      "raw_score": 0.221282,
-      "relative": -0.118839,
-      "score": 0.088513,
-      "top_headline": "Mid-America Apartment Communities Stock: Is MAA Underperforming the Real Estate Sector?",
-      "weight": 0.022127
-    },
-    "MANH": {
-      "articles": 2,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "3 Reasons MANH is Risky and 1 Stock to Buy Instead",
-      "weight": 0.020688
-    },
-    "MAR": {
-      "articles": 3,
-      "raw_score": 0.341176,
-      "relative": -0.036764,
-      "score": 0.170588,
-      "top_headline": "Host Hotels Pays a Serious Dividend. Can the Hotels Keep Funding It?",
-      "weight": 0.019604
-    },
-    "MARA": {
-      "articles": 2,
-      "raw_score": 0.104592,
-      "relative": -0.165515,
-      "score": 0.041837,
-      "top_headline": "MARA Holdings CEO Frederick Thiel Sells 27,505 Shares",
-      "weight": 0.039611
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Cardano News: Mastercard and Fireblocks Just Two of the Latest Developments for ADA",
+      "weight": 0.005305
     },
     "MAS": {
-      "articles": 2,
-      "raw_score": 0.390954,
-      "relative": -0.050971,
-      "score": 0.156382,
+      "articles": 1,
+      "raw_score": 0.411765,
+      "relative": -0.004701,
+      "score": 0.102941,
       "top_headline": "Is Masco (MAS) Undervalued On Its Long Term Home Improvement Growth Story?",
-      "weight": 0.062953
+      "weight": 0.007251
     },
     "MCD": {
-      "articles": 11,
-      "raw_score": -0.19057,
-      "relative": -0.357086,
-      "score": -0.149734,
-      "top_headline": "3 Restaurant Stocks Near 52-Week Lows as Consumer Pressure Builds",
-      "weight": 0.101649
-    },
-    "MCHP": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "ADI vs. MCHP: Which Semiconductor Stock Has an Upside Now?",
-      "weight": 0.083524
-    },
-    "MCK": {
-      "articles": 2,
-      "raw_score": 0.601481,
-      "relative": 0.03324,
-      "score": 0.240592,
-      "top_headline": "McKesson (MCK) Lifted Its Guidance, Is The Stock Still 11% Undervalued?",
-      "weight": 0.05049
-    },
-    "MCO": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "3 Reasons Why Growth Investors Shouldn't Overlook Moody's (MCO)",
-      "weight": 0.010328
-    },
-    "MDB": {
-      "articles": 7,
-      "raw_score": 0.887672,
-      "relative": 0.414018,
-      "score": 0.62137,
-      "top_headline": "MongoDB (MDB) Moves to Strong Buy: Rationale Behind the Upgrade",
-      "weight": 0.081807
+      "top_headline": "Can McDonald's Stock Reclaim Its All-Time High as Rising Prices Weigh on Consumers?",
+      "weight": 0.001715
     },
     "MDLZ": {
-      "articles": 3,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Hershey vs. Mondelez: Same Cocoa Problem, Two Very Different Dividends",
-      "weight": 0.066344
+      "weight": 0.005213
     },
     "MDT": {
-      "articles": 7,
-      "raw_score": 0.955912,
-      "relative": 0.461786,
-      "score": 0.669139,
+      "articles": 3,
+      "raw_score": 1.0,
+      "relative": 0.392357,
+      "score": 0.5,
       "top_headline": "Can Medtronic\u2019s (MDT) Core Units Keep Up With Management\u2019s New Bets?",
-      "weight": 0.178259
-    },
-    "MELI": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "MercadoLibre (MELI) Stock Looks Rich Relative To Its Earnings",
-      "weight": 0.03502
-    },
-    "MET": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Can MetLife's Group Benefits Segment Maintain Its Momentum?",
-      "weight": 0.015178
+      "weight": 0.013914
     },
     "META": {
-      "articles": 68,
-      "raw_score": 0.30348,
-      "relative": 0.083305,
-      "score": 0.290657,
-      "top_headline": "Shopify (SHOP) Is Up 10.7% After New Meta AI Pact And Tailwind Labs Deal - Has The Bull Case Changed?",
-      "weight": 1.506667
-    },
-    "MGM": {
-      "articles": 6,
-      "raw_score": 0.339923,
-      "relative": 0.019263,
-      "score": 0.226616,
-      "top_headline": "MGM Resorts International (MGM) Stock Dropped, So What Is Driving Attention Now?",
-      "weight": 0.16303
-    },
-    "MHK": {
-      "articles": 3,
-      "raw_score": -0.134436,
-      "relative": -0.27457,
-      "score": -0.067218,
-      "top_headline": "Is Mohawk Industries (MHK) Undervalued As Insider Selling Raises Fresh Questions?",
-      "weight": 0.030749
-    },
-    "MKC": {
-      "articles": 4,
-      "raw_score": -0.319205,
-      "relative": -0.389755,
-      "score": -0.182403,
-      "top_headline": "McCormick Likely to Keep Guidance at Fiscal Q3 Results, UBS Says",
-      "weight": 0.044738
-    },
-    "MLM": {
-      "articles": 1,
-      "raw_score": -0.407407,
-      "relative": -0.309204,
-      "score": -0.101852,
-      "top_headline": "Martin Marietta Materials (MLM): Buy, Sell, or Hold Post Q2 Earnings?",
-      "weight": 0.009149
-    },
-    "MMM": {
-      "articles": 4,
-      "raw_score": 0.091151,
-      "relative": -0.155266,
-      "score": 0.052086,
-      "top_headline": "3M vs. Honeywell: Which Industrial Conglomerate is a Stronger Pick?",
-      "weight": 0.06374
-    },
-    "MNST": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Surging International Sales And Coca-Cola Partnership Could Be A Game Changer For Monster Beverage (MNST)",
-      "weight": 0.038694
-    },
-    "MO": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "PM vs. MO: The Smoke-Free Dividend Winner in This Tobacco Showdown",
-      "weight": 0.023799
-    },
-    "MOD": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Modine (MOD) Rises As Market Takes a Dip: Key Facts",
-      "weight": 0.008955
-    },
-    "MOH": {
-      "articles": 3,
-      "raw_score": 0.286969,
-      "relative": -0.063868,
-      "score": 0.143485,
-      "top_headline": "UNH vs. MOH: Which Managed Care Stock Looks More Attractive?",
-      "weight": 0.031027
-    },
-    "MOS": {
-      "articles": 4,
-      "raw_score": 0.179468,
-      "relative": -0.104799,
-      "score": 0.102553,
-      "top_headline": "Mosaic Stock: Is MOS Underperforming the Basic Material Sector?",
-      "weight": 0.030161
-    },
-    "MP": {
-      "articles": 5,
-      "raw_score": 0.726151,
-      "relative": 0.246492,
-      "score": 0.453844,
-      "top_headline": "Critical Metals Jumps 9% as Rare Earth Stocks Stall; MP Materials Ticks Up, USA Rare Earth Eases",
-      "weight": 0.051561
-    },
-    "MPC": {
-      "articles": 5,
-      "raw_score": 0.604917,
-      "relative": 0.170721,
-      "score": 0.378073,
-      "top_headline": "Goldman Sachs Bets this Refining Stock Will Soar Past its Record High",
-      "weight": 0.13113
+      "articles": 11,
+      "raw_score": 0.815047,
+      "relative": 0.532751,
+      "score": 0.640394,
+      "top_headline": "Trump bought up to $25 million in Meta and millions in SpaceX debt in August",
+      "weight": 0.318861
     },
     "MRK": {
-      "articles": 9,
-      "raw_score": 0.723523,
-      "relative": 0.33529,
-      "score": 0.542642,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Why Moderna (MRNA) Is Up 29.1% After Melanoma Vaccine Success And Middle East Expansion Talks",
-      "weight": 0.180264
+      "weight": 0.005804
     },
     "MRNA": {
-      "articles": 10,
-      "raw_score": 0.943434,
-      "relative": 0.518366,
-      "score": 0.725719,
+      "articles": 2,
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
       "top_headline": "Why Moderna (MRNA) Is Up 29.1% After Melanoma Vaccine Success And Middle East Expansion Talks",
-      "weight": 0.194022
+      "weight": 0.008665
     },
     "MRVL": {
-      "articles": 11,
-      "raw_score": 0.672792,
-      "relative": 0.32127,
-      "score": 0.528622,
-      "top_headline": "Marvell\u2019s 203% YTD Surge Sets High Bar but We See More Runway Ahead",
-      "weight": 0.15255
+      "articles": 2,
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
+      "top_headline": "Broadcom vs. Marvell: The AI Supercycle Is Big Enough for Both. Here's the Better Buy.",
+      "weight": 0.003404
     },
     "MS": {
-      "articles": 22,
-      "raw_score": 0.48805,
-      "relative": 0.222132,
-      "score": 0.429484,
-      "top_headline": "Ingersoll Rand Sees Broad Demand Recovery, Long-Cycle Orders Accelerate",
-      "weight": 0.310011
-    },
-    "MSCI": {
       "articles": 1,
-      "raw_score": 0.4,
-      "relative": -0.107352,
-      "score": 0.1,
-      "top_headline": "What\u2019s Going On With MSCI (MSCI)?",
-      "weight": 0.013381
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "Morgan Stanley Lagged Its Peers After UBS Merger Talk and a Target Cut. Here\u2019s What the Stock Already Prices In",
+      "weight": 0.003284
     },
     "MSFT": {
-      "articles": 19,
-      "raw_score": 0.538358,
-      "relative": 0.257593,
-      "score": 0.464945,
-      "top_headline": "Microsoft, Meta, Akamai, Zscaler, Comcast, and More Stocks That Explain Today\u2019s Market",
-      "weight": 0.2626
-    },
-    "MSI": {
-      "articles": 2,
-      "raw_score": 0.385102,
-      "relative": -0.053312,
-      "score": 0.154041,
-      "top_headline": "Motorola Solutions (MSI) Powering Essential Communications for First Responders",
-      "weight": 0.020965
-    },
-    "MSTR": {
       "articles": 5,
-      "raw_score": 0.469875,
-      "relative": 0.08632,
-      "score": 0.293672,
-      "top_headline": "Strategy Proposes Daily Dividend Payments for Four Preferred Stocks",
-      "weight": 0.060064
-    },
-    "MTB": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "M&T Bank (MTB) Stock Could Be A Bargain Despite Its 90% Run",
-      "weight": 0.051791
-    },
-    "MTCH": {
-      "articles": 2,
-      "raw_score": 0.643983,
-      "relative": 0.050241,
-      "score": 0.257593,
-      "top_headline": "4 Top-Performing Liquid Stocks to Strengthen Your Portfolio",
-      "weight": 0.024997
+      "raw_score": -0.290787,
+      "relative": -0.289385,
+      "score": -0.181742,
+      "top_headline": "The Morning Risk Report: The Credit-Card Bill That Banks Fear Most Has Gained Trump as an Ally",
+      "weight": 0.545302
     },
     "MU": {
-      "articles": 32,
-      "raw_score": 0.696979,
-      "relative": 0.429886,
-      "score": 0.637238,
+      "articles": 10,
+      "raw_score": 0.714983,
+      "relative": 0.442344,
+      "score": 0.549987,
       "top_headline": "Micron beats on earnings and issues strong guidance as data center revenue jumps 11-fold",
-      "weight": 1.195738
-    },
-    "NBIX": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Neurocrine Maps AI, China and Pipeline Strategy as INGREZZA Faces 2029 Price Hit",
-      "weight": 0.003039
-    },
-    "NCLH": {
-      "articles": 2,
-      "raw_score": 0.056078,
-      "relative": -0.184921,
-      "score": 0.022431,
-      "top_headline": "Norwegian Cruise Line (NCLH) Beats Stock Market Upswing: What Investors Need to Know",
-      "weight": 0.049392
-    },
-    "NDAQ": {
-      "articles": 4,
-      "raw_score": 0.858279,
-      "relative": 0.283093,
-      "score": 0.490445,
-      "top_headline": "Nasdaq Eyes 2027 Equity Tokens as AI, Cloud and RegTech Fuel Growth",
-      "weight": 0.032961
-    },
-    "NDSN": {
-      "articles": 6,
-      "raw_score": 0.856346,
-      "relative": 0.363545,
-      "score": 0.570897,
-      "top_headline": "How Is Nordson (NDSN) Positioned for This Next Chapter of Semiconductor Growth",
-      "weight": 0.101425
+      "weight": 0.131463
     },
     "NEE": {
-      "articles": 5,
-      "raw_score": -0.154132,
-      "relative": -0.303685,
-      "score": -0.096332,
-      "top_headline": "NextEra Energy (NEE), What Is Behind The Fresh Attention?",
-      "weight": 0.139296
-    },
-    "NEM": {
-      "articles": 4,
-      "raw_score": 0.480048,
-      "relative": 0.066961,
-      "score": 0.274313,
-      "top_headline": "Can Newmont's Record Free Cash Flow Momentum Carry Into Q3?",
-      "weight": 0.061768
-    },
-    "NET": {
-      "articles": 6,
-      "raw_score": 0.233388,
-      "relative": -0.05176,
-      "score": 0.155592,
-      "top_headline": "Cloudflare (NET) Stock Trades Down, Here Is Why",
-      "weight": 0.097757
-    },
-    "NFLX": {
-      "articles": 13,
-      "raw_score": -0.093629,
-      "relative": -0.283426,
-      "score": -0.076074,
-      "top_headline": "What Would A Real Market Crash Do To Netflix Stock After This Fall?",
-      "weight": 0.220642
-    },
-    "NI": {
-      "articles": 1,
-      "raw_score": 0.666667,
-      "relative": -0.040686,
-      "score": 0.166667,
-      "top_headline": "NiSource Stock: Is NI Outperforming the Utilities Sector?",
-      "weight": 0.013361
-    },
-    "NKE": {
-      "articles": 18,
-      "raw_score": -0.832904,
-      "relative": -0.92127,
-      "score": -0.713918,
-      "top_headline": "Nike shares tumble after weak revenue outlook and layoff plans underway",
-      "weight": 1.049754
-    },
-    "NOC": {
-      "articles": 3,
-      "raw_score": 0.870091,
-      "relative": 0.227693,
-      "score": 0.435046,
-      "top_headline": "Northrop Grumman (NOC) Lands Navy Radar Deal On Undervalued Stock Narrative",
-      "weight": 0.062327
-    },
-    "NOW": {
-      "articles": 5,
-      "raw_score": 0.420128,
-      "relative": 0.055228,
-      "score": 0.26258,
-      "top_headline": "AI Alliances And Raised Targets Could Be A Game Changer For ServiceNow (NOW)",
-      "weight": 0.058035
-    },
-    "NRG": {
-      "articles": 4,
-      "raw_score": 0.841477,
-      "relative": 0.273492,
-      "score": 0.480844,
-      "top_headline": "Is NRG Energy (NRG) A Bargain Following Its Pullback And EPS Growth Expectations?",
-      "weight": 0.092636
-    },
-    "NTAP": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Can AI and Flash Demand Power NetApp's Raised FY27 Outlook?",
-      "weight": 0.092869
-    },
-    "NTRS": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Northern Trust Corporation (NTRS) is a Top Dividend Stock Right Now: Should You Buy?",
-      "weight": 0.010817
-    },
-    "NU": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Nu Holdings Expands Lending: Can Credit Quality Hold Up?",
-      "weight": 0.015421
-    },
-    "NUE": {
-      "articles": 6,
-      "raw_score": 0.425954,
-      "relative": 0.076617,
-      "score": 0.283969,
-      "top_headline": "Cleveland-Cliffs Jumps 5% as Month-Long Rebound Extends; Nucor and Steel Dynamics Tick Up",
-      "weight": 0.066699
-    },
-    "NVDA": {
-      "articles": 31,
-      "raw_score": -0.047412,
-      "relative": -0.250581,
-      "score": -0.043229,
-      "top_headline": "Cerebras stock hits post-IPO low, tumbling 20% for the week on Nvidia pressure and lockup expiration",
-      "weight": 0.701736
-    },
-    "NVTS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Magnachip Shares Rise 14% After Securing $5 Million Investment From Navitas",
-      "weight": 0.005164
-    },
-    "NWSA": {
-      "articles": 1,
-      "raw_score": -0.186441,
-      "relative": -0.253962,
-      "score": -0.04661,
-      "top_headline": "News (NWSA) Launches A Geopolitical Risk Council, Is The 22% Upside Still There?",
-      "weight": 0.025954
-    },
-    "NXPI": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "NXP Semiconductors (NXPI) Stock May Be 7% Undervalued After Embedded Systems Growth News",
-      "weight": 0.022476
-    },
-    "O": {
-      "articles": 2,
-      "raw_score": 0.775138,
-      "relative": 0.102703,
-      "score": 0.310055,
-      "top_headline": "Realty Income (O) Stock Looks Fully Priced Despite Its 31% Three Year Gain",
-      "weight": 0.078416
-    },
-    "ODFL": {
-      "articles": 3,
-      "raw_score": 0.286563,
-      "relative": -0.064071,
-      "score": 0.143282,
-      "top_headline": "Winners And Losers Of Q2: Old Dominion Freight Line (NASDAQ:ODFL) Vs The Rest Of The Ground Transportation Stocks",
-      "weight": 0.030868
-    },
-    "OKE": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "Oneok Inc. (OKE) Stock Drops Despite Market Gains: Important Facts to Note",
-      "weight": 0.003953
-    },
-    "OKLO": {
-      "articles": 2,
-      "raw_score": -0.003006,
-      "relative": -0.208555,
-      "score": -0.001203,
-      "top_headline": "OKLO Stock: UBS Cuts Price Target, But This Government-Backed Nuclear Project Could Be Key Catalyst",
-      "weight": 0.013505
-    },
-    "OKTA": {
-      "articles": 5,
-      "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
-      "top_headline": "Why Did OKTA, S, META Stocks Jump To 52-Week Highs Today?",
-      "weight": 0.096018
-    },
-    "OLLI": {
-      "articles": 4,
-      "raw_score": -0.017398,
-      "relative": -0.217294,
-      "score": -0.009942,
-      "top_headline": "Ollie's (OLLI): Buy, Sell, or Hold Post Q2 Earnings?",
-      "weight": 0.076191
-    },
-    "OMC": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "3 Reasons We\u2019re Fans of Omnicom Group (OMC)",
-      "weight": 0.009871
-    },
-    "ON": {
-      "articles": 4,
-      "raw_score": 0.493438,
-      "relative": 0.074612,
-      "score": 0.281964,
-      "top_headline": "Prediction: ON Semiconductor Could Be a Sleeper AI Infrastructure Winner",
-      "weight": 0.130595
-    },
-    "ONON": {
-      "articles": 9,
-      "raw_score": 0.90604,
-      "relative": 0.472178,
-      "score": 0.67953,
-      "top_headline": "On Holding (ONON) Is Up 9.9% After Buyback, Mbapp\u00e9 Deal And Board Move - Has The Bull Case Changed?",
-      "weight": 0.25125
-    },
-    "ONTO": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Improved Investors\u2019 Confidence Boosted Onto Innovation (ONTO)",
-      "weight": 0.116696
-    },
-    "ORCL": {
-      "articles": 25,
-      "raw_score": -0.1765,
-      "relative": -0.364941,
-      "score": -0.157589,
-      "top_headline": "Oracle's Stock Falls 3.5% on Data Center Delay Concerns",
-      "weight": 0.431487
-    },
-    "OSCR": {
-      "articles": 7,
-      "raw_score": 0.974298,
-      "relative": 0.474656,
-      "score": 0.682008,
-      "top_headline": "Oscar Health (OSCR) Stock Looks Cheap Relative To Its Earnings Path",
-      "weight": 0.153253
-    },
-    "OTIS": {
       "articles": 1,
       "raw_score": -0.5,
-      "relative": -0.332352,
+      "relative": -0.232643,
       "score": -0.125,
-      "top_headline": "3 Reasons OTIS is Risky and 1 Stock to Buy Instead",
-      "weight": 0.0072
+      "top_headline": "NextEra Energy (NEE), What Is Behind The Fresh Attention?",
+      "weight": 0.009005
     },
-    "OWL": {
-      "articles": 3,
-      "raw_score": -0.551408,
-      "relative": -0.483056,
-      "score": -0.275704,
-      "top_headline": "Blue Owl Capital (OWL) Stock Looks Above Fair Value Following A 43% Fall",
-      "weight": 0.075927
+    "NFLX": {
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.357643,
+      "score": -0.25,
+      "top_headline": "Will Netflix Stock Trade for $135 or $70 by September 2027? Here's the Most Likely Scenario.",
+      "weight": 0.001438
     },
-    "OXY": {
+    "NKE": {
+      "articles": 4,
+      "raw_score": -0.933598,
+      "relative": -0.641127,
+      "score": -0.533485,
+      "top_headline": "Nike shares tumble after weak revenue outlook and layoff plans underway",
+      "weight": 0.101138
+    },
+    "NRG": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Is NRG Energy (NRG) A Bargain Following Its Pullback And EPS Growth Expectations?",
+      "weight": 0.009223
+    },
+    "NTAP": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "NetApp (NTAP) Acquires AI Storage Software Firm To Expand AI Infrastructure",
+      "weight": 0.002776
+    },
+    "NVDA": {
+      "articles": 9,
+      "raw_score": -0.097492,
+      "relative": -0.180761,
+      "score": -0.073119,
+      "top_headline": "Nvidia-backed Aussie AI firm Firmus withdraws historic IPO, citing market volatility",
+      "weight": 0.584148
+    },
+    "O": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Realty Income Sells a 49% European Stake to KKR. Here\u2019s What It Means for the Dividend",
+      "weight": 0.003037
+    },
+    "OKTA": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "AI Pivot Can Give Okta (OKTA)\u2019s Growth Engine a Second Gear",
+      "weight": 0.003241
+    },
+    "ON": {
+      "articles": 1,
+      "raw_score": 0.478261,
+      "relative": 0.011923,
+      "score": 0.119565,
+      "top_headline": "Prediction: ON Semiconductor Could Be a Sleeper AI Infrastructure Winner",
+      "weight": 0.007347
+    },
+    "ONON": {
+      "articles": 1,
+      "raw_score": 0.933333,
+      "relative": 0.125691,
+      "score": 0.233333,
+      "top_headline": "On Holding (ONON) Is Up 9.9% After Buyback, Mbapp\u00e9 Deal And Board Move - Has The Bull Case Changed?",
+      "weight": 0.009359
+    },
+    "ORCL": {
       "articles": 2,
-      "raw_score": 0.009426,
-      "relative": -0.203582,
-      "score": 0.00377,
-      "top_headline": "Occidental Now Trades Below Wall Street\u2019s Raised Targets. Here\u2019s Where the Stock Could Go",
-      "weight": 0.003967
+      "raw_score": -1.0,
+      "relative": -0.507643,
+      "score": -0.4,
+      "top_headline": "Nvidia, Oracle, CoreWeave and other AI stocks sink on OpenAI revenue report",
+      "weight": 0.089568
     },
-    "PAAS": {
-      "articles": 3,
-      "raw_score": 0.718363,
-      "relative": 0.151829,
-      "score": 0.359181,
-      "top_headline": "Can Pan American Silver's Solid Reserve Base Support Growth?",
-      "weight": 0.014037
+    "OSCR": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Oscar Health (OSCR) Stock Looks Cheap Relative To Its Earnings Path",
+      "weight": 0.010347
     },
     "PANW": {
-      "articles": 7,
-      "raw_score": -0.182589,
-      "relative": -0.335165,
-      "score": -0.127813,
+      "articles": 1,
+      "raw_score": -0.555556,
+      "relative": -0.246532,
+      "score": -0.138889,
       "top_headline": "AI Slowdown Push 'Unrealistic,' Says Palo Alto Networks CEO, AI Firms Trying to Seek Regulatory 'Sympathy'",
-      "weight": 0.10865
+      "weight": 0.004249
     },
     "PARA": {
-      "articles": 9,
-      "raw_score": 0.656258,
-      "relative": 0.284841,
-      "score": 0.492194,
-      "top_headline": "Paramount\u2019s $52 Billion Debt Sale Shows How Higher Rates Are Biting Corporate America",
-      "weight": 0.215757
-    },
-    "PATH": {
-      "articles": 3,
-      "raw_score": -0.279966,
-      "relative": -0.347335,
-      "score": -0.139983,
-      "top_headline": "UiPath (PATH) Gets Two Price Target Cuts: Is the Growth Story at Risk?",
-      "weight": 0.070015
-    },
-    "PAYC": {
-      "articles": 1,
-      "raw_score": 0.5,
-      "relative": -0.082352,
-      "score": 0.125,
-      "top_headline": "Paycom Software (PAYC) Following Its Sharp Rebound, Is The Valuation Story Already Priced In?",
-      "weight": 0.040679
+      "articles": 2,
+      "raw_score": 1.0,
+      "relative": 0.292357,
+      "score": 0.4,
+      "top_headline": "Skydance's David Ellison tells CNBC combined company is 'positioned to win in every single vertical'",
+      "weight": 0.100345
     },
     "PAYX": {
-      "articles": 6,
-      "raw_score": 0.364026,
-      "relative": 0.035332,
-      "score": 0.242684,
-      "top_headline": "Paychex (PAYX) Beats EPS Estimates, But Slow Growth Weighs on Shares",
-      "weight": 0.17967
-    },
-    "PCG": {
-      "articles": 4,
-      "raw_score": -0.62589,
-      "relative": -0.565004,
-      "score": -0.357651,
-      "top_headline": "PG&E (PCG) Downgraded On California Wildfire Liability Reform Risk",
-      "weight": 0.099162
-    },
-    "PDD": {
       "articles": 2,
-      "raw_score": 0.132503,
-      "relative": -0.154351,
-      "score": 0.053001,
-      "top_headline": "Is PDD Holdings (PDD) Cheap After Higher Earnings Estimates And A 10% Monthly Drop?",
-      "weight": 0.026434
+      "raw_score": 0.29653,
+      "relative": 0.010969,
+      "score": 0.118612,
+      "top_headline": "Paychex (PAYX) Beats EPS Estimates, But Slow Growth Weighs on Shares",
+      "weight": 0.014873
     },
     "PEG": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
       "top_headline": "Does PSE&G\u2019s New High\u2011Capacity Stations Mark a Deeper Shift in PEG\u2019s Regulated Investment Strategy?",
-      "weight": 0.022317
+      "weight": 0.002776
     },
     "PEP": {
-      "articles": 13,
-      "raw_score": 0.500268,
-      "relative": 0.199116,
-      "score": 0.406468,
-      "top_headline": "PepsiCo (PEP) Price Rises For Chips And Soda Put 2027 In Focus",
-      "weight": 0.307199
-    },
-    "PFE": {
       "articles": 6,
-      "raw_score": 0.796031,
-      "relative": 0.323335,
-      "score": 0.530687,
-      "top_headline": "What Could Pfizer (PFE) Unlock From Faster FDA Reviews And Orphan Drug Growth?",
-      "weight": 0.076542
-    },
-    "PG": {
-      "articles": 8,
-      "raw_score": 0.450131,
-      "relative": 0.120016,
-      "score": 0.327368,
-      "top_headline": "If You Invest $100 Per Month in Procter & Gamble Stock, Here's the Passive Dividend Income It Could Generate Over 10 Years",
-      "weight": 0.117925
-    },
-    "PGR": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Progressive (PGR) Stock Could Still Be A Bargain On Earnings",
-      "weight": 0.041186
-    },
-    "PHM": {
-      "articles": 1,
-      "raw_score": 0.238095,
-      "relative": -0.147828,
-      "score": 0.059524,
-      "top_headline": "Can PulteGroup (PHM) Trade At A Discount After A 172% Run?",
-      "weight": 0.009031
-    },
-    "PINS": {
-      "articles": 6,
-      "raw_score": 0.766108,
-      "relative": 0.303386,
-      "score": 0.510739,
-      "top_headline": "PINS Rides on Growing International Monetization: Can Momentum Continue?",
-      "weight": 0.097899
-    },
-    "PL": {
-      "articles": 5,
-      "raw_score": 0.576704,
-      "relative": 0.153088,
-      "score": 0.36044,
-      "top_headline": "Planet Labs (PL) Is Up 6.2% After Expanding Pelican Manufacturing And Advancing High-Res Imaging Program",
-      "weight": 0.127943
-    },
-    "PLD": {
-      "articles": 3,
-      "raw_score": 0.379185,
-      "relative": -0.01776,
-      "score": 0.189592,
-      "top_headline": "What Makes Prologis (PLD) a Strong Investment?",
-      "weight": 0.027421
+      "raw_score": -0.470265,
+      "relative": -0.421153,
+      "score": -0.31351,
+      "top_headline": "PepsiCo cuts earnings forecast as North American turnaround takes longer than expected",
+      "weight": 0.182296
     },
     "PLTR": {
-      "articles": 16,
-      "raw_score": 0.445266,
-      "relative": 0.167608,
-      "score": 0.37496,
-      "top_headline": "Why Palantir (PLTR) Is Up 6.8% After Expanding AIP Deals And Announcing Nebius AI Partnership",
-      "weight": 0.26747
-    },
-    "PM": {
-      "articles": 5,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
-      "top_headline": "Philip Morris International (PM) Lifts Quarterly Dividend 8.8% To $6.40 Annualized",
-      "weight": 0.064715
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "Is Palantir a Millionaire-Maker Stock After Its Rally?",
+      "weight": 0.003219
     },
     "PNC": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "PNC vs. U.S. Bancorp: Which Regional Bank Dividend Belongs in Your Portfolio?",
-      "weight": 0.137039
-    },
-    "PNR": {
       "articles": 1,
-      "raw_score": -0.081081,
-      "relative": -0.227623,
-      "score": -0.02027,
-      "top_headline": "Pentair (PNR) Stock May Be 46% Undervalued As New CFO Arrives",
-      "weight": 0.027744
-    },
-    "PODD": {
-      "articles": 3,
-      "raw_score": -0.122009,
-      "relative": -0.268357,
-      "score": -0.061005,
-      "top_headline": "Insulet (PODD) Stock May Trade At A Discount To Fair Value",
-      "weight": 0.074492
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "PNC vs. U.S. Bancorp: Which Regional Bank Dividend Belongs in Your Portfolio?",
+      "weight": 0.01064
     },
     "POOL": {
-      "articles": 2,
-      "raw_score": -0.861509,
-      "relative": -0.551956,
-      "score": -0.344604,
-      "top_headline": "Is Pool (POOL) Undervalued As Investors Weigh Its Board Refresh And Valuation Gap?",
-      "weight": 0.051263
-    },
-    "PPG": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.457352,
+      "relative": -0.357643,
       "score": -0.25,
-      "top_headline": "Is PPG Industries (PPG) Undervalued Following Its Coatings Push And Leadership Changes?",
-      "weight": 0.005594
+      "top_headline": "Is Pool (POOL) Undervalued As Investors Weigh Its Board Refresh And Valuation Gap?",
+      "weight": 0.00461
     },
-    "PPL": {
-      "articles": 3,
-      "raw_score": 0.16784,
-      "relative": -0.123432,
-      "score": 0.08392,
-      "top_headline": "Can PPL's Financing Strategy Support Growth and Capital Investments?",
-      "weight": 0.019686
-    },
-    "PSA": {
+    "PRU": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "Self-Storage Could Be Entering a New Growth Cycle \u2014 Baron Capital Re-Initiated Public Storage (PSA)",
-      "weight": 0.009809
-    },
-    "PSX": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Phillips 66 (PSX) Stock May Be Below Fair Value On Cash Flow",
-      "weight": 0.022062
-    },
-    "PWR": {
-      "articles": 6,
-      "raw_score": 0.977959,
-      "relative": 0.444621,
-      "score": 0.651973,
-      "top_headline": "Buy 3 AI-Led Stocks Amid Solid Estimate Revisions and Upside Potential",
-      "weight": 0.118592
+      "top_headline": "Prudential Financial\u2019s Japanese Businesses Get Suspension, Improvement Orders from Regulator After Misconduct",
+      "weight": 0.221346
     },
     "PYPL": {
-      "articles": 7,
-      "raw_score": 0.164189,
-      "relative": -0.09242,
-      "score": 0.114932,
+      "articles": 1,
+      "raw_score": -0.25,
+      "relative": -0.170143,
+      "score": -0.0625,
       "top_headline": "Peter Thiel Warns Even JD Vance Could Struggle to Win 2028 White House \u2014 Says Vance Vs Rubio is 'The Wrong Question'",
-      "weight": 0.156703
-    },
-    "QBTS": {
-      "articles": 3,
-      "raw_score": 0.348072,
-      "relative": -0.033316,
-      "score": 0.174036,
-      "top_headline": "What Does D Wave Quantum (QBTS) Gain From Its New Enterprise Partnership?",
-      "weight": 0.045836
+      "weight": 0.006002
     },
     "QCOM": {
-      "articles": 12,
-      "raw_score": 0.5587,
-      "relative": 0.239608,
-      "score": 0.44696,
+      "articles": 2,
+      "raw_score": 0.62969,
+      "relative": 0.144233,
+      "score": 0.251876,
       "top_headline": "Qualcomm Stock Has an Opportunity Investors May Be Underestimating",
-      "weight": 0.225521
-    },
-    "RBLX": {
-      "articles": 3,
-      "raw_score": -0.536291,
-      "relative": -0.475498,
-      "score": -0.268146,
-      "top_headline": "Gaming stocks fall after Meta unveils AI game-building tools",
-      "weight": 0.034659
-    },
-    "RCL": {
-      "articles": 10,
-      "raw_score": 0.396573,
-      "relative": 0.097704,
-      "score": 0.305056,
-      "top_headline": "Royal Caribbean (RCL) Moves 3.8% Higher: Will This Strength Last?",
-      "weight": 0.223476
+      "weight": 0.008688
     },
     "RDDT": {
-      "articles": 5,
-      "raw_score": 0.260646,
-      "relative": -0.044448,
-      "score": 0.162904,
-      "top_headline": "RDDT Expands Global Footprint: Can It Stay Ahead of PINS & SNAP?",
-      "weight": 0.131746
-    },
-    "RDW": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Is Redwire (RDW) A Bargain Following Its NITE STAR Contract Win?",
-      "weight": 0.077364
-    },
-    "REGN": {
-      "articles": 2,
-      "raw_score": 0.693155,
-      "relative": 0.06991,
-      "score": 0.277262,
-      "top_headline": "Regeneron (REGN) Stock Still Looks Undervalued After A 40% Run",
-      "weight": 0.03503
-    },
-    "RF": {
-      "articles": 3,
-      "raw_score": 0.58196,
-      "relative": 0.083628,
-      "score": 0.29098,
-      "top_headline": "Are You Looking for a High-Growth Dividend Stock?",
-      "weight": 0.029569
-    },
-    "RGTI": {
-      "articles": 5,
-      "raw_score": 0.220359,
-      "relative": -0.069628,
-      "score": 0.137724,
-      "top_headline": "Rigetti Computing (RGTI) Rides Quantum Momentum, Does The Valuation Already Look Full?",
-      "weight": 0.110734
-    },
-    "RIO": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Market Chatter: Rio Tinto Unveils Expansion Plans For Metals Trading Business",
-      "weight": 0.00919
-    },
-    "RIOT": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Riot Platforms, Inc. (RIOT) Stock Dips While Market Gains: Key Facts",
-      "weight": 0.012961
+      "raw_score": 0.132075,
+      "relative": -0.074624,
+      "score": 0.033019,
+      "top_headline": "Has Reddit (RDDT) Fallen Below Fair Value On Its Earnings Story?",
+      "weight": 0.008702
     },
     "RIVN": {
-      "articles": 7,
-      "raw_score": 0.664172,
-      "relative": 0.257568,
-      "score": 0.46492,
+      "articles": 1,
+      "raw_score": 0.666667,
+      "relative": 0.059024,
+      "score": 0.166667,
       "top_headline": "Rivian tops Q3 delivery expectations, reconfirms 2026 guidance",
-      "weight": 0.209227
-    },
-    "RKLB": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Stocktwits Space Race Weekly: Why RKLB, FLY, RDW And PL Are Outpacing SPCX",
-      "weight": 0.019301
-    },
-    "RL": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Here is Why Ralph Lauren (RL) is a Good Investment at Today\u2019s Price",
-      "weight": 0.040347
-    },
-    "RMD": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "ResMed Targets 12%-14% EPS Growth as GLP-1 Patients Lift Sleep Therapy Demand",
-      "weight": 0.009572
-    },
-    "ROIV": {
-      "articles": 3,
-      "raw_score": 0.784299,
-      "relative": 0.184797,
-      "score": 0.392149,
-      "top_headline": "Roivant\u2019s Lung Drug Clears Phase 2 Test: Is Another Major Pipeline Asset Emerging?",
-      "weight": 0.031708
-    },
-    "ROKU": {
-      "articles": 1,
-      "raw_score": 0.6875,
-      "relative": -0.035477,
-      "score": 0.171875,
-      "top_headline": "Why Roku (ROKU) Is Getting Attention Today",
-      "weight": 0.010866
-    },
-    "ROL": {
-      "articles": 5,
-      "raw_score": -0.6732,
-      "relative": -0.628102,
-      "score": -0.42075,
-      "top_headline": "Piper Sandler cuts Rollins to Neutral, citing AI search disruption",
-      "weight": 0.108821
-    },
-    "ROP": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Is Roche Holding (SWX:ROP) Undervalued Following Its Phase 3 IgA Nephropathy Win?",
-      "weight": 0.02717
-    },
-    "ROST": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Buy 3 Big Discount Retailers to Gain From Solid Near-Term Price Upside",
-      "weight": 0.009755
-    },
-    "RRC": {
-      "articles": 3,
-      "raw_score": 0.00355,
-      "relative": -0.205577,
-      "score": 0.001775,
-      "top_headline": "Range Resources (RRC) Could Be 17% Undervalued Following Its Recent Pullback",
-      "weight": 0.019259
-    },
-    "RS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Best Momentum Stocks to Buy for September 25th",
-      "weight": 0.020753
-    },
-    "RTX": {
-      "articles": 5,
-      "raw_score": 0.316095,
-      "relative": -0.009793,
-      "score": 0.197559,
-      "top_headline": "Did United\u2019s A321XLR GTF Advantage Order Just Deepen RTX's (RTX) Engine Lock-In Strategy?",
-      "weight": 0.049079
-    },
-    "RVTY": {
-      "articles": 1,
-      "raw_score": 0.824561,
-      "relative": -0.001212,
-      "score": 0.20614,
-      "top_headline": "Why Revvity (RVTY) Is Getting Attention Today",
-      "weight": 0.017757
-    },
-    "S": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Why Did OKTA, S, META Stocks Jump To 52-Week Highs Today?",
-      "weight": 0.040997
-    },
-    "SANM": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Electrical Systems Stocks Q2 Results: Benchmarking Sanmina (NASDAQ:SANM)",
-      "weight": 0.003466
+      "weight": 0.020035
     },
     "SBUX": {
-      "articles": 11,
-      "raw_score": 0.01642,
-      "relative": -0.194451,
-      "score": 0.012901,
-      "top_headline": "Starbucks Stock Has Fallen 13% in a Month, but the Turnaround Numbers Keep Improving",
-      "weight": 0.245317
-    },
-    "SCCO": {
-      "articles": 4,
-      "raw_score": 0.964469,
-      "relative": 0.343773,
-      "score": 0.551125,
-      "top_headline": "Southern Copper (SCCO) Stock Could Be Overvalued On Current Earnings Strength",
-      "weight": 0.110461
+      "articles": 5,
+      "raw_score": 0.896722,
+      "relative": 0.452808,
+      "score": 0.560451,
+      "top_headline": "OpenAI's revenue scare, Delta earnings, what investors think of a Starbucks-Chipotle deal and more in Morning Squawk",
+      "weight": 0.123537
     },
     "SCHW": {
-      "articles": 5,
-      "raw_score": -0.252394,
-      "relative": -0.365098,
-      "score": -0.157746,
-      "top_headline": "Bond Volatility Has Charles Schwab Stock And MarketAxess In Focus",
-      "weight": 0.092046
-    },
-    "SE": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.457352,
+      "relative": -0.357643,
       "score": -0.25,
-      "top_headline": "Here's Why Sea Limited Sponsored ADR (SE) Fell More Than Broader Market",
-      "weight": 0.005471
-    },
-    "SHAK": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Below-Expected Earnings Pressured Shake Shack (SHAK) in Q2",
-      "weight": 0.010415
+      "top_headline": "Bond Volatility Has Charles Schwab Stock And MarketAxess In Focus",
+      "weight": 0.004884
     },
     "SHOP": {
-      "articles": 10,
-      "raw_score": 0.906292,
-      "relative": 0.489795,
-      "score": 0.697147,
-      "top_headline": "Shopify (SHOP) Is Up 10.7% After New Meta AI Pact And Tailwind Labs Deal - Has The Bull Case Changed?",
-      "weight": 0.179624
-    },
-    "SHW": {
-      "articles": 5,
-      "raw_score": 0.918581,
-      "relative": 0.366761,
-      "score": 0.574113,
-      "top_headline": "Should Sherwin-Williams\u2019 (SHW) Aggressive Store Expansion and Tech Spend Require Action From Investors?",
-      "weight": 0.117436
-    },
-    "SITM": {
-      "articles": 2,
-      "raw_score": 0.864976,
-      "relative": 0.138638,
-      "score": 0.345991,
-      "top_headline": "SiTime Corporation (SITM) Positioned at the Heart of AI Hardware Expansion",
-      "weight": 0.031851
-    },
-    "SJM": {
-      "articles": 6,
-      "raw_score": 0.60352,
-      "relative": 0.194994,
-      "score": 0.402346,
-      "top_headline": "J. M. Smucker (SJM) Stock Looks Stretched After Its 27% Run",
-      "weight": 0.144465
-    },
-    "SLB": {
-      "articles": 5,
-      "raw_score": 0.919368,
-      "relative": 0.367253,
-      "score": 0.574605,
-      "top_headline": "SLB Wins Oman Contract, Strengthening Its Middle East Growth Story",
-      "weight": 0.041456
-    },
-    "SMCI": {
-      "articles": 1,
-      "raw_score": -0.666667,
-      "relative": -0.374019,
-      "score": -0.166667,
-      "top_headline": "HPE vs. Super Micro: Which AI Server Stock Offers the Better Risk-Reward?",
-      "weight": 0.018346
-    },
-    "SMR": {
-      "articles": 1,
+      "articles": 3,
       "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "NuScale Power (SMR) Draws Fresh Attention, Is The Stock Still A Bargain?",
-      "weight": 0.002419
-    },
-    "SNA": {
-      "articles": 1,
-      "raw_score": 0.454545,
-      "relative": -0.093716,
-      "score": 0.113636,
-      "top_headline": "Snap-on's Gross Margin Expands: Can RCI Keep Driving Gains?",
-      "weight": 0.013976
-    },
-    "SNOW": {
-      "articles": 5,
-      "raw_score": 0.307225,
-      "relative": -0.015336,
-      "score": 0.192016,
-      "top_headline": "Snowflake (SNOW) Moves to Buy: Rationale Behind the Upgrade",
-      "weight": 0.077025
-    },
-    "SNPS": {
-      "articles": 11,
-      "raw_score": 0.605305,
-      "relative": 0.268245,
-      "score": 0.475597,
-      "top_headline": "Synopsys Stock Gets an Upgrade. Why This Analyst Sees 69% Upside.",
-      "weight": 0.254106
+      "relative": 0.392357,
+      "score": 0.5,
+      "top_headline": "Shopify (SHOP) Is Up 10.7% After New Meta AI Pact And Tailwind Labs Deal - Has The Bull Case Changed?",
+      "weight": 0.013627
     },
     "SO": {
-      "articles": 7,
-      "raw_score": 0.63728,
-      "relative": 0.238744,
-      "score": 0.446096,
+      "articles": 2,
+      "raw_score": 0.707512,
+      "relative": 0.175362,
+      "score": 0.283005,
       "top_headline": "Southern (SO) Signs Google Nuclear Deal As Valuation Upside Faces A Fresh Test",
-      "weight": 0.155333
-    },
-    "SOFI": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Is the Market Right or Wrong About These 4 High Short Interest Stocks?",
-      "weight": 0.004987
-    },
-    "SOUN": {
-      "articles": 3,
-      "raw_score": 0.63639,
-      "relative": 0.110843,
-      "score": 0.318195,
-      "top_headline": "Will SoundHound's OASYS Edge Expand Its Embedded AI Opportunity?",
-      "weight": 0.021588
-    },
-    "SPGI": {
-      "articles": 1,
-      "raw_score": -0.428571,
-      "relative": -0.314495,
-      "score": -0.107143,
-      "top_headline": "S&P Global (SPGI) Stock Looks Fully Valued Following Crypto Risk Deal",
-      "weight": 0.035998
+      "weight": 0.011955
     },
     "SPOT": {
-      "articles": 3,
-      "raw_score": 0.214688,
-      "relative": -0.100008,
-      "score": 0.107344,
-      "top_headline": "Gross-Margin Expansion is a Key Driver of SPOT's Profitability",
-      "weight": 0.065838
-    },
-    "SRE": {
-      "articles": 2,
-      "raw_score": 0.832031,
-      "relative": 0.12546,
-      "score": 0.332812,
-      "top_headline": "Sempra's Dividend Analysis",
-      "weight": 0.015566
-    },
-    "STLD": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Is It Worth Investing in Steel Dynamics (STLD) Based on Wall Street's Bullish Views?",
-      "weight": 0.004927
-    },
-    "STT": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "State Street (STT): Buy, Sell, or Hold Post Q2 Earnings?",
-      "weight": 0.003653
-    },
-    "STX": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Why Seagate (STX) Is Up 19.2% After Agentic AI Hype Lifts Storage Demand Expectations",
-      "weight": 0.019957
+      "raw_score": 0.142857,
+      "relative": -0.071928,
+      "score": 0.035714,
+      "top_headline": "Spotify Technology (SPOT) Faces A Fresh Valuation Test As Podcasts And Audiobooks Drive The Story",
+      "weight": 0.006423
     },
     "STZ": {
-      "articles": 2,
-      "raw_score": -0.390034,
-      "relative": -0.363366,
-      "score": -0.156014,
+      "articles": 1,
+      "raw_score": -0.36,
+      "relative": -0.197643,
+      "score": -0.09,
       "top_headline": "STZ Stock\u2019s Selloff Just Pushed the Yield to 3.6%. But Should Dividend Investors Be Worried?",
-      "weight": 0.060819
-    },
-    "SWK": {
-      "articles": 3,
-      "raw_score": 0.624329,
-      "relative": 0.104812,
-      "score": 0.312165,
-      "top_headline": "Stanley Black & Decker (SWK) Gains Attention On Margin Progress, Is It Fully Valued?",
-      "weight": 0.03891
-    },
-    "SWKS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Skyworks Just Surged 33% in a Month: Is It Too Late to Buy SWKS Stock Now?",
-      "weight": 0.002675
-    },
-    "SYF": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Synchrony Financial Sees Resilient Spending, Reaffirms Receivables Growth Outlook",
-      "weight": 0.005261
-    },
-    "SYK": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Here's Why You Should Hold Stryker Stock in Your Portfolio for Now",
-      "weight": 0.023689
-    },
-    "SYY": {
-      "articles": 2,
-      "raw_score": 0.277564,
-      "relative": -0.096326,
-      "score": 0.111026,
-      "top_headline": "Consumer Discretionary Stocks Q2 Recap: Benchmarking Sysco (NYSE:SYY)",
-      "weight": 0.014902
-    },
-    "T": {
-      "articles": 3,
-      "raw_score": 0.139587,
-      "relative": -0.137559,
-      "score": 0.069793,
-      "top_headline": "Does AT&T\u2019s Dividend Reaffirmation And Cowboys Deal Signal A Stable Strategy For T\u2019s Future?",
-      "weight": 0.074097
-    },
-    "TCOM": {
-      "articles": 3,
-      "raw_score": 0.407864,
-      "relative": -0.00342,
-      "score": 0.203932,
-      "top_headline": "Wall Street Bulls Look Optimistic About Trip.com (TCOM): Should You Buy?",
-      "weight": 0.025849
+      "weight": 0.00721
     },
     "TDG": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
       "top_headline": "Is TransDigm Group (TDG) Undervalued Following Its New Debt Deals?",
-      "weight": 0.022023
-    },
-    "TEAM": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Can Strong Cloud Growth Sustain Atlassian's Revenue Momentum?",
-      "weight": 0.010624
-    },
-    "TECH": {
-      "articles": 2,
-      "raw_score": -0.421569,
-      "relative": -0.37598,
-      "score": -0.168628,
-      "top_headline": "Bio-Techne (TECH) Shareholders Approve the Merck KGaA Takeover and Reject the Pay Package",
-      "weight": 0.024156
-    },
-    "TECK": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "USA Rare Earth vs. Teck Resources: Which Mining Stock Has Better Potential?",
-      "weight": 0.014016
-    },
-    "TEL": {
-      "articles": 2,
-      "raw_score": 0.395528,
-      "relative": -0.049141,
-      "score": 0.158211,
-      "top_headline": "What Makes TE Connectivity (TEL) a New Buy Stock",
-      "weight": 0.033038
-    },
-    "TEM": {
-      "articles": 4,
-      "raw_score": 0.797152,
-      "relative": 0.248163,
-      "score": 0.455515,
-      "top_headline": "Buy 3 AI-Powered Medical Stocks to Strengthen Your Portfolio in Q4",
-      "weight": 0.024536
-    },
-    "TER": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Teradyne Strengthens AI Test Portfolio: Can It Beat KLAC & COHU?",
-      "weight": 0.030919
+      "weight": 0.002739
     },
     "TFC": {
-      "articles": 5,
-      "raw_score": 0.61906,
-      "relative": 0.179561,
-      "score": 0.386913,
+      "articles": 1,
+      "raw_score": 0.666667,
+      "relative": 0.059024,
+      "score": 0.166667,
       "top_headline": "First Financial Bancorp (FFBC) Could Be 14% Undervalued As Efficiency Narrative Builds",
-      "weight": 0.21288
+      "weight": 0.0102
     },
     "TGT": {
-      "articles": 6,
-      "raw_score": 0.759747,
-      "relative": 0.299145,
-      "score": 0.506498,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "1 Overlooked Dividend King With a 55-Year Winning Streak Worth Buying Now",
-      "weight": 0.097389
+      "weight": 0.004832
     },
     "TJX": {
-      "articles": 4,
-      "raw_score": 0.228916,
-      "relative": -0.076543,
-      "score": 0.130809,
-      "top_headline": "The Zacks Analyst Blog Highlights Five Below, Dollar Tree, Kohl's, Target and The TJX Companies",
-      "weight": 0.052138
-    },
-    "TLN": {
-      "articles": 2,
-      "raw_score": -0.10044,
-      "relative": -0.247528,
-      "score": -0.040176,
-      "top_headline": "TLN Drops 33.3% in 3 Months as Risks Test Its Cash Flow Story",
-      "weight": 0.012153
-    },
-    "TMO": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Dodge and Cox\u2019s Bullish Stance on Thermo Fisher Scientific (TMO)",
-      "weight": 0.032644
-    },
-    "TMUS": {
-      "articles": 3,
-      "raw_score": -0.081029,
-      "relative": -0.247867,
-      "score": -0.040515,
-      "top_headline": "Bernstein cuts Deutsche Telekom on T-Mobile U.S. risks; names BT top pick",
-      "weight": 0.092383
-    },
-    "TOST": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Is Toast (TOST) a Buy as Wall Street Analysts Look Optimistic?",
-      "weight": 0.012459
-    },
-    "TPL": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "Q2 Earnings Highs And Lows: Texas Pacific Land (NYSE:TPL) Vs The Rest Of The U.S. Shale E&P Stocks",
-      "weight": 0.015577
-    },
-    "TPR": {
-      "articles": 1,
-      "raw_score": 0.2,
-      "relative": -0.157352,
-      "score": 0.05,
-      "top_headline": "3 Reasons TPR is Risky and 1 Stock to Buy Instead",
-      "weight": 0.008086
-    },
-    "TRGP": {
-      "articles": 2,
-      "raw_score": 0.855907,
-      "relative": 0.13501,
-      "score": 0.342363,
-      "top_headline": "Truist Adds Fresh Fuel to Targa\u2019s (TRGP) Growth Story. Is There More Upside Ahead?",
-      "weight": 0.067176
-    },
-    "TRMB": {
-      "articles": 2,
-      "raw_score": -0.076881,
-      "relative": -0.238105,
-      "score": -0.030753,
-      "top_headline": "Trimble (TRMB) Stock Looks Discounted After A 30% Five Year Fall",
-      "weight": 0.014584
-    },
-    "TROW": {
-      "articles": 1,
-      "raw_score": -0.578947,
-      "relative": -0.352089,
-      "score": -0.144737,
-      "top_headline": "BLK vs. TROW: Which Asset Manager\u2019s Dividend Actually Survives the Next Market Crash?",
-      "weight": 0.015146
-    },
-    "TRV": {
-      "articles": 3,
-      "raw_score": 0.328672,
-      "relative": -0.043016,
-      "score": 0.164336,
-      "top_headline": "3 P&C Insurers Stand to Gain From Higher Fixed-Income Yields",
-      "weight": 0.027155
+      "top_headline": "AI agents like Muse can shop for you. Here's what that means for retail stocks",
+      "weight": 0.112165
     },
     "TSCO": {
-      "articles": 2,
-      "raw_score": 0.169405,
-      "relative": -0.13959,
-      "score": 0.067762,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "How Investors Are Reacting To Tractor Supply (TSCO) Opening Its First AI\u2011Enabled Automated Distribution Hub",
-      "weight": 0.019946
+      "weight": 0.001451
     },
     "TSEM": {
-      "articles": 3,
-      "raw_score": 0.760918,
-      "relative": 0.173107,
-      "score": 0.380459,
+      "articles": 1,
+      "raw_score": 0.692308,
+      "relative": 0.065434,
+      "score": 0.173077,
       "top_headline": "Tower Semiconductor (TSEM) Jumped, What Is Behind The Latest Attention?",
-      "weight": 0.07037
+      "weight": 0.006801
     },
     "TSLA": {
-      "articles": 20,
-      "raw_score": 0.527767,
-      "relative": 0.251575,
-      "score": 0.458927,
-      "top_headline": "Tesla\u2019s Cybercab had a rocky first month in Austin. Now comes the hard part: expanding",
-      "weight": 0.550515
+      "articles": 5,
+      "raw_score": -0.566997,
+      "relative": -0.462016,
+      "score": -0.354373,
+      "top_headline": "Tesla drops 'Full Self-Driving' brand name in Europe after regulator pushback",
+      "weight": 0.159655
     },
     "TSM": {
-      "articles": 4,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "Is Taiwan Semiconductor Manufacturing (NYSE:TSM) Priced For Perfection Or Still A Bargain?",
-      "weight": 0.072173
-    },
-    "TSN": {
-      "articles": 3,
-      "raw_score": 0.056814,
-      "relative": -0.178945,
-      "score": 0.028407,
-      "top_headline": "Jim Cramer Said This Stock Is Struggling So Hard That It\u2019s As Dark As Iceland",
-      "weight": 0.02804
+      "weight": 0.003448
     },
     "TT": {
-      "articles": 3,
-      "raw_score": 0.941283,
-      "relative": 0.263289,
-      "score": 0.470641,
+      "articles": 2,
+      "raw_score": 0.922369,
+      "relative": 0.261305,
+      "score": 0.368948,
       "top_headline": "Trane Technologies (TT) Is Up 5.9% After Analyst Spotlight And HVAC Demand Tailwinds \u2013 Has The Bull Case Changed?",
-      "weight": 0.181014
-    },
-    "TTD": {
-      "articles": 2,
-      "raw_score": -0.448572,
-      "relative": -0.386781,
-      "score": -0.179429,
-      "top_headline": "The Trade Desk Trades Above Wall Street\u2019s Average Target. Here\u2019s What the Cost Cuts Change",
-      "weight": 0.015228
-    },
-    "TTWO": {
-      "articles": 4,
-      "raw_score": -0.293141,
-      "relative": -0.374861,
-      "score": -0.167509,
-      "top_headline": "Take-Two Has 25 Buy Ratings Before GTA VI. Zero Holds. And Its Cheapest Multiple in a Year.",
-      "weight": 0.027343
-    },
-    "TWLO": {
-      "articles": 3,
-      "raw_score": -0.163934,
-      "relative": -0.289319,
-      "score": -0.081967,
-      "top_headline": "Twilio (TWLO) Stock Sees Fair Value Lift As AI Focus Drives Analyst Optimism",
-      "weight": 0.069346
-    },
-    "TWST": {
-      "articles": 3,
-      "raw_score": 0.488054,
-      "relative": 0.036675,
-      "score": 0.244027,
-      "top_headline": "Practice Caution with This Hot Stock Up 493% in the Past Year",
-      "weight": 0.039852
-    },
-    "TXN": {
-      "articles": 5,
-      "raw_score": 1.0,
-      "relative": 0.417648,
-      "score": 0.625,
-      "top_headline": "Texas Instruments Is Up 56% YTD. 2 More Dividend Stocks Are Just as Hot.",
-      "weight": 0.098638
-    },
-    "TXRH": {
-      "articles": 1,
-      "raw_score": 0.473684,
-      "relative": -0.088931,
-      "score": 0.118421,
-      "top_headline": "CAVA vs. Texas Roadhouse: Which Restaurant Stock Has the Edge?",
-      "weight": 0.014033
-    },
-    "TXT": {
-      "articles": 3,
-      "raw_score": -0.071231,
-      "relative": -0.242968,
-      "score": -0.035615,
-      "top_headline": "Textron (TXT) Faces A 27% Fair Value Gap On Execution Concerns",
-      "weight": 0.050334
-    },
-    "U": {
-      "articles": 3,
-      "raw_score": -0.577758,
-      "relative": -0.496231,
-      "score": -0.288879,
-      "top_headline": "Gaming stocks fall after Meta unveils AI game-building tools",
-      "weight": 0.027276
-    },
-    "UAL": {
-      "articles": 5,
-      "raw_score": 0.673349,
-      "relative": 0.213491,
-      "score": 0.420843,
-      "top_headline": "United Airlines Holdings (UAL) Received Its First A321XLR With New Long Range Engines",
-      "weight": 0.054085
-    },
-    "UBER": {
-      "articles": 6,
-      "raw_score": 0.704305,
-      "relative": 0.262184,
-      "score": 0.469537,
-      "top_headline": "Uber Expanded Costco Delivery to 47 States \u2014 Here's What Happened Next",
-      "weight": 0.069754
-    },
-    "UCTT": {
-      "articles": 1,
-      "raw_score": 0.4,
-      "relative": -0.107352,
-      "score": 0.1,
-      "top_headline": "Ultra Clean Holdings (UCTT) Rebounds From A Sharp Pullback, Is The Valuation Gap Real?",
-      "weight": 0.01319
-    },
-    "UDR": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Multifamily REITs Are Finally Showing Signs of Recovery \u2014 Why Baron Increased UDR (UDR)",
-      "weight": 0.01868
-    },
-    "UHS": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Universal Health Services Stock: Is UHS Underperforming the Health Care Sector?",
-      "weight": 0.004757
-    },
-    "ULTA": {
-      "articles": 1,
-      "raw_score": 0.0,
-      "relative": -0.207352,
-      "score": 0.0,
-      "top_headline": "3 Reasons We\u2019re Fans of Ulta (ULTA)",
-      "weight": 0.003953
+      "weight": 0.01703
     },
     "UNH": {
-      "articles": 9,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.542648,
-      "score": 0.75,
-      "top_headline": "Humana Jumps 7% on Barclays Upgrade and $515 Target; UnitedHealth Nudges Higher",
-      "weight": 0.144781
-    },
-    "UNP": {
-      "articles": 5,
-      "raw_score": 0.770327,
-      "relative": 0.274102,
-      "score": 0.481454,
-      "top_headline": "Union Pacific (UNP) Stock Looks Fairly Priced Following Its 52% Five Year Return",
-      "weight": 0.081973
-    },
-    "UPS": {
-      "articles": 5,
-      "raw_score": -0.04227,
-      "relative": -0.233771,
-      "score": -0.026419,
-      "top_headline": "Is UPS\u2019s (UPS) Near-100% Payout Ratio Compatible With Margin Pressures From Rising Fuel Costs?",
-      "weight": 0.119677
-    },
-    "UPST": {
-      "articles": 5,
-      "raw_score": 0.668658,
-      "relative": 0.210559,
-      "score": 0.417912,
-      "top_headline": "Upstart Expands Partnership With Commonwealth Credit Union",
-      "weight": 0.053962
+      "relative": 0.142357,
+      "score": 0.25,
+      "top_headline": "UnitedHealth Stock Is Up 14% in 2026. Time to Sell or Load Up?",
+      "weight": 0.003371
     },
     "USB": {
-      "articles": 3,
-      "raw_score": 0.740407,
-      "relative": 0.162851,
-      "score": 0.370203,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.142357,
+      "score": 0.25,
       "top_headline": "PNC vs. U.S. Bancorp: Which Regional Bank Dividend Belongs in Your Portfolio?",
-      "weight": 0.108198
+      "weight": 0.01064
     },
     "UTHR": {
-      "articles": 3,
-      "raw_score": -0.326966,
-      "relative": -0.370835,
-      "score": -0.163483,
+      "articles": 1,
+      "raw_score": -0.5,
+      "relative": -0.232643,
+      "score": -0.125,
       "top_headline": "United Therapeutics (UTHR) Falls On Goldman Sell Call, Is It Still 29% Undervalued?",
-      "weight": 0.081187
-    },
-    "UUUU": {
-      "articles": 3,
-      "raw_score": 0.607048,
-      "relative": 0.096172,
-      "score": 0.303524,
-      "top_headline": "Can Energy Fuels Build a Strong Rare Earth Growth Platform?",
-      "weight": 0.019976
-    },
-    "V": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "How Has Visa's Growth Story Changed?",
-      "weight": 0.042728
-    },
-    "VALE": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "VALE S.A. (VALE) Suffers a Larger Drop Than the General Market: Key Insights",
-      "weight": 0.003939
-    },
-    "VFC": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "V.F. (VFC) Ascends While Market Falls: Some Facts to Note",
-      "weight": 0.005511
-    },
-    "VICI": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "VICI Properties Inc. (VICI) Suffers a Larger Drop Than the General Market: Key Insights",
-      "weight": 0.005511
-    },
-    "VLO": {
-      "articles": 4,
-      "raw_score": 0.78553,
-      "relative": 0.241522,
-      "score": 0.448874,
-      "top_headline": "Valero Energy (VLO) Could Be 45% Overvalued After Strong Earnings And Margin Tailwinds",
-      "weight": 0.129083
-    },
-    "VLTO": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "VLTO Stock Rises 13.2% in Three Months: Here's What You Should Know",
-      "weight": 0.02857
-    },
-    "VMC": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Reflecting On Building Materials Stocks\u2019 Q2 Earnings: Vulcan Materials (NYSE:VMC)",
-      "weight": 0.005056
-    },
-    "VRSK": {
-      "articles": 2,
-      "raw_score": 0.554027,
-      "relative": 0.014258,
-      "score": 0.221611,
-      "top_headline": "Verisk Analytics Reaffirms Growth Target as Light Weather Weighs on Claims",
-      "weight": 0.031957
-    },
-    "VRT": {
-      "articles": 5,
-      "raw_score": -0.311717,
-      "relative": -0.402176,
-      "score": -0.194823,
-      "top_headline": "Vertiv Holdings Co (VRT) Shares Drop Into Securities Probe After Q2 Miss",
-      "weight": 0.108243
-    },
-    "VRTX": {
-      "articles": 7,
-      "raw_score": 0.405527,
-      "relative": 0.076517,
-      "score": 0.283869,
-      "top_headline": "The Surprise That Sent Vertex \u2014 And Its Chief Rival \u2014 Soaring",
-      "weight": 0.059537
-    },
-    "VST": {
-      "articles": 3,
-      "raw_score": 0.588412,
-      "relative": 0.086854,
-      "score": 0.294206,
-      "top_headline": "Constellation vs. Vistra: Which AI Power Stock Is the Better Buy?",
-      "weight": 0.028065
-    },
-    "VTR": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.042648,
-      "score": 0.25,
-      "top_headline": "Despite Sale, Baron Capital Maintains Outlook on Ventas (VTR)",
-      "weight": 0.005338
-    },
-    "VTRS": {
-      "articles": 1,
-      "raw_score": 0.75,
-      "relative": -0.019852,
-      "score": 0.1875,
-      "top_headline": "Viatris (VTRS) Wins Japan WAKIX Approval. Can it Build a Meaningful Specialty Business?",
-      "weight": 0.007172
-    },
-    "VZ": {
-      "articles": 6,
-      "raw_score": 0.343365,
-      "relative": 0.021558,
-      "score": 0.22891,
-      "top_headline": "Can Verizon Communications (VZ) Stay Cheap As 6G Plans Expand?",
-      "weight": 0.140735
-    },
-    "W": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Wayfair Stock Dropped 7% in a Day on the Fed. Is the Selloff a Gift?",
-      "weight": 0.015223
-    },
-    "WAB": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Westinghouse Air Brake Technologies (WAB) Following Its $700 Million Guinea Deal, Buying Opportunity Or Priced In?",
-      "weight": 0.020173
+      "weight": 0.006998
     },
     "WAT": {
-      "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.192648,
-      "score": 0.4,
-      "top_headline": "Waters Tops Growth Outlook as AI Demand, BD Integration Fuel Momentum",
-      "weight": 0.069365
-    },
-    "WBD": {
-      "articles": 7,
-      "raw_score": -0.010774,
-      "relative": -0.214894,
-      "score": -0.007542,
-      "top_headline": "Paramount Skydance (PSKY) Lines Up $7.5 Billion Loan For Its Acquisition",
-      "weight": 0.057583
-    },
-    "WDAY": {
-      "articles": 5,
-      "raw_score": 0.944343,
-      "relative": 0.382862,
-      "score": 0.590215,
-      "top_headline": "Workday (WDAY) Could Be 65% Undervalued As Q2 Beat And Payroll Deals Land",
-      "weight": 0.058543
-    },
-    "WDC": {
-      "articles": 2,
-      "raw_score": 0.726012,
-      "relative": 0.083053,
-      "score": 0.290405,
-      "top_headline": "S&P Global raises Western Digital outlook to positive on surging AI demand",
-      "weight": 0.076014
-    },
-    "WEC": {
-      "articles": 1,
-      "raw_score": 0.085714,
-      "relative": -0.185924,
-      "score": 0.021429,
-      "top_headline": "WEC Energy Group (WEC) Stock Looks Reasonable Following Its 41% Three Year Run",
-      "weight": 0.037079
-    },
-    "WELL": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.042648,
+      "relative": 0.142357,
       "score": 0.25,
-      "top_headline": "Is Welltower (WELL) Fully Priced After A 217% Five Year Run?",
-      "weight": 0.005352
+      "top_headline": "Waters Tops Growth Outlook as AI Demand, BD Integration Fuel Momentum",
+      "weight": 0.0082
     },
     "WFC": {
-      "articles": 7,
-      "raw_score": 0.527021,
-      "relative": 0.161562,
-      "score": 0.368915,
-      "top_headline": "Trane Technologies (TT) Is Up 5.9% After Analyst Spotlight And HVAC Demand Tailwinds \u2013 Has The Bull Case Changed?",
-      "weight": 0.125216
-    },
-    "WFRD": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.457352,
-      "score": -0.25,
-      "top_headline": "Weatherford International (WFRD) Heads To TD Cowen As Fair Value Narrative Stays In Focus",
-      "weight": 0.006006
+      "articles": 3,
+      "raw_score": 0.380295,
+      "relative": 0.082505,
+      "score": 0.190147,
+      "top_headline": "Wells Fargo gets a bold upgrade ahead of earnings. Why the stock can play catch-up",
+      "weight": 0.298378
     },
     "WM": {
-      "articles": 3,
-      "raw_score": -0.474568,
-      "relative": -0.444636,
-      "score": -0.237284,
+      "articles": 1,
+      "raw_score": -0.510204,
+      "relative": -0.235194,
+      "score": -0.127551,
       "top_headline": "Waste Management (WM) Could Be 20% Below Fair Value Following Its Recent Pullback",
-      "weight": 0.079769
-    },
-    "WMB": {
-      "articles": 3,
-      "raw_score": 1.0,
-      "relative": 0.292648,
-      "score": 0.5,
-      "top_headline": "Data Center Buildout Boosts Natural Gas Use: WMB, AR & KMI to Gain?",
-      "weight": 0.022303
+      "weight": 0.009363
     },
     "WMT": {
-      "articles": 14,
-      "raw_score": 0.491615,
-      "relative": 0.197507,
-      "score": 0.404859,
-      "top_headline": "Is Walmart\u2019s (WMT) Digital Transformation Paying Off?",
-      "weight": 0.227636
-    },
-    "WRB": {
-      "articles": 1,
-      "raw_score": 0.746835,
-      "relative": -0.020643,
-      "score": 0.186709,
-      "top_headline": "W. R. Berkley (WRB) Could Be 17% Undervalued Following Its Dividend Declaration",
-      "weight": 0.014741
-    },
-    "WST": {
-      "articles": 2,
-      "raw_score": 0.623539,
-      "relative": 0.042063,
-      "score": 0.249416,
-      "top_headline": "West Pharmaceutical Poised to See EPS Upside to Current 2027 Wall Street Estimates, Morgan Stanley Says",
-      "weight": 0.012914
-    },
-    "WTW": {
-      "articles": 3,
-      "raw_score": 0.900352,
-      "relative": 0.242824,
-      "score": 0.450176,
-      "top_headline": "WTW AI Workforce Transformation Partnership With Softtek Targets Enterprise Implementation",
-      "weight": 0.020681
-    },
-    "WULF": {
       "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.192648,
+      "relative": 0.292357,
       "score": 0.4,
-      "top_headline": "Why TeraWulf (WULF) Is Up 6.2% After Securing a 20-Year Anthropic AI Lease",
-      "weight": 0.007576
-    },
-    "WYNN": {
-      "articles": 1,
-      "raw_score": -0.513514,
-      "relative": -0.335731,
-      "score": -0.128378,
-      "top_headline": "Wynn Resorts (WYNN) Stock Seems About Right After Its Sharp Fall",
-      "weight": 0.049761
-    },
-    "XOM": {
-      "articles": 8,
-      "raw_score": 0.492597,
-      "relative": 0.1509,
-      "score": 0.358252,
-      "top_headline": "Truist Adds Fresh Fuel to Targa\u2019s (TRGP) Growth Story. Is There More Upside Ahead?",
-      "weight": 0.167638
+      "top_headline": "Is Walmart\u2019s (WMT) Digital Transformation Paying Off?",
+      "weight": 0.008024
     },
     "XYL": {
-      "articles": 2,
-      "raw_score": 0.687766,
-      "relative": 0.067754,
-      "score": 0.275106,
-      "top_headline": "Xylem (XYL) Raises $1.5b As Undervalued Narrative Faces A Market Test",
-      "weight": 0.094601
-    },
-    "XYZ": {
-      "articles": 4,
-      "raw_score": 1.0,
-      "relative": 0.364076,
-      "score": 0.571429,
-      "top_headline": "Block (XYZ) Gains A National Proof Point For Its Commerce Ecosystem",
-      "weight": 0.030524
+      "articles": 1,
+      "raw_score": 0.375,
+      "relative": -0.013893,
+      "score": 0.09375,
+      "top_headline": "Xylem (XYL) Stock Could Be 35% Undervalued As Cash Flow Holds Up",
+      "weight": 0.004226
     },
     "YUM": {
-      "articles": 4,
-      "raw_score": 0.460183,
-      "relative": 0.055609,
-      "score": 0.262962,
+      "articles": 2,
+      "raw_score": 0.576268,
+      "relative": 0.122865,
+      "score": 0.230507,
       "top_headline": "What Could Yum! Brands (YUM) Gain From KFC Open House In Texas?",
-      "weight": 0.07924
-    },
-    "ZBH": {
-      "articles": 2,
-      "raw_score": 0.076223,
-      "relative": -0.176863,
-      "score": 0.030489,
-      "top_headline": "Zimmer Biomet (ZBH): Buy, Sell, or Hold Post Q2 Earnings?",
-      "weight": 0.061842
-    },
-    "ZM": {
-      "articles": 2,
-      "raw_score": -0.015566,
-      "relative": -0.213578,
-      "score": -0.006226,
-      "top_headline": "How Far Could Zoom Communications Stock Fall In A Real Market Shock?",
-      "weight": 0.027638
+      "weight": 0.008293
     },
     "ZS": {
-      "articles": 8,
-      "raw_score": -0.400779,
-      "relative": -0.498828,
-      "score": -0.291475,
-      "top_headline": "Microsoft, Meta, Akamai, Zscaler, Comcast, and More Stocks That Explain Today\u2019s Market",
-      "weight": 0.151306
-    },
-    "ZTS": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.457352,
+      "relative": -0.357643,
       "score": -0.25,
-      "top_headline": "Zoetis (ZTS) Registers a Bigger Fall Than the Market: Important Facts to Note",
-      "weight": 0.005511
+      "top_headline": "Zscaler (ZS) Names Ross Tackett Chief Revenue Officer",
+      "weight": 0.001311
     }
   },
-  "total_articles": 3005
+  "total_articles": 476
 }
