@@ -1,245 +1,309 @@
 {
-  "as_of": "2026-10-11T17:55:54.629364+00:00",
-  "macro": 0.16645,
-  "macro_articles": 136,
-  "mean_score": 0.079959,
+  "as_of": "2026-10-17T16:10:40.187948+00:00",
+  "macro": -0.091776,
+  "macro_articles": 139,
+  "mean_score": 0.12325,
   "sources": {
-    "cnbc-business": 40,
-    "cnbc-earnings": 17,
-    "cnbc-economy": 16,
-    "cnbc-finance": 14,
-    "cnbc-markets": 24,
-    "cnbc-tech": 24,
-    "fed-press": 3,
+    "cnbc-business": 43,
+    "cnbc-earnings": 18,
+    "cnbc-economy": 25,
+    "cnbc-finance": 17,
+    "cnbc-markets": 17,
+    "cnbc-tech": 26,
+    "fed-press": 1,
     "mw-bulletins": 15,
-    "mw-markets": 77,
-    "mw-top": 20
+    "mw-markets": 80,
+    "mw-top": 23
   },
   "symbols": {
     "AAPL": {
-      "articles": 2,
-      "raw_score": 0.154752,
-      "relative": -0.018059,
-      "score": 0.061901,
-      "top_headline": "Trump\u2019s AI lunch included every major tech company. Except Apple",
-      "weight": 0.032638
+      "articles": 6,
+      "raw_score": 0.226602,
+      "relative": 0.027818,
+      "score": 0.151068,
+      "top_headline": "The Morning Risk Report: Debanking Probe Finds JPMorgan, Banks Cut Off MAGA Sellers and Democrat Groups",
+      "weight": 0.810071
     },
     "AMZN": {
-      "articles": 2,
+      "articles": 3,
       "raw_score": 1.0,
-      "relative": 0.320041,
-      "score": 0.4,
-      "top_headline": "Amazon overhauls aging devices lineup with higher-priced Alexa tablet, dumping the budget Fire",
-      "weight": 0.248131
+      "relative": 0.37675,
+      "score": 0.5,
+      "top_headline": "Amazon launches new Bee 'personal AI' devices that listen to conversations",
+      "weight": 0.112371
     },
-    "BA": {
-      "articles": 2,
-      "raw_score": -1.0,
-      "relative": -0.479959,
-      "score": -0.4,
-      "top_headline": "Alaska Airlines CEO 'not overly concerned' about new Boeing Max 10 delay",
-      "weight": 0.011637
-    },
-    "BLK": {
+    "AVGO": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
-      "top_headline": "Six Investing Pros Weigh In on Surging Yields\u2014and How to Trade Them",
-      "weight": 0.002884
+      "top_headline": "TSMC chip capacity is \u2018fierce\u2019 battleground for AI customers, amid record quarter",
+      "weight": 0.1685
+    },
+    "BAC": {
+      "articles": 4,
+      "raw_score": -0.951502,
+      "relative": -0.666965,
+      "score": -0.543715,
+      "top_headline": "Bank of America shares drop after third-quarter revenue miss and regulatory penalty",
+      "weight": 0.568151
+    },
+    "BRK-B": {
+      "articles": 2,
+      "raw_score": 0.170326,
+      "relative": -0.055119,
+      "score": 0.06813,
+      "top_headline": "Software\u2019s new consolidator gets big vote of confidence from Berkshire",
+      "weight": 0.963296
+    },
+    "C": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "U.S. presses China on Mastercard, Citigroup market access in bilateral Bangkok talks, official says",
+      "weight": 0.118866
     },
     "CMG": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "OpenAI's revenue scare, Delta earnings, what investors think of a Starbucks-Chipotle deal and more in Morning Squawk",
-      "weight": 0.077241
+      "weight": 0.009903
     },
     "COST": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "AI agents like Muse can shop for you. Here's what that means for retail stocks",
-      "weight": 0.07903
+      "weight": 0.010132
+    },
+    "CVS": {
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.37325,
+      "score": -0.25,
+      "top_headline": "The Morning Risk Report: Bank of America to Pay $1.2 Billion to Settle Violations of Money Laundering, Sanctions Laws",
+      "weight": 0.110552
     },
     "DAL": {
       "articles": 1,
       "raw_score": 0.294118,
-      "relative": -0.00643,
+      "relative": -0.04972,
       "score": 0.073529,
       "top_headline": "Delta Air Lines cuts 2026 forecast on fuel surge, but CEO says demand is still strong",
-      "weight": 0.48017
+      "weight": 0.061561
     },
     "DIS": {
-      "articles": 2,
-      "raw_score": 0.614526,
-      "relative": 0.165851,
-      "score": 0.24581,
-      "top_headline": "Disney+ to stream upcoming Super Bowl",
-      "weight": 0.051358
-    },
-    "GM": {
       "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.329959,
-      "score": -0.25,
-      "top_headline": "General Motors Q3 sales drop 5.5%, while Toyota buoyed by EVs, hybrids",
-      "weight": 0.014117
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "Disney+ to stream upcoming Super Bowl",
+      "weight": 0.005241
     },
     "GOOGL": {
-      "articles": 4,
-      "raw_score": 0.146631,
-      "relative": 0.003829,
-      "score": 0.083789,
-      "top_headline": "Can Google's new model really catch up to OpenAI and Anthropic at the frontier?",
-      "weight": 0.044853
+      "articles": 2,
+      "raw_score": -0.557604,
+      "relative": -0.346291,
+      "score": -0.223042,
+      "top_headline": "New Cracks in AI Trade Push Wall Street to Worst Week Since June",
+      "weight": 0.26258
     },
     "GS": {
-      "articles": 2,
-      "raw_score": -0.354271,
-      "relative": -0.221668,
-      "score": -0.141708,
-      "top_headline": "India\u2019s central bank hikes rates for the first time since 2023 as inflation risks build",
-      "weight": 0.192076
+      "articles": 3,
+      "raw_score": 0.581569,
+      "relative": 0.167535,
+      "score": 0.290785,
+      "top_headline": "We're upgrading our Goldman Sachs rating after a strong quarter bodes well for the future",
+      "weight": 0.079701
     },
     "JPM": {
-      "articles": 1,
-      "raw_score": 0.824561,
-      "relative": 0.126181,
-      "score": 0.20614,
-      "top_headline": "JPMorgan makes bullish call in fixed income space, suggests it's a once in a generation opportunity",
-      "weight": 0.338899
-    },
-    "LLY": {
-      "articles": 1,
-      "raw_score": -1.0,
-      "relative": -0.329959,
-      "score": -0.25,
-      "top_headline": "Eli Lilly says closely watched combo obesity regimen boosts weight loss in mid-stage trial",
-      "weight": 0.003944
+      "articles": 4,
+      "raw_score": -0.860942,
+      "relative": -0.615216,
+      "score": -0.491967,
+      "top_headline": "The Morning Risk Report: Debanking Probe Finds JPMorgan, Banks Cut Off MAGA Sellers and Democrat Groups",
+      "weight": 0.570088
     },
     "LULU": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "From BJ\u2019s to Lululemon, retailers are trimming assortments to boost business",
-      "weight": 0.216354
+      "weight": 0.027738
+    },
+    "MA": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "U.S. presses China on Mastercard, Citigroup market access in bilateral Bangkok talks, official says",
+      "weight": 0.118866
+    },
+    "MCD": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "McDonald's is leaning into chicken and drinks to grow. New data shows it could be a tough task",
+      "weight": 0.057886
     },
     "META": {
-      "articles": 3,
-      "raw_score": 0.859502,
-      "relative": 0.349792,
-      "score": 0.429751,
-      "top_headline": "Trump bought up to $25 million in Meta and millions in SpaceX debt in August",
-      "weight": 0.196355
+      "articles": 5,
+      "raw_score": 0.984108,
+      "relative": 0.491818,
+      "score": 0.615068,
+      "top_headline": "Tesla's Roadster reveal, Apple and Meta team up, Nike's India push and more in Morning Squawk",
+      "weight": 0.222562
+    },
+    "MRK": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "Merck CEO tells CNBC he expects breakthrough cancer vaccine will become faster to make",
+      "weight": 0.080074
+    },
+    "MS": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
+      "weight": 0.187807
     },
     "MSFT": {
-      "articles": 2,
-      "raw_score": 0.023088,
-      "relative": -0.070724,
-      "score": 0.009235,
-      "top_headline": "Microsoft's Nadella says AI needs an \u2018emergency brake\u2019 that humans control",
-      "weight": 0.502519
+      "articles": 4,
+      "raw_score": 0.926484,
+      "relative": 0.40617,
+      "score": 0.52942,
+      "top_headline": "Microsoft, Shopify and 3 more AI stocks that are favorite Wall Street earnings plays",
+      "weight": 0.856125
     },
     "MU": {
-      "articles": 5,
-      "raw_score": 0.749573,
-      "relative": 0.388523,
-      "score": 0.468483,
-      "top_headline": "Micron beats on earnings and issues strong guidance as data center revenue jumps 11-fold",
-      "weight": 0.07972
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.37325,
+      "score": -0.25,
+      "top_headline": "Memory stocks are getting hammered. China and a 2029 oversupply are the big worries",
+      "weight": 0.157482
+    },
+    "NFLX": {
+      "articles": 1,
+      "raw_score": -1.0,
+      "relative": -0.37325,
+      "score": -0.25,
+      "top_headline": "Wall Street's latest AI spook, Netflix layoffs, 'good debt' and more in Morning Squawk",
+      "weight": 0.079064
     },
     "NKE": {
       "articles": 2,
-      "raw_score": -0.958872,
-      "relative": -0.463508,
-      "score": -0.383549,
-      "top_headline": "Nike shares tumble after weak revenue outlook and layoff plans underway",
-      "weight": 0.069044
+      "raw_score": 0.265163,
+      "relative": -0.017185,
+      "score": 0.106065,
+      "top_headline": "Tesla's Roadster reveal, Apple and Meta team up, Nike's India push and more in Morning Squawk",
+      "weight": 0.330719
     },
     "NVDA": {
-      "articles": 5,
-      "raw_score": -0.108705,
-      "relative": -0.1479,
-      "score": -0.067941,
-      "top_headline": "Nvidia-backed Aussie AI firm Firmus withdraws historic IPO, citing market volatility",
-      "weight": 0.399641
+      "articles": 6,
+      "raw_score": -0.207767,
+      "relative": -0.261761,
+      "score": -0.138511,
+      "top_headline": "Nvidia, AMD, Dell sink in global tech rout on AI funding worries",
+      "weight": 0.483022
     },
     "ORCL": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.329959,
+      "relative": -0.37325,
       "score": -0.25,
       "top_headline": "Nvidia, Oracle, CoreWeave and other AI stocks sink on OpenAI revenue report",
-      "weight": 0.061881
+      "weight": 0.007934
     },
     "PARA": {
       "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.320041,
+      "relative": 0.27675,
       "score": 0.4,
       "top_headline": "Skydance's David Ellison tells CNBC combined company is 'positioned to win in every single vertical'",
-      "weight": 0.070702
+      "weight": 0.009064
     },
     "PEP": {
       "articles": 1,
       "raw_score": -0.6,
-      "relative": -0.229959,
+      "relative": -0.27325,
       "score": -0.15,
       "top_headline": "PepsiCo cuts earnings forecast as North American turnaround takes longer than expected",
-      "weight": 0.112507
+      "weight": 0.014424
     },
     "PRU": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "Prudential Financial\u2019s Japanese Businesses Get Suspension, Improvement Orders from Regulator After Misconduct",
-      "weight": 0.155959
-    },
-    "RIVN": {
-      "articles": 1,
-      "raw_score": 0.666667,
-      "relative": 0.086707,
-      "score": 0.166667,
-      "top_headline": "Rivian tops Q3 delivery expectations, reconfirms 2026 guidance",
-      "weight": 0.014116
+      "weight": 0.019995
     },
     "SBUX": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "OpenAI's revenue scare, Delta earnings, what investors think of a Starbucks-Chipotle deal and more in Morning Squawk",
-      "weight": 0.077241
+      "weight": 0.009903
+    },
+    "SCHW": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "A Popular Tax-Saving Trade is Juicing Wall Street\u2019s Borrowing Binge",
+      "weight": 0.136007
+    },
+    "SHOP": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "Microsoft, Shopify and 3 more AI stocks that are favorite Wall Street earnings plays",
+      "weight": 0.627787
     },
     "TJX": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.170041,
+      "relative": 0.12675,
       "score": 0.25,
       "top_headline": "AI agents like Muse can shop for you. Here's what that means for retail stocks",
-      "weight": 0.07903
+      "weight": 0.010132
     },
     "TSLA": {
-      "articles": 3,
-      "raw_score": -0.615829,
-      "relative": -0.387874,
-      "score": -0.307915,
-      "top_headline": "Tesla drops 'Full Self-Driving' brand name in Europe after regulator pushback",
-      "weight": 0.109092
+      "articles": 5,
+      "raw_score": 0.168779,
+      "relative": -0.017763,
+      "score": 0.105487,
+      "top_headline": "Prediction market odds on Tesla-SpaceX merger are above 50% for early 2027",
+      "weight": 0.610764
+    },
+    "UNH": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.12675,
+      "score": 0.25,
+      "top_headline": "UnitedHealth Group tops estimates, hikes profit outlook as insurer manages high medical costs",
+      "weight": 0.164037
     },
     "WFC": {
       "articles": 2,
       "raw_score": 0.36168,
-      "relative": 0.064713,
+      "relative": 0.021422,
       "score": 0.144672,
       "top_headline": "Wells Fargo gets a bold upgrade ahead of earnings. Why the stock can play catch-up",
-      "weight": 0.204103
+      "weight": 0.026167
     }
   },
-  "total_articles": 250
+  "total_articles": 265
 }
