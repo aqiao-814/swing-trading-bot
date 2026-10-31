@@ -1,331 +1,388 @@
 {
-  "as_of": "2026-10-25T16:59:27.889656+00:00",
-  "macro": -0.068105,
-  "macro_articles": 124,
-  "mean_score": 0.122501,
+  "as_of": "2026-10-31T17:32:34.542316+00:00",
+  "macro": -0.093557,
+  "macro_articles": 123,
+  "mean_score": 0.096827,
   "sources": {
-    "cnbc-business": 50,
-    "cnbc-earnings": 13,
-    "cnbc-economy": 23,
-    "cnbc-finance": 25,
-    "cnbc-markets": 17,
-    "cnbc-tech": 25,
-    "mw-bulletins": 15,
-    "mw-markets": 75,
-    "mw-top": 16
+    "cnbc-business": 46,
+    "cnbc-earnings": 3,
+    "cnbc-economy": 13,
+    "cnbc-finance": 45,
+    "cnbc-markets": 25,
+    "cnbc-tech": 21,
+    "fed-press": 1,
+    "mw-bulletins": 12,
+    "mw-markets": 78,
+    "mw-top": 15
   },
   "symbols": {
     "AAPL": {
-      "articles": 6,
-      "raw_score": -0.03728,
-      "relative": -0.147354,
-      "score": -0.024853,
-      "top_headline": "The Morning Risk Report: Debanking Probe Finds JPMorgan, Banks Cut Off MAGA Sellers and Democrat Groups",
-      "weight": 0.063527
+      "articles": 2,
+      "raw_score": -0.283218,
+      "relative": -0.210114,
+      "score": -0.113287,
+      "top_headline": "Cramer\u2019s week ahead: Expect more volatility as tech earnings, midterms loom",
+      "weight": 0.380323
     },
     "AMGN": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.372501,
+      "relative": -0.346827,
       "score": -0.25,
       "top_headline": "Amgen says drug combo cuts risk of death by 58% in patients with aggressive lung cancer",
-      "weight": 0.227375
+      "weight": 0.028196
     },
     "AMZN": {
-      "articles": 3,
-      "raw_score": 0.65421,
-      "relative": 0.204604,
-      "score": 0.327105,
-      "top_headline": "Musk's clash with Ukraine accelerates demand for Starlink alternatives. Few exist",
-      "weight": 0.07928
+      "articles": 10,
+      "raw_score": -0.451512,
+      "relative": -0.444143,
+      "score": -0.347317,
+      "top_headline": "U.S. Stocks Slide as Amazon, Intel Earnings Spark More AI Selling",
+      "weight": 2.56944
     },
     "AVGO": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
-      "top_headline": "TSMC chip capacity is \u2018fierce\u2019 battleground for AI customers, amid record quarter",
-      "weight": 0.010408
+      "top_headline": "Broadcom CEO Intervened to Seal $63 Billion Anthropic Debt Deal",
+      "weight": 0.041842
     },
     "AXP": {
       "articles": 2,
       "raw_score": -0.45029,
-      "relative": -0.302617,
+      "relative": -0.276943,
       "score": -0.180116,
       "top_headline": "American Express is cutting 5% of its workforce to 'prepare for AI'",
-      "weight": 0.43378
+      "weight": 0.053792
     },
     "AZN": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.372501,
+      "relative": -0.346827,
       "score": -0.25,
       "top_headline": "Amgen says drug combo cuts risk of death by 58% in patients with aggressive lung cancer",
-      "weight": 0.227375
+      "weight": 0.028196
     },
     "BA": {
-      "articles": 2,
-      "raw_score": 0.748405,
-      "relative": 0.176861,
-      "score": 0.299362,
-      "top_headline": "Boeing wins FAA approval for 737 Max 10 after years of delays as Duffy says certification process should be faster",
-      "weight": 0.137372
-    },
-    "BAC": {
-      "articles": 4,
-      "raw_score": -0.951502,
-      "relative": -0.666216,
-      "score": -0.543715,
-      "top_headline": "Bank of America shares drop after third-quarter revenue miss and regulatory penalty",
-      "weight": 0.035095
+      "articles": 3,
+      "raw_score": -0.508061,
+      "relative": -0.350857,
+      "score": -0.25403,
+      "top_headline": "Boeing says it won't significantly ramp up 737 Max production until late 2027",
+      "weight": 0.060545
     },
     "BRK-B": {
-      "articles": 3,
-      "raw_score": -0.752523,
-      "relative": -0.498762,
-      "score": -0.376261,
-      "top_headline": "Berkshire shares shake the Buffett blues with new all-time highs",
-      "weight": 0.281392
+      "articles": 2,
+      "raw_score": 0.698171,
+      "relative": 0.182442,
+      "score": 0.279268,
+      "top_headline": "Berkshire ekes out some new highs, but October rally stalls",
+      "weight": 0.182328
     },
     "BX": {
       "articles": 1,
       "raw_score": 0.333333,
-      "relative": -0.039167,
+      "relative": -0.013493,
       "score": 0.083333,
       "top_headline": "Blackstone\u2019s Core Businesses Hit by Rising Rates",
-      "weight": 0.113168
+      "weight": 0.014034
     },
-    "C": {
+    "CCL": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.127499,
-      "score": 0.25,
-      "top_headline": "U.S. presses China on Mastercard, Citigroup market access in bilateral Bangkok talks, official says",
-      "weight": 0.007342
+      "raw_score": -1.0,
+      "relative": -0.346827,
+      "score": -0.25,
+      "top_headline": "Cruise companies aim to keep fuel costs down. Their strategies for doing so differ",
+      "weight": 0.257542
     },
     "CMCSA": {
       "articles": 1,
       "raw_score": 0.272727,
-      "relative": -0.054319,
+      "relative": -0.028645,
       "score": 0.068182,
       "top_headline": "Comcast beats earnings expectations as media revenue offsets weakness in connectivity",
-      "weight": 0.184843
+      "weight": 0.022922
     },
     "CMG": {
-      "articles": 1,
+      "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.127499,
-      "score": 0.25,
-      "top_headline": "Restaurant earnings will test whether owning more brands pays off",
-      "weight": 0.159459
+      "relative": 0.303173,
+      "score": 0.4,
+      "top_headline": "Chipotle shares rise 7% after CEO says same-store sales growth will continue",
+      "weight": 0.208869
     },
     "COF": {
       "articles": 3,
       "raw_score": 0.74348,
-      "relative": 0.249239,
+      "relative": 0.274913,
       "score": 0.37174,
       "top_headline": "Capital One delivered a strong quarter. Why we're not declaring victory just yet",
-      "weight": 0.280975
+      "weight": 0.034843
     },
-    "CVS": {
+    "COIN": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
+      "top_headline": "Coinbase net income surges 66% in third quarter, benefiting from bitcoin investment gains",
+      "weight": 0.353638
+    },
+    "CVX": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
+      "top_headline": "Chevron and Exxon hit all-time highs as refining profits soar in reaction to Iran and Ukraine wars",
+      "weight": 0.349488
+    },
+    "DG": {
       "articles": 1,
       "raw_score": -1.0,
-      "relative": -0.372501,
+      "relative": -0.346827,
       "score": -0.25,
-      "top_headline": "The Morning Risk Report: Bank of America to Pay $1.2 Billion to Settle Violations of Money Laundering, Sanctions Laws",
-      "weight": 0.006829
+      "top_headline": "FTC and 20 states sue Dollar General, alleging retailer overcharged shoppers",
+      "weight": 0.110983
+    },
+    "F": {
+      "articles": 1,
+      "raw_score": 0.2,
+      "relative": -0.046827,
+      "score": 0.05,
+      "top_headline": "Ford reports mixed third-quarter results, says 2027 earnings will be in line with this year",
+      "weight": 0.250309
+    },
+    "FDX": {
+      "articles": 3,
+      "raw_score": 1.0,
+      "relative": 0.403173,
+      "score": 0.5,
+      "top_headline": "FedEx beats expectations, raises outlook in first report since calendar adjustment",
+      "weight": 0.444961
     },
     "GM": {
       "articles": 1,
       "raw_score": 0.777778,
-      "relative": 0.071944,
+      "relative": 0.097618,
       "score": 0.194444,
       "top_headline": "General Motors beats Wall Street's Q3 earnings expectations, narrows full-year guidance",
-      "weight": 0.185016
+      "weight": 0.022943
     },
     "GOOGL": {
-      "articles": 1,
-      "raw_score": -0.565217,
-      "relative": -0.263805,
-      "score": -0.141304,
-      "top_headline": "New Cracks in AI Trade Push Wall Street to Worst Week Since June",
-      "weight": 0.016001
+      "articles": 9,
+      "raw_score": -0.265802,
+      "relative": -0.296178,
+      "score": -0.199352,
+      "top_headline": "Reddit shares sink on weak sales guidance and plans login requirement test as Google search traffic shrinks",
+      "weight": 1.90309
     },
     "GS": {
-      "articles": 2,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.277499,
-      "score": 0.4,
+      "relative": 0.153173,
+      "score": 0.25,
       "top_headline": "Goldman Sachs, JPMorgan and Morgan Stanley are dominating the AI stock boom. Here's their edge",
-      "weight": 0.084977
+      "weight": 0.010116
     },
     "IBM": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
       "top_headline": "IBM beats on top and bottom lines as CEO Krishna touts 'Super Intelligence' traction",
-      "weight": 0.044831
+      "weight": 0.005559
+    },
+    "INTC": {
+      "articles": 7,
+      "raw_score": -0.755028,
+      "relative": -0.625346,
+      "score": -0.528519,
+      "top_headline": "Intel stock plunges 21% as chipmaker blames PC slowdown for weak guidance",
+      "weight": 3.177783
     },
     "JPM": {
-      "articles": 4,
-      "raw_score": 0.429813,
-      "relative": 0.123107,
-      "score": 0.245607,
-      "top_headline": "Goldman Sachs, JPMorgan and Morgan Stanley are dominating the AI stock boom. Here's their edge",
-      "weight": 0.114105
-    },
-    "MA": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
-      "top_headline": "U.S. presses China on Mastercard, Citigroup market access in bilateral Bangkok talks, official says",
-      "weight": 0.007342
+      "top_headline": "Goldman Sachs, JPMorgan and Morgan Stanley are dominating the AI stock boom. Here's their edge",
+      "weight": 0.010116
     },
-    "MCD": {
+    "KO": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
+      "top_headline": "Coca-Cola hikes earnings outlook, even as it sees lackluster demand in North America",
+      "weight": 0.120627
+    },
+    "LIN": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
+      "top_headline": "Linde delivers a good quarter and puts in a fix for an overhang on the stock",
+      "weight": 0.085146
+    },
+    "LLY": {
       "articles": 2,
       "raw_score": 1.0,
-      "relative": 0.277499,
+      "relative": 0.303173,
       "score": 0.4,
+      "top_headline": "We're raising our price target on Eli Lilly as the obesity-drug boom rolls on",
+      "weight": 0.331953
+    },
+    "MCD": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
       "top_headline": "Restaurant earnings will test whether owning more brands pays off",
-      "weight": 0.163034
+      "weight": 0.019774
     },
     "META": {
-      "articles": 10,
-      "raw_score": -0.647773,
-      "relative": -0.620787,
-      "score": -0.498287,
-      "top_headline": "Tech Stocks Fall on AI Concerns",
-      "weight": 0.904738
+      "articles": 12,
+      "raw_score": 0.193795,
+      "relative": 0.058209,
+      "score": 0.155036,
+      "top_headline": "Meta outlook revised downward by S&P on cash flow and capex concerns",
+      "weight": 1.1743
     },
     "MRK": {
       "articles": 2,
-      "raw_score": -0.2936,
-      "relative": -0.239941,
-      "score": -0.11744,
-      "top_headline": "Moderna shares plunge after cancer vaccine data leaks \u2014 despite positive results",
-      "weight": 0.165978
+      "raw_score": 0.892976,
+      "relative": 0.260364,
+      "score": 0.35719,
+      "top_headline": "Merck tops quarterly estimates, hikes profit outlook as new Keytruda form shows strength",
+      "weight": 0.248782
     },
     "MRNA": {
       "articles": 2,
       "raw_score": -0.597621,
-      "relative": -0.361549,
+      "relative": -0.335875,
       "score": -0.239048,
       "top_headline": "Moderna Investors Should Brace for More Whiplash",
-      "weight": 0.2668
+      "weight": 0.033085
     },
     "MS": {
-      "articles": 2,
+      "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.277499,
-      "score": 0.4,
+      "relative": 0.153173,
+      "score": 0.25,
       "top_headline": "Goldman Sachs, JPMorgan and Morgan Stanley are dominating the AI stock boom. Here's their edge",
-      "weight": 0.093175
+      "weight": 0.010116
     },
     "MSFT": {
       "articles": 2,
-      "raw_score": 1.0,
-      "relative": 0.277499,
-      "score": 0.4,
-      "top_headline": "Microsoft, Shopify and 3 more AI stocks that are favorite Wall Street earnings plays",
-      "weight": 0.048903
+      "raw_score": 0.256711,
+      "relative": 0.005858,
+      "score": 0.102685,
+      "top_headline": "Microsoft plans to raise $25 billion in debt as it pursues AI buildout",
+      "weight": 0.440782
     },
     "MU": {
-      "articles": 2,
-      "raw_score": 0.971015,
-      "relative": 0.265905,
-      "score": 0.388406,
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
       "top_headline": "Two AI Chipmakers Make Up 34% of America\u2019s Earnings Boom",
-      "weight": 0.67123
+      "weight": 0.082031
     },
     "NFLX": {
-      "articles": 3,
-      "raw_score": 0.58762,
-      "relative": 0.171309,
-      "score": 0.29381,
-      "top_headline": "Netflix has dipped its toe into theatrical. Is it ready to jump in?",
-      "weight": 0.260307
-    },
-    "NKE": {
       "articles": 2,
-      "raw_score": 0.265163,
-      "relative": -0.016436,
-      "score": 0.106065,
-      "top_headline": "Tesla's Roadster reveal, Apple and Meta team up, Nike's India push and more in Morning Squawk",
-      "weight": 0.020429
+      "raw_score": 0.617976,
+      "relative": 0.150364,
+      "score": 0.24719,
+      "top_headline": "Netflix has dipped its toe into theatrical. Is it ready to jump in?",
+      "weight": 0.031674
+    },
+    "NOW": {
+      "articles": 1,
+      "raw_score": -0.842105,
+      "relative": -0.307353,
+      "score": -0.210526,
+      "top_headline": "ServiceNow shares plunge 27% to worst day ever after earnings revive AI disruption fears",
+      "weight": 0.259188
     },
     "NVDA": {
-      "articles": 7,
-      "raw_score": 0.7712,
-      "relative": 0.417339,
-      "score": 0.53984,
-      "top_headline": "Two AI Chipmakers Make Up 34% of America\u2019s Earnings Boom",
-      "weight": 1.088593
+      "articles": 6,
+      "raw_score": 0.089412,
+      "relative": -0.037218,
+      "score": 0.059608,
+      "top_headline": "Nvidia responds to report Jensen Huang was target of Chinese asset, says diversion allegations were 'investigated and debunked'",
+      "weight": 0.217108
     },
     "PARA": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
       "top_headline": "Larry Ellison Went on Borrowing Spree to Bankroll His Son\u2019s Warner Bros. Bid",
-      "weight": 0.032134
+      "weight": 0.003985
     },
     "PG": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
       "top_headline": "Procter & Gamble earnings beat as sales rise 4%, boosted by laundry and home products",
-      "weight": 0.340214
+      "weight": 0.042189
     },
-    "SCHW": {
+    "RCL": {
       "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.127499,
-      "score": 0.25,
-      "top_headline": "A Popular Tax-Saving Trade is Juicing Wall Street\u2019s Borrowing Binge",
-      "weight": 0.008401
+      "raw_score": -1.0,
+      "relative": -0.346827,
+      "score": -0.25,
+      "top_headline": "Cruise companies aim to keep fuel costs down. Their strategies for doing so differ",
+      "weight": 0.257542
     },
-    "SHOP": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.127499,
-      "score": 0.25,
-      "top_headline": "Microsoft, Shopify and 3 more AI stocks that are favorite Wall Street earnings plays",
-      "weight": 0.038779
+    "RIVN": {
+      "articles": 2,
+      "raw_score": 0.419439,
+      "relative": 0.070949,
+      "score": 0.167775,
+      "top_headline": "Rivian third-quarter earnings beat estimates as software revenue, R2 deliveries rise",
+      "weight": 0.597406
+    },
+    "SBUX": {
+      "articles": 2,
+      "raw_score": 0.171246,
+      "relative": -0.028328,
+      "score": 0.068498,
+      "top_headline": "Starbucks serves up a solid quarter and full-year outlook. Why we're staying invested",
+      "weight": 0.606897
     },
     "TSLA": {
-      "articles": 7,
-      "raw_score": 0.580747,
-      "relative": 0.284022,
-      "score": 0.406523,
-      "top_headline": "With earnings in rearview mirror, SpaceX-Tesla merger chatter takes center stage",
-      "weight": 0.283001
+      "articles": 4,
+      "raw_score": 0.957478,
+      "relative": 0.450304,
+      "score": 0.54713,
+      "top_headline": "Musk and Zuckerberg echo Trump's push to rebrand AI as 'super intelligence' on earnings calls. Others do not",
+      "weight": 0.258495
     },
     "UAL": {
       "articles": 1,
       "raw_score": -0.103448,
-      "relative": -0.148363,
+      "relative": -0.122689,
       "score": -0.025862,
       "top_headline": "United Airlines slashes 2026 profit outlook on fuel prices, but travelers keep booking despite higher fares",
-      "weight": 0.23083
-    },
-    "UNH": {
-      "articles": 1,
-      "raw_score": 1.0,
-      "relative": 0.127499,
-      "score": 0.25,
-      "top_headline": "UnitedHealth Group tops estimates, hikes profit outlook as insurer manages high medical costs",
-      "weight": 0.010133
+      "weight": 0.028625
     },
     "WBD": {
       "articles": 1,
       "raw_score": 1.0,
-      "relative": 0.127499,
+      "relative": 0.153173,
       "score": 0.25,
       "top_headline": "Larry Ellison Went on Borrowing Spree to Bankroll His Son\u2019s Warner Bros. Bid",
-      "weight": 0.032134
+      "weight": 0.003985
+    },
+    "XOM": {
+      "articles": 1,
+      "raw_score": 1.0,
+      "relative": 0.153173,
+      "score": 0.25,
+      "top_headline": "Chevron and Exxon hit all-time highs as refining profits soar in reaction to Iran and Ukraine wars",
+      "weight": 0.349488
     }
   },
   "total_articles": 259
